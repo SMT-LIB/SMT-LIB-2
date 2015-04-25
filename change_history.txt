@@ -1,0 +1,109 @@
+Note: history only accounts for content changes, not release changes.
+
+2015-04-25:
+  Logics/AUFLIA.smt2:
+    Updated to Version 2.5.
+  Logics/AUFLIRA.smt2:
+    Updated to Version 2.5.
+  Logics/AUFNIRA.smt2:
+    Updated to Version 2.5.
+  Logics/LRA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_ABV.smt2:
+    Updated to Version 2.5.
+  Logics/QF_AUFBV.smt2:
+    Updated to Version 2.5.
+  Logics/QF_AUFLIA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_AX.smt2:
+    Updated to Version 2.5.
+  Logics/QF_BV.smt2:
+    Updated to Version 2.5.
+  Logics/QF_IDL.smt2:
+    Updated to Version 2.5.
+  Logics/QF_LIA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_LRA.smt2:
+    Updated to Version 2.5. 
+  Logics/QF_NIA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_NRA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_RDL.smt2:
+    Updated to Version 2.5.
+  Logics/QF_UFBV.smt2:
+    Updated to Version 2.5.
+  Logics/QF_UFIDL.smt2:
+    Updated to Version 2.5.
+  Logics/QF_UFLIA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_UFLRA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_UFNRA.smt2:
+    Updated to Version 2.5.
+  Logics/QF_UF.smt2:
+    Updated to Version 2.5.
+  Logics/UFLRA.smt2:
+    Updated to Version 2.5.
+  Logics/UFNIA.smt2:
+    Updated to Version 2.5.
+  Theories/ArraysEx.smt2:
+    Updated to Version 2.5.
+  Theories/Core.smt2:
+    Updated to Version 2.5.
+  Theories/FixedSizeBitVectors.smt2:
+    Updated to Version 2.5.
+  Theories/FloatingPoint.smt2:
+    Updated to Version 2.5.
+    Updated reference to tech report.
+  Theories/Ints.smt2:
+    Updated to Version 2.5.
+  Theories/Reals_Ints.smt2:
+    Updated to Version 2.5.
+  Theories/Reals.smt2:
+    Updated to Version 2.5.
+
+2013-06-24:
+  Logics/QF_ABV.smt2:
+    Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
+  Logics/QF_AUFBV.smt2:
+    Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
+  Logics/QF_BV.smt2:
+    Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
+  Logics/QF_UFBV.smt2:
+    Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
+  Theories/FixedSizeBitVectors.smt2:
+    Renamed theory's name from Fixed_Size_Bit_Vectors to FixedSizeBitVectors,
+    for consistency.
+    Added :value attribute.
+
+2012-09-26:
+  Logics/AUFNIRA.smt2:
+    Clarified in :notes in what way AUFNIRA extendes AUFLIRA.
+
+2011-06-15:
+  Logics/QF_BV.smt2:
+    Fixed bug in definition of bvsmod.  Previously, it gave an incorrect
+    answer when the divisor is negative and goes into the dividend evenly.
+
+2011-06-03:
+  Logics/LRA.smt2:
+    Replaced ''(* c x), or (* x c)'' with ''c, (* c x), or (* x c)'' 
+    in :extensions.
+    (The missing case was had been left out unintentionally.)
+  Logics/QF_AUFLIA.smt2:
+    Allowed x to be more than a free constants in terms of the form 
+    (* c x) or (*x c)   in :extensions.
+  Logics/QF_LRA.smt2:
+    Replaced ''(* c x), or (* x c)'' with ''c, (* c x), or (* x c)'' 
+    in :extensions. (The missing case had been left out unintentionally.)
+
+2010-12-16:
+  Logics/QF_RDL.smt2:
+    Replaced erroneous ''n > 0'' with ''n > 1'' in language attribute.
+
+2010-08-15:
+  Theories/ArraysEx.smt2:
+    Minor fix.
+  Theories/Core.smt2:
+    Minor fix.
