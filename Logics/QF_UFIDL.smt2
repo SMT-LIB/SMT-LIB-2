@@ -1,7 +1,7 @@
 (logic QF_UFIDL
 
  :smt-lib-version 2.5
- :smt-lib-release "2015-04-25"
+ :smt-lib-release "2015-05-28"
  :written-by "Clark Barrett, Cesare Tinelli"
  :date "2010-05-12"
  :last-updated "2015-04-25"

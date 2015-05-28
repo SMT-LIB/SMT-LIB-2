@@ -1,1 +1,2 @@
 v2.5-r2015-04-25
+v2.5-r2015-05-28 Standard reference updated to 2.5

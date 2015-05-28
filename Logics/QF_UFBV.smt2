@@ -1,7 +1,7 @@
 (logic QF_UFBV
 
  :smt-lib-version 2.5
- :smt-lib-release "2015-04-25"
+ :smt-lib-release "2015-05-28"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
  :last-updated "2015-04-25"

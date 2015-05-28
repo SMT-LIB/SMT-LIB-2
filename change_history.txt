@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2015-05-28:
+  Standard reference:
+    Standard reference updated to 2.5
+
 2015-04-25:
   Logics/AUFLIA.smt2:
     Updated to Version 2.5.
