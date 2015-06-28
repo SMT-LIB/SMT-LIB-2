@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2015-06-28:
+  Standard reference:
+    Standard reference minor update (2.5)
+
 2015-05-28:
   Standard reference:
     Standard reference updated to 2.5
