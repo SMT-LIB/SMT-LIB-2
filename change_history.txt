@@ -1,5 +1,15 @@
 Note: history only accounts for content changes, not release changes.
 
+2016-04-20:
+  Theories/FixedSizeBitVectors.smt2:
+    Minor formatting of notes fields.
+  Theories/Reals.smt2:
+    Minor formatting of notes fields.
+
+2016-02-07:
+  Logics/LIA.smt2:
+    Updated to Version 2.5.
+
 2015-06-28:
   Standard reference:
     Standard reference minor update (2.5)

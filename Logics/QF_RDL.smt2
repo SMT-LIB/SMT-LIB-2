@@ -1,7 +1,7 @@
 (logic QF_RDL
 
  :smt-lib-version 2.5
- :smt-lib-release "2015-06-28"
+ :smt-lib-release "2016-04-20"
  :written-by "Cesare Tinelli"
  :date "2010-04-30"
  :last-updated "2015-04-25"
