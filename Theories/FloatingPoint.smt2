@@ -1,7 +1,7 @@
 (theory FloatingPoint
 
  :smt-lib-version 2.5
- :smt-lib-release "2016-04-20"
+ :smt-lib-release "2016-11-30"
  :written-by "Cesare Tinelli and Martin Brain"
  :date "2014-05-27"
  :last-updated "2015-04-25"
@@ -226,8 +226,8 @@
  "
 
  :note
- "(fq.eq x y) evaluates to true if x evaluates to -zero and y to +zero, or vice versa.
-  fq.eq and all the other comparison operators evaluate to false if one of their
+ "(fp.eq x y) evaluates to true if x evaluates to -zero and y to +zero, or vice versa.
+  fp.eq and all the other comparison operators evaluate to false if one of their
   arguments is NaN.
  "
 

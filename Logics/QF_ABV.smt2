@@ -1,7 +1,7 @@
 (logic QF_ABV
 
  :smt-lib-version 2.5
- :smt-lib-release "2016-04-20"
+ :smt-lib-release "2016-11-30"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-07-05"
  :last-updated "2015-04-25"

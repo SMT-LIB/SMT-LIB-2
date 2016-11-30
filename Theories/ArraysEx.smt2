@@ -1,7 +1,7 @@
 (theory ArraysEx
 
  :smt-lib-version 2.5
- :smt-lib-release "2016-04-20"
+ :smt-lib-release "2016-11-30"
  :written-by "Cesare Tinelli"
  :date "2010-04-28"
  :last-updated "2015-04-25"

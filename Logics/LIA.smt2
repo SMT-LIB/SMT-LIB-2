@@ -1,15 +1,13 @@
 (logic LIA
 
  :smt-lib-version 2.5
- :smt-lib-release "2016-04-20"
+ :smt-lib-release "2016-11-30"
  :written-by "Cesare Tinelli"
  :date "2016-02-07"
- :last-updated "2016-02-07"
  :update-history
  "Note: history only accounts for content changes, not release changes.
-  2016-02-07 Updated to Version 2.5.
  "
-
+ 
  :theories (Ints)
 
  :language 
