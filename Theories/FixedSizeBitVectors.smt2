@@ -1,12 +1,14 @@
 (theory FixedSizeBitVectors
 
  :smt-lib-version 2.5
- :smt-lib-release "2016-11-30"
+ :smt-lib-release "2017-05-03"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02" 
- :last-updated "2016-04-20"
+ :last-updated "2017-05-03"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2017-05-03 Updated to version 2.6; changed semantics of division and
+             remainder operators.
   2016-04-20 Minor formatting of notes fields.
   2015-04-25 Updated to Version 2.5.
   2013-06-24 Renamed theory's name from Fixed_Size_Bit_Vectors to FixedSizeBitVectors,
@@ -167,11 +169,13 @@
 
    [[(bvmul s t)]] := nat2bv[m](bv2nat([[s]]) * bv2nat([[t]]))
 
-   [[(bvudiv s t)]] := if bv2nat([[t]]) ≠ 0 then
-                          nat2bv[m](bv2nat([[s]]) div bv2nat([[t]]))
+   [[(bvudiv s t)]] := if bv2nat([[t]]) = 0
+                       then λx:[0, m). 1
+                       else nat2bv[m](bv2nat([[s]]) div bv2nat([[t]]))
 
-   [[(bvurem s t)]] := if bv2nat([[t]]) ≠ 0 then
-                          nat2bv[m](bv2nat([[s]]) rem bv2nat([[t]]))
+   [[(bvurem s t)]] := if bv2nat([[t]]) = 0
+                       then [[s]]
+                       else nat2bv[m](bv2nat([[s]]) rem bv2nat([[t]]))
 
    - Shift operations
 
@@ -192,15 +196,15 @@
  "
 
 :notes
- "The constraints on the theory models do not specify the meaning of 
-   (bvudiv s t) or (bvurem s t) in case bv2nat([[t]]) is 0.  
-   Since the semantics of SMT-LIB's underlying logic associates *total* 
-   functions to function symbols, this means that we consider as models
-   of this theory *any* interpretation conforming to the specifications 
-   in the definition field (and defining bvudiv and bvurem arbitrarily 
-   when the second argument evaluates to 0).  
-   Solvers supporting this theory then cannot make any any assumptions
-   about the value of (bvudiv s t) or (bvurem s t) when t evaluates to 0.
+
+ "After extensive discussion, it was decided to fix the value of
+   (bvudiv s t) and (bvurem s t) in the case when bv2nat([[t]]) is 0.
+   While this solution is not preferred by all users, it has the
+   advantage that it simplifies solver implementations.  Furthermore,
+   it is straightforward for users to use alternative semantics by
+   defining their own version of these operators (using define-fun) and
+   using ite to insert their own semantics when the second operand is
+   0.
  "
 
 )

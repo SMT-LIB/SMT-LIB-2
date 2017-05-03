@@ -1,5 +1,14 @@
 Note: history only accounts for content changes, not release changes.
 
+2017-05-03:
+  Logics/QF_BV.smt2:
+    Updated to Version 2.6.  Division and remainder operations are no
+    longer undefiend when the second operand is 0.  See
+    the FixedSizeBitVectors theory definition for details.
+  Theories/FixedSizeBitVectors.smt2:
+    Updated to version 2.6; changed semantics of division and
+    remainder operators.
+
 2016-04-20:
   Theories/FixedSizeBitVectors.smt2:
     Minor formatting of notes fields.

@@ -1,17 +1,20 @@
 (logic QF_BV
 
  :smt-lib-version 2.5
- :smt-lib-release "2016-11-30"
+ :smt-lib-release "2017-05-03"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02"
- :last-updated "2015-04-25"
+ :last-updated "2017-05-03"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2017-05-03 Updated to Version 2.6.  Division and remainder operations are no
+             longer undefiend when the second operand is 0.  See
+             the FixedSizeBitVectors theory definition for details.
   2015-04-25 Updated to Version 2.5.
   2013-06-24 Changed references to Fixed_Size_Bitvectors to FixedSizeBitVectors.
   2011-06-15 Fixed bug in definition of bvsmod.  Previously, it gave an incorrect
              answer when the divisor is negative and goes into the dividend evenly.
-"
+ "
 
 :theories (FixedSizeBitVectors)
 
@@ -58,9 +61,9 @@
     (bvmul (_ BitVec m) (_ BitVec m) (_ BitVec m))
       - multiplication modulo 2^m
     (bvudiv (_ BitVec m) (_ BitVec m) (_ BitVec m))
-      - unsigned division, truncating towards 0 (undefined if divisor is 0)
+      - unsigned division, truncating towards 0
     (bvurem (_ BitVec m) (_ BitVec m) (_ BitVec m))
-      - unsigned remainder from truncating division (undefined if divisor is 0)
+      - unsigned remainder from truncating division
     (bvshl (_ BitVec m) (_ BitVec m) (_ BitVec m))
       - shift left (equivalent to multiplication by 2^x where x is the value of
         the second argument)
