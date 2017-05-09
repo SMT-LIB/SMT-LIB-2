@@ -1,7 +1,7 @@
 (theory FixedSizeBitVectors
 
  :smt-lib-version 2.5
- :smt-lib-release "2017-05-03"
+ :smt-lib-release "2017-05-09"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02" 
  :last-updated "2017-05-03"

@@ -1,12 +1,13 @@
 (theory Reals
 
  :smt-lib-version 2.5
- :smt-lib-release "2017-05-03"
+ :smt-lib-release "2017-05-09"
  :written-by "Cesare Tinelli"
  :date "2010-04-17"
- :last-updated "2016-04-20"
+ :last-updated "2017-05-08"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2017-05-08 Fixed error in note on intepretation of (/t 0). 
   2016-04-20 Minor formatting of notes fields.
   2015-04-25 Updated to Version 2.5.
   2012-06-20 Modified the definition of :value attribute to include abstract values
@@ -59,8 +60,9 @@
   instance of Reals. However, the declaration imposes no constraints
   on their value. This means in particular that 
   - for every instance theory T and
-  - for every closed terms t1 and t2 of sort Real, 
-  there is a model of T that satisfies (= t1 (/ t2 0)). 
+  - for every value v (as defined in the :values attribute) and 
+    closed term t of sort Real,
+  there is a model of T that satisfies (= v (/ t 0)).
  "
 
  :notes

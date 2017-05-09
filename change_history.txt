@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2017-05-08:
+  Theories/Reals.smt2:
+    Fixed error in note on intepretation of (/t 0). 
+
 2017-05-03:
   Logics/QF_BV.smt2:
     Updated to Version 2.6.  Division and remainder operations are no
