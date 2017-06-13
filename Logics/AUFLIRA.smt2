@@ -1,7 +1,7 @@
 (logic AUFLIRA
 
- :smt-lib-version 2.5
- :smt-lib-release "2017-05-09"
+ :smt-lib-version 2.6
+ :smt-lib-release "2017-06-13"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-05-05"
  :last-updated "2015-04-25"

@@ -1,12 +1,13 @@
 (theory FixedSizeBitVectors
 
- :smt-lib-version 2.5
- :smt-lib-release "2017-05-09"
+ :smt-lib-version 2.6
+ :smt-lib-release "2017-06-13"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02" 
- :last-updated "2017-05-03"
+ :last-updated "2017-06-13"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2017-06-13 Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
   2017-05-03 Updated to version 2.6; changed semantics of division and
              remainder operators.
   2016-04-20 Minor formatting of notes fields.
@@ -67,6 +68,8 @@
     - op1 is from {bvnot, bvneg}
     - op2 is from {bvand, bvor, bvadd, bvmul, bvudiv, bvurem, bvshl, bvlshr}
     - m is a numeral greater than 0
+
+    The operators in {bvand, bvor, bvadd, bvmul} have the :left_assoc attribute.
  "
 
  :funs_description "

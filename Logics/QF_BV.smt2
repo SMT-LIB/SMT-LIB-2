@@ -1,12 +1,13 @@
 (logic QF_BV
 
- :smt-lib-version 2.5
- :smt-lib-release "2017-05-09"
+ :smt-lib-version 2.6
+ :smt-lib-release "2017-06-13"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02"
- :last-updated "2017-05-03"
+ :last-updated "2017-06-13"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2017-06-13 Added that bvxor and bvxnor are left associative
   2017-05-03 Updated to Version 2.6.  Division and remainder operations are no
              longer undefiend when the second operand is 0.  See
              the FixedSizeBitVectors theory definition for details.
@@ -158,7 +159,12 @@
     (bvxnor s t) abbreviates (bvor (bvand s t) (bvand (bvnot s) (bvnot t)))
     (bvcomp s t) abbreviates (bvxnor s t) if m = 1, and
        (bvand (bvxnor ((_ extract |m-1| |m-1|) s) ((_ extract |m-1| |m-1|) t))
-              (bvcomp ((_ extract |m-2| 0) s) ((_ extract |m-2| 0) t))) otherwise
+              (bvcomp ((_ extract |m-2| 0) s) ((_ extract |m-2| 0) t))) otherwise.
+
+    Additionally, bvxor and bvxnor are left associative, so:
+
+    (bvxor s_1 s_2 ... s_n) abbreviates (bvxor (bvxor s_1 s_2 ...) s_n), and
+    (bvxnor s_1 s_2 ... s_n) abbreviates (bvxnor (bvxnor s_1 s_2 ...) s_n).
 
   - Arithmetic operators
 

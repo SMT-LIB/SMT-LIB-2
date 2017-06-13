@@ -1,5 +1,11 @@
 Note: history only accounts for content changes, not release changes.
 
+2017-06-13:
+  Logics/QF_BV.smt2:
+    Added that bvxor and bvxnor are left associative
+  Theories/FixedSizeBitVectors.smt2:
+    Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
+
 2017-05-08:
   Theories/Reals.smt2:
     Fixed error in note on intepretation of (/t 0). 
