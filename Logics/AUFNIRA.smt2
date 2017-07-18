@@ -1,7 +1,7 @@
 (logic AUFNIRA
 
  :smt-lib-version 2.6
- :smt-lib-release "2017-06-13"
+ :smt-lib-release "2017-07-18"
  :written-by "Cesare Tinelli and Clark Barrett"
  :date "2010-05-12"
  :last-updated "2015-04-25"

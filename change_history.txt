@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2017-07-18:
+  Standard reference:
+    Standard reference updated to 2.6
+
 2017-06-13:
   Logics/QF_BV.smt2:
     Added that bvxor and bvxnor are left associative

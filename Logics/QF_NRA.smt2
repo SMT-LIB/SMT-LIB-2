@@ -1,7 +1,7 @@
 (logic QF_NRA
 
  :smt-lib-version 2.6
- :smt-lib-release "2017-06-13"
+ :smt-lib-release "2017-07-18"
  :written-by "Cesare Tinelli"
  :date "2011-06-11"
  :last-updated "2015-04-25"
