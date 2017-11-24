@@ -1,7 +1,7 @@
 (logic QF_UF
 
  :smt-lib-version 2.6
- :smt-lib-release "2017-07-18"
+ :smt-lib-release "2017-11-24"
  :written-by "Cesare Tinelli"
  :date "2010-04-14"
  :last-updated "2015-04-25"

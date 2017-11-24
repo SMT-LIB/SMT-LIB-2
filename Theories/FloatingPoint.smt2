@@ -1,7 +1,7 @@
 (theory FloatingPoint
 
  :smt-lib-version 2.6
- :smt-lib-release "2017-07-18"
+ :smt-lib-release "2017-11-24"
  :written-by "Cesare Tinelli and Martin Brain"
  :date "2014-05-27"
  :last-updated "2015-04-25"

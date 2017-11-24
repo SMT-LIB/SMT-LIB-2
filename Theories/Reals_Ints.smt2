@@ -1,12 +1,15 @@
 (theory Reals_Ints
 
  :smt-lib-version 2.6
- :smt-lib-release "2017-07-18"
+ :smt-lib-release "2017-11-24"
  :written_by "Cesare Tinelli"
  :date "2010-04-17"
- :last-updated "2015-04-25"
+ :last-updated "2017-11-24"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2017-11-24 Added abstract values for irrational numbers to set of Real values,
+             consistently with the Reals theory (the omission of such values
+             was an oversight).
   2015-04-25 Updated to Version 2.5.
  "
  
@@ -51,6 +54,7 @@
   - all terms of the form (- n) where n is a numeral other than 0.
 
   The set of values for the sort Real consists of 
+  - an abstract value for each irrational algebraic number
   - all terms of the form (/ (to_real m) (to_real n)) or 
     (/ (- (to_real m)) (to_real n)) where 
     - m is a numeral,

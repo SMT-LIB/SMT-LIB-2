@@ -1,5 +1,11 @@
 Note: history only accounts for content changes, not release changes.
 
+2017-11-24:
+  Theories/Reals_Ints.smt2:
+    Added abstract values for irrational numbers to set of Real values,
+    consistently with the Reals theory (the omission of such values
+    was an oversight).
+
 2017-07-18:
   Standard reference:
     Standard reference updated to 2.6
