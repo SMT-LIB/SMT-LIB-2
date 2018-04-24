@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2018-04-24
+  Theories/UnicodeStrings.smt2
+    First draft (Draft 1.0) for the theory of Unicode Strings and Languages
+
 2017-11-24:
   Theories/Reals_Ints.smt2:
     Added abstract values for irrational numbers to set of Real values,
