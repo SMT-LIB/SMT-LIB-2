@@ -1,5 +1,12 @@
 Note: history only accounts for content changes, not release changes.
 
+2019-04-17
+  Theories/UnicodeStrings.smt2
+    Draft 2.0
+    Taking into account some of the feedback from the SMT-LIB community.
+    In particular, with respect to Draft 1.0 character sort (Char) does not
+    exists anymore, as this was considered to have more cons than pros.
+
 2018-04-24
   Theories/UnicodeStrings.smt2
     First draft (Draft 1.0) for the theory of Unicode Strings and Languages

@@ -1,11 +1,11 @@
 ;;
-;; DRAFT 1.0
+;; DRAFT 2.0
 ;;
 (theory Strings
 
  :smt-lib-version 2.6
  :written_by "Cesare Tinelli, Clark Barret, and Pascal Fontaine"
- :date "2018-04-20"
+ :date "2019-04-17"
  
  :notes
  "This a theory of character strings and regular expressions over an alphabet 
@@ -13,24 +13,37 @@
   in combination with Ints, the theory of integer numbers.
  "
  
+ :notes
+ "Draft 2.0 differs from Draft 1.0 for taking into account some of the feedback
+  from the SMT-LIB community. In particular, with respect to Draft 1.0 
+  it does not have a character sort (Char) anymore, as this was considered 
+  to have more cons than pros.
+ "
+
 ;-------
 ; Sorts
 ;-------
 
  :sorts (
-  (Char 0)   ; character sort 
   (String 0) ; string sort
   (RegLan 0) ; regular expression sort
   (Int 0)    ; integer sort
 )
 
+; In string fields below (which are double-quote-delimited) we cannot write 
+; something like "abc" to denote a string constant, we must use ""abc"" instead.
+:notes
+"Because of SMT-LIB's own escaping conventions, string literals are written 
+ in quadruple quotes, as in ""abc"", in textual fields here.
+" 
+
 ;-----------
 ; Constants
 ;-----------
 
- ; Character constants
+ ; singleton string constants
  :funs_description 
- "All indexed identifiers, all of sort Char, of the form 
+ "All indexed identifiers, all of sort String, of the form 
 
     (_ char ⟨H⟩) 
    
@@ -44,13 +57,14 @@
 
    Ex:  (_ char #xA)  (_ char #x4E)  (_ char #x123)  (_ char #x1BC3D)  
   
-   Each identifier (_ char n), called a _Unicode constant_ in this theory, 
-   denotes the Unicode character with code point n – more formally, it denotes 
-   the codepoint itself. 
+   Each identifier (_ char n) denotes a string of length 1 whose only character 
+   is the Unicode character with code point n. We identify Unicode characters with
+   their code point, expressed as a hexadecimal.
    For instance, 
-   - (_ char #x2B) denotes code point 0x0002B, for the character + (PLUS SIGN); 
-   - (_ char #x27E8) denotes code point 0x027E8, for ⟨ 
-     (MATHEMATICAL LEFT ANGLE BRACKET).
+   - (_ char #x2B) denotes the string ""+"" whose only character has code point 
+     0x0002B (PLUS SIGN); 
+   - (_ char #x27E8) denotes the string ""⟨"" whose only character has code point 
+     0x027E8 (MATHEMATICAL LEFT ANGLE BRACKET).
  "
 
  :notes
@@ -60,31 +74,28 @@
  "
 
  :notes
- "Because of beginning zeros, the same code point is denoted by more than one
-  constant. 
+ "Because of beginning zeros, the same one-character string is denoted by more 
+  than one constant. 
   Example: (_ char #x2B), (_ char #x02B), (_ char #x002B) and (_ char #x0002B).
  "
 
  :notes 
- "The constants represent all the Unicode code points in Planes 0 to 2 of
-  Unicode, ranging from 0x00000 to 0x2FFFF. (Planes 3-13 are currently 
+ "The singleton string constants represent all the Unicode code points in Planes 0 
+  to 2 of Unicode, ranging from 0x00000 to 0x2FFFF. (Planes 3-13 are currently  
   unassigned and 14-16 are special purpose or private planes.)
+  
+  The final draft may extend the constants to all 17 Unicode planes.
 
   References: 
   - https://www.unicode.org/
   - http://www.utf8-chartable.de/
  "
 
- :notes 
- "Rationale for having a character sort in the theory:
-  For some applications it is more convenient to reason about individual
-  characters, as opposed to strings of length 1.
- "
 
  :notes 
- "Rationale for the chosen notation for character constants:
-  Because of their large range, Unicode code oints are typically given in
-  hexadecimal notation. Using an hexadecimal directly to denote the corresponding 
+ "Rationale for the chosen notation for singleton string constants:
+  Because of their large range, Unicode code points are typically given in
+  hexadecimal notation. Using a hexadecimal directly to denote the corresponding 
   character, however, would create an overloading problem in logics that combine 
   this theory with that of bitvectors since hexadecimals denote bitvectors there.
   Using them as indices instead avoids this problem.
@@ -109,32 +120,29 @@
        \u{d₄d₃d₂d₁d₀}
    where each dᵢ is a hexadecimal digit and d₄ is restricted to the range 0-2.
    These are the **only escape sequences** in this theory. See later.
+
+   In the final draft, the restrictions above on the digits may be extended 
+   to allow characters from all 17 Unicode planes.
   "
 
  :notes
   "SMT-LIB 2.6 has one escape sequence of its own for string literals. Two
-   double quotes are used to represent the double-quote character within 
-   a string literal (like the one containing this very note). That escape 
+   double quotes ("") are used to represent the double-quote character within 
+   a string literal such as the one containing this very note. That escape 
    sequence is at the level of the SMT-LIB frontend of a solver, not at the 
    level of this theory. 
   "
  
-; we cannot write "abc" in a string field here, we will need to use ""abc""
-:notes
-  "Because of SMT-LIB's own escaping conventions, string literals will then 
-   be written in quadruple quotes, as in ""abc"", in textual fields here.
- " 
 
  :values 
- "The set of values for Char is the set of all character constants;
-  for String it is set of all string literals; for RegLan it is the set 
-  of all ground terms of that sort.
+ "The set of values for String it is set of all string literals; 
+  for RegLan it is the set of all ground terms of that sort.
  "
 
  :notes
- "The set of values for Char, String and RegLan could be restricted further, to 
-  remove some redundancies. For instances, we could disallow leading zeros in
-  character constants and in escape sequences.
+ "The set of values for String and RegLan could be restricted further, to 
+  remove some redundancies. For instance, we could disallow leading zeros 
+  in singleton string constants and in escape sequences.
   For RegLan, we could insist on some level of normalization for regular
   expressions values. These restrictions are left to future versions.
  "
@@ -148,8 +156,6 @@
  ; String functions
 
  :funs (
-  ; Character to string injection
-  (str Char String) 
 
   ; String concatenation
   (str.++ String String String :left-assoc)
@@ -192,6 +198,15 @@
   (re.* RegLan RegLan) 
 )
 
+:note 
+"function str.to-re allows one to write _symbolic regular expressions_, 
+ that is, RegLan terms with subterms like (str.to-re x) where x is a variable. 
+ Such terms have more expressive power than regular expressions. This is 
+ intentional, for future developments.
+ The restriction to actual regular expressions will be imposed in a logic
+ where str.to-re will be applicable to string constants only.
+"
+
 ;----------------------------
 ; Additional functions
 ;----------------------------
@@ -207,12 +222,6 @@
   ; Total
   (str.at String Int String)
 
-  ; Character at given position in string.
-  ; Partial 
-  (str.char String Int Char)
-  ;
-  ; Discussion: Could be made total by mapping input with out-of-range position
-  ;             to some agreed upon _error_ character.
 
   ; Substring
   ; (str.substr s i n) denotes the substring of s of length (up to) n starting 
@@ -258,10 +267,10 @@
   (str.replace String String String String)
 
   ; Digit check
-  ; (str.is-digit c) is true iff c is a decimal digit, that is, 
-  ; a code point in the range 0x0030 ... 0x0039.
+  ; (str.is-digit s) is true iff s consists of a single character which is 
+  ; a decimal digit, that is, a code point in the range 0x0030 ... 0x0039.
   ; Total
-  (str.is-digit Char Bool)
+  (str.is-digit String Bool)
 
   ; RE Kleene cross
   ; (re.+ e) abbreviates (re.++ e (re.* e)).
@@ -274,7 +283,8 @@
   (re.opt RegLan RegLan) 
 
   ; RE range
-  ; (re.range s₁ s₂) is the set of all strings s with (str.<= s₁ s s₂)
+  ; (re.range s₁ s₂) is the set of all *singleton* strings s such that
+  ; (str.<= s₁ s s₂)
   ; Total
   (re.range String String) 
 
@@ -286,19 +296,18 @@
   ((_ re.^ n) RegLan RegLan)
 
   ; Function symbol indexed by two numerals n₁ and n₂.
-  ; - ((_ re.loop n₁ n₂) e) = ((_ re.^ n₁) e)           if n₁ >= n₂
+  ; - ((_ re.loop n₁ n₂) e) = re.none                   if n₁ > n₂
+  ; - ((_ re.loop n₁ n₂) e) = ((_ re.^ n₁) e)           if n₁ = n₂
   ; - ((_ re.loop n₁ n₂) e) = 
   ;     (re.union ((_ re.^ n₁) e) ... ((_ re.^ n₂) e))   if n₁ < n₂
   ;
   ((_ re.loop n₁ n₂) RegLan RegLan)
-  ;
-  ; Discussion: Should ((_ re.loop n₁ n₂) e) be equal to re.none when n₁ > n₂?
  )
   
  :notes
- "The symbol re.^ is indexed, as opposed to having an additional Int argument 
-  for n, is problematic because then n can be symbolic in a formula, complicating 
-  solving or requiring a logic that restrict n to be a numeral only.
+ "The symbol re.^ is indexed, as opposed to having an additional Int argument.
+  The latter is problematic because then n can be symbolic in a formula, 
+  complicating solving or requiring a logic that restricts n to be a numeral.
   The same argument applies to re.loop and has been used for functions in other 
   theories, such as (_ extract i j) in FixedSizeBitVectors.
  "
@@ -309,23 +318,8 @@
 
  :fun (
   ; Conversion to integers.
-  ; (char.code c) denotes the integer represented by c's code point 
-  ; when seen as an integer number in hexadecimal notation.
-  ; Total
-  (char.code Char Int)
-
- ; Conversion to integers.
-  ; (char.from-int n) denotes the character with code point n
-  ; if n is in range.
-  ; Partial
-  (char.from-int Int Char)
-  ;
-  ; Discussion: It could be made total by having it return an agreeed upon 
-  ; _error_ character when n is out of range.
-
-  ; Conversion to integers.
   ; (str.to-int s) with s consisting of digits (in the sense of str.is-digit)
-  ; evaluates to the positive integer denoted by s if seen as number in base 10.
+  ; evaluates to the positive integer denoted by s if seen as a number in base 10.
   ; It evaluates to -1 if s is empty or contains non-digits. 
   ; Total
   (str.to-int String Int)
@@ -353,17 +347,15 @@
  "For every expanded signature Σ, the instance of Strings with that signature
   is the theory consisting of all Σ-models that satisfy the constraints detailed
   below.
-  We use ⟦ _ ⟧ to denote the meaning of a symbol in a given Σ-model.
-
-  * Char 
- 
-    ⟦Char⟧ is the set of all integers from 0x00000 to 0x2FFFF, representing the set
-    of all code points for Unicode characters in Planes 0-2. 
+  We use 
+  - ⟦ _ ⟧ to denote the meaning of a symbol in a given Σ-model.
+  - UC to denote the set of all integers from 0x00000 to 0x2FFFF, representing 
+    the set of all code points for Unicode characters in Planes 0-2. 
 
   * String
 
-    ⟦String⟧ is the set ⟦Char⟧* of all words, in the sense of universal algebra, 
-    over the alphabet ⟦Char⟧ of Unicode characters, with juxtaposition denoting
+    ⟦String⟧ is the set UC* of all words, in the sense of universal algebra, 
+    over the alphabet UC of Unicode characters, with juxtaposition denoting
     the concatenation operator here. 
 
     Note: Character positions in a word are numbered starting at 0.
@@ -371,22 +363,22 @@
   * RegLan
 
     ⟦RegLan⟧ is the powerset of ⟦String⟧, the set of all subsets of ⟦String⟧. 
-    Each subset can be seen as a language with alphabet ⟦Char⟧. 
+    Each subset can be seen as a language with alphabet UC. 
     Each term of sort RegLan denotes a regular language in ⟦RegLan⟧.
 
   * Int
 
     ⟦Int⟧ is the set of integer numbers.
 
-  * Char constants
+  * Singleton string constants
 
-    Each Unicode constant is interpreted as the corresponding code point.
+    Each such constant is interpreted as the corresponding code point.
     For example, constant (_ char #x3B1) is interpreted as code point 0x003B1,
     for the letter α.  
 
   * String constants
 
-    1. The empty string constant """" is interpreted as the empty word ε of ⟦Char⟧*.
+    1. The empty string constant """" is interpreted as the empty word ε of UC*.
 
     2. Each string constant containing a single (printable) US ASCII character is
        interpreted as the word consisting of the corresponding Unicode character
@@ -395,9 +387,9 @@
        Ex: ⟦""m""⟧ = ⟦(_ char #x6D)⟧ = 0x0006D
            ⟦"" ""⟧ = ⟦(_ char #x20)⟧ = 0x00020
 
-    3. Each string constant of the form ""\ud₃d₂d₁d₀"" where each dᵢ is a
+    3. Each string constant of the form ""\ud₄d₃d₂d₁d₀"" where each dᵢ is a
        hexadecimal digit and d₄ is in the set {0,1,2} is interpreted as
-       the word consisting of just the character with code point 0xd₃d₂d₁d₀
+       the word consisting of just the character with code point 0xd₄d₃d₂d₁d₀
 
        Ex: ⟦""\u003A""⟧ = ⟦(_ char #x3A)⟧ = 0x0003A
 
@@ -416,7 +408,7 @@
        Ex: ⟦""a\u002C1""⟧ = ⟦""a""⟧⟦""\u002C1""⟧ = 0x00061 0x002C1
            ⟦""\u2CA""⟧ = 0x0005C ⟦""u2CXA""⟧           (not an escape sequence)
            ⟦""\u2CXA""⟧ = 0x0005C ⟦""u2CXA""⟧          (not an escape sequence)
-           ⟦""\u{ACG}A""⟧ = 0x0005C ⟦""{ACG}A""⟧       (not an escape sequence)
+           ⟦""\u{ACG}A""⟧ = 0x0005C ⟦""u{ACG}A""⟧      (not an escape sequence)
 
     6. ⟦l⟧ = ⟦l₁⟧⟦l₂⟧  if l can be obtained as the concatenation of string literals
        l₁ and l₂ where l₁ is an escape sequence and l₂ is non-empty.
@@ -432,10 +424,6 @@
                corresponding to ""\u1234"" is at position 1, and character T is
                at position 2.
 
-  * (str Char String) 
-
-    ⟦str⟧  maps each element of ⟦Char⟧ to the word in ⟦Char⟧* consisting of just
-    that element.
 
   * (str.++ String String String) 
 
@@ -443,7 +431,7 @@
 
   * (str.len String Int)
 
-    ⟦str.len⟧(w) is the number of characters (elements of ⟦Char⟧) in w,
+    ⟦str.len⟧(w) is the number of characters (elements of UC) in w,
     denoted below as |w|. 
 
     Note: ⟦str.len⟧(w) is **not** the number of bytes used by some Unicode
@@ -456,7 +444,7 @@
   * (str.< String String Bool)
 
     ⟦str.<⟧(w₁, w₂) is true iff w₁ is smaller than w₂ in the lexicographic 
-    extension to ⟦Char⟧* of the standard numerical < ordering over ⟦Char⟧.
+    extension to UC* of the standard numerical < ordering over UC.
 
   * (str.to-re String RegLan) 
 
@@ -472,11 +460,11 @@
 
   * (re.all RegLan)
 
-    ⟦re.all⟧  = ⟦String⟧ = ⟦Char⟧* .
+    ⟦re.all⟧  = ⟦String⟧ = UC* .
 
   * (re.allchar RegLan)
 
-    ⟦re.allchar⟧  = { w ∈ ⟦Char⟧* | |w| = 1 } .
+    ⟦re.allchar⟧  = { w ∈ UC* | |w| = 1 } .
 
   * (re.++ RegLan RegLan RegLan :left-assoc)
 
@@ -492,7 +480,7 @@
 
   * (re.* RegLan RegLan) 
 
-    ⟦re.*⟧(L) is the smallest subset K of ⟦Char⟧* such that
+    ⟦re.*⟧(L) is the smallest subset K of UC* such that
     1. ε ∈ K
     2. ⟦re.++⟧(L,K) ⊆ K
 
@@ -503,12 +491,6 @@
   * (str.at String Int String)
 
     ⟦str.at⟧(w, n) = ⟦str.substr⟧(w, n, 1) 
-
-  * (str.char String Int Char)
-
-    ⟦str.char⟧(w, n) is the character at position n in w if 0 <= n < |w|.
-
-    Note: The returned value is (currently) unspecified when n < 0 or |w| <= n.
 
   * (str.substr String Int Int String)
 
@@ -553,12 +535,11 @@
       - w' = u₁w₂u₂
       - |u₁| is minimal
                                   if ⟦str.contains⟧(w, w₁) = true
-
     ⟦str.replace⟧(w, w₁, w₂) = w   otherwise
 
-  * (str.is-digit Char Bool)
+  * (str.is-digit String Bool)
 
-       ⟦str.is-digit⟧(c) = true iff  0x00030 <= c <= 0x00039
+       ⟦str.is-digit⟧(w) = true  iff |w| = 1 and 0x00030 <= w <= 0x00039
 
   * (re.+ RegLan RegLan) 
 
@@ -570,7 +551,7 @@
 
   * (re.range String String)
 
-    ⟦re.range⟧(w₁, w₂) = { w ∈ ⟦Char⟧* | w₁ <= w <= w₂ }  where <= is ⟦str.<=⟧
+    ⟦re.range⟧(w₁, w₂) = { w ∈ UC* | w₁ <= w <= w₂ }  where <= is ⟦str.<=⟧
 
   * ((_ re.^ n) RegLan RegLan)
 
@@ -582,14 +563,6 @@
 
        ⟦(_ re.loop i n)⟧ (L) = Lⁱ ∪ ... ∪ Lⁿ   if i < n       
        ⟦(_ re.loop i n)⟧ (L) = Lⁱ              if i >= n
-
-  * (char.code Char Int)
-
-    ⟦char.code⟧(c) = c          (⟦Char⟧ is a subset of ⟦Int⟧)
-
-  * (char.from-int Int Char)
-
-    ⟦char.from-int⟧(n) = n     if 0x00000 <= n <= 0x2FFFF
 
   * (str.to-int String Int)
 
