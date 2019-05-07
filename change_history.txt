@@ -1,5 +1,11 @@
 Note: history only accounts for content changes, not release changes.
 
+2019-05-07
+  Theories/UnicodeStrings.smt2
+    Draft 2.1
+    Fixed a few typos in UnicodeStrings and changed names from hyphen
+    (e.g. str.to-int) to underscore (str.to_int)
+
 2019-04-17
   Theories/UnicodeStrings.smt2
     Draft 2.0

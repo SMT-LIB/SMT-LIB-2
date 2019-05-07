@@ -1,20 +1,25 @@
 ;;
-;; DRAFT 2.0
+;; DRAFT 2.1
 ;;
 (theory Strings
 
  :smt-lib-version 2.6
  :written_by "Cesare Tinelli, Clark Barret, and Pascal Fontaine"
- :date "2019-04-17"
+ :date "2019-05-07"
  
  :notes
  "This a theory of character strings and regular expressions over an alphabet 
   consisting of Unicode characters. It is not meant to be used in isolation but 
   in combination with Ints, the theory of integer numbers.
  "
+
+ :notes 
+ "The theory is based on an initial proposal by N. Bjørner, V. Ganesh, R. Michel
+  and M. Veanes at SMT 2012.
+ "
  
  :notes
- "Draft 2.0 differs from Draft 1.0 for taking into account some of the feedback
+ "Draft 2.* differs from Draft 1.0 for taking into account some of the feedback
   from the SMT-LIB community. In particular, with respect to Draft 1.0 
   it does not have a character sort (Char) anymore, as this was considered 
   to have more cons than pros.
@@ -69,7 +74,7 @@
 
  :notes
  "The use of hexadecimal as indices of indexed symbols requires a (minor)
-  extension of the SMT-LIB 2 standard which currently allows only numeral and
+  extension of the SMT-LIB 2 standard which currently allows only numerals and
   symbols as indices.
  "
 
@@ -132,17 +137,17 @@
    sequence is at the level of the SMT-LIB frontend of a solver, not at the 
    level of this theory. 
   "
- 
+
 
  :values 
- "The set of values for String it is set of all string literals; 
+ "The set of values for String is set of all string literals; 
   for RegLan it is the set of all ground terms of that sort.
  "
 
  :notes
  "The set of values for String and RegLan could be restricted further, to 
   remove some redundancies. For instance, we could disallow leading zeros 
-  in singleton string constants and in escape sequences.
+  in escape sequences.
   For RegLan, we could insist on some level of normalization for regular
   expressions values. These restrictions are left to future versions.
  "
@@ -171,10 +176,10 @@
 
  :funs (
  ; String to RE injection
-  (str.to-re String RegLan) 
+  (str.to_re String RegLan) 
 
   ; RE membership
-  (str.in-re String RegLan Bool) 
+  (str.in_re String RegLan Bool) 
 
   ; Constant denoting the empty set of strings
   (re.none RegLan)
@@ -199,12 +204,12 @@
 )
 
 :note 
-"function str.to-re allows one to write _symbolic regular expressions_, 
- that is, RegLan terms with subterms like (str.to-re x) where x is a variable. 
+"Function str.to_re allows one to write _symbolic regular expressions_, 
+ that is, RegLan terms with subterms like (str.to_re x) where x is a variable. 
  Such terms have more expressive power than regular expressions. This is 
  intentional, for future developments.
  The restriction to actual regular expressions will be imposed in a logic
- where str.to-re will be applicable to string constants only.
+ where str.to_re will be applicable to string constants only.
 "
 
 ;----------------------------
@@ -215,6 +220,7 @@
 
  :fun (
   ; Reflexive closure of lexicographic ordering
+  ; Total
   (str.<= String String Bool :chainable)   
  
   ; Singleton string containing a character at given position 
@@ -222,17 +228,16 @@
   ; Total
   (str.at String Int String)
 
-
   ; Substring
-  ; (str.substr s i n) denotes the substring of s of length (up to) n starting 
-  ; at position i.
+  ; (str.substr s i n) denotes the (unscattered) substring of s of length 
+  ; (up to) n starting at position i.
   ; Total
   (str.substr String Int Int String)
   ;
   ; Discussion: consider alternative proposals for output in case of
-  ;  - negative index, 
-  ;  - (index + offset) greater than length, 
-  ;  - negative offset
+  ;  1. negative index, 
+  ;  2. (index + offset) greater than length, 
+  ;  3. negative offset
 
   ; First string is a prefix of second one.
   ; (str.prefixof s t) is true iff s is a prefix of t.
@@ -267,10 +272,10 @@
   (str.replace String String String String)
 
   ; Digit check
-  ; (str.is-digit s) is true iff s consists of a single character which is 
+  ; (str.is_digit s) is true iff s consists of a single character which is 
   ; a decimal digit, that is, a code point in the range 0x0030 ... 0x0039.
   ; Total
-  (str.is-digit String Bool)
+  (str.is_digit String Bool)
 
   ; RE Kleene cross
   ; (re.+ e) abbreviates (re.++ e (re.* e)).
@@ -278,7 +283,7 @@
   (re.+ RegLan RegLan) 
 
   ; RE option
-  ; (re.opt e) abbreviates (re.union e (str.to-re ""))
+  ; (re.opt e) abbreviates (re.union e (str.to_re ""))
   ; Total
   (re.opt RegLan RegLan) 
 
@@ -290,7 +295,7 @@
 
   ; Function symbol indexed by a numeral n.
   ; ((_ re.^ n) e) is the nth power of e:
-  ; - ((_ re.^ 0) e) = (str.to-re "") 
+  ; - ((_ re.^ 0) e) = (str.to_re "") 
   ; - ((_ re.^ n') e) = (re.++ e ((_ re.^ n) e))  where n' = n + 1
   ;
   ((_ re.^ n) RegLan RegLan)
@@ -299,7 +304,7 @@
   ; - ((_ re.loop n₁ n₂) e) = re.none                   if n₁ > n₂
   ; - ((_ re.loop n₁ n₂) e) = ((_ re.^ n₁) e)           if n₁ = n₂
   ; - ((_ re.loop n₁ n₂) e) = 
-  ;     (re.union ((_ re.^ n₁) e) ... ((_ re.^ n₂) e))   if n₁ < n₂
+  ;     (re.union ((_ re.^ n₁) e) ... ((_ re.^ n₂) e))  if n₁ < n₂
   ;
   ((_ re.loop n₁ n₂) RegLan RegLan)
  )
@@ -318,28 +323,28 @@
 
  :fun (
   ; Conversion to integers.
-  ; (str.to-int s) with s consisting of digits (in the sense of str.is-digit)
+  ; (str.to_int s) with s consisting of digits (in the sense of str.is_digit)
   ; evaluates to the positive integer denoted by s if seen as a number in base 10.
   ; It evaluates to -1 if s is empty or contains non-digits. 
   ; Total
-  (str.to-int String Int)
+  (str.to_int String Int)
   ;
   ; Discussion:
   ; Should we allow the representation of negative integers – with, e.g.,
-  ; (str.to-int "-123") evaluating to -123?
+  ; (str.to_int "-123") evaluating to -123?
   ; If so, to what should we map the empty string and strings with extraneous
   ; characters?
   
   ; Conversion from integers.
-  ; (str.from-int n) with n non-negative is the corresponding string in decimal
+  ; (str.from_int n) with n non-negative is the corresponding string in decimal
   ; notation. Otherwise, it is the empty string. 
   ; Total
-  (str.from-int Int String)
+  (str.from_int Int String)
   ;
   ; Discussion:
-  ; If str.to-int can also accept representations of negative integers
-  ; str.from-int should map negative integers to their corresponding string
-  ; (so that (str.to-int (str.from-int n)) equals n for all n).
+  ; If str.to_int can also accept representations of negative integers
+  ; str.from_int should map negative integers to their corresponding string
+  ; (so that (str.to_int (str.from_int n)) equals n for all n).
  )
 
 
@@ -446,9 +451,9 @@
     ⟦str.<⟧(w₁, w₂) is true iff w₁ is smaller than w₂ in the lexicographic 
     extension to UC* of the standard numerical < ordering over UC.
 
-  * (str.to-re String RegLan) 
+  * (str.to_re String RegLan) 
 
-    ⟦str.to-re⟧(w) = { w }.
+    ⟦str.to_re⟧(w) = { w }.
 
   * (str.in-re String RegLan Bool) 
 
@@ -537,9 +542,9 @@
                                   if ⟦str.contains⟧(w, w₁) = true
     ⟦str.replace⟧(w, w₁, w₂) = w   otherwise
 
-  * (str.is-digit String Bool)
+  * (str.is_digit String Bool)
 
-       ⟦str.is-digit⟧(w) = true  iff |w| = 1 and 0x00030 <= w <= 0x00039
+       ⟦str.is_digit⟧(w) = true  iff |w| = 1 and 0x00030 <= w <= 0x00039
 
   * (re.+ RegLan RegLan) 
 
@@ -564,21 +569,21 @@
        ⟦(_ re.loop i n)⟧ (L) = Lⁱ ∪ ... ∪ Lⁿ   if i < n       
        ⟦(_ re.loop i n)⟧ (L) = Lⁱ              if i >= n
 
-  * (str.to-int String Int)
+  * (str.to_int String Int)
 
-    ⟦str.to-int⟧(w) = -1 if w = ⟦l⟧  where l is the empty string literal or 
+    ⟦str.to_int⟧(w) = -1 if w = ⟦l⟧  where l is the empty string literal or 
     one containing more than digits, i.e., characters with code point in the
     range 0x00030–0x00039.
 
-    ⟦str.to-int⟧(w) = n if w = ⟦l⟧  where l is a string literal consisting
+    ⟦str.to_int⟧(w) = n if w = ⟦l⟧  where l is a string literal consisting
     of a single digit denoting number n.
 
-    ⟦str.to-int⟧(w) = 10*⟦str.to-int⟧(w₁) + ⟦str.to-int⟧(w₂) if 
+    ⟦str.to_int⟧(w) = 10*⟦str.to_int⟧(w₁) + ⟦str.to_int⟧(w₂) if 
     - w = w₁w₂
     - |w₁| > 0
     - |w₂| = 1
-    - ⟦str.to-int⟧(w₁) >= 0
-    - ⟦str.to-int⟧(w₂) >= 0.
+    - ⟦str.to_int⟧(w₁) >= 0
+    - ⟦str.to_int⟧(w₂) >= 0.
  
     Note: This function is made total by mapping the empty word and words with
           non-digits to -1.
@@ -587,19 +592,19 @@
           with (characters corresponding to) superflous zeros, such as 
           ⟦""0023""⟧.
 
-  * (str.from-int Int String)
+  * (str.from_int Int String)
 
-    ⟦str.from-int⟧(n) = w  where w is the shortest word such that 
-    ⟦str.to-int⟧(w) = n,  if n >= 0.
+    ⟦str.from_int⟧(n) = w  where w is the shortest word such that 
+    ⟦str.to_int⟧(w) = n,  if n >= 0.
 
-    ⟦str.from-int⟧(n) = ε,  if n < 0.
+    ⟦str.from_int⟧(n) = ε,  if n < 0.
 
     Note: This function is made total by mapping negative integers
           to the empty word.
 
-    Note: ⟦str.to-int⟧(⟦str.from-int⟧(n)) = n iff n is a non-negative integer.
+    Note: ⟦str.to_int⟧(⟦str.from_int⟧(n)) = n iff n is a non-negative integer.
 
-    Note: ⟦str.from-int⟧(⟦str.to-int⟧(w)) = w iff w consists only of digits and
+    Note: ⟦str.from_int⟧(⟦str.to_int⟧(w)) = w iff w consists only of digits and
           has no superfluous zeros.
  "
 )
