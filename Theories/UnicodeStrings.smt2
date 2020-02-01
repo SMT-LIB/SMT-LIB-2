@@ -1,11 +1,8 @@
-;;
-;; DRAFT 2.1
-;;
 (theory Strings
 
  :smt-lib-version 2.6
  :written_by "Cesare Tinelli, Clark Barret, and Pascal Fontaine"
- :date "2019-05-07"
+ :date "2020-02-01"
  
  :notes
  "This a theory of character strings and regular expressions over an alphabet 
@@ -16,13 +13,10 @@
  :notes 
  "The theory is based on an initial proposal by N. Bjørner, V. Ganesh, R. Michel
   and M. Veanes at SMT 2012.
- "
- 
- :notes
- "Draft 2.* differs from Draft 1.0 for taking into account some of the feedback
-  from the SMT-LIB community. In particular, with respect to Draft 1.0 
-  it does not have a character sort (Char) anymore, as this was considered 
-  to have more cons than pros.
+  The following additional people, alphabetical order, have contributed further 
+  suggestions that helped shape the current version of the theory (with our 
+  apologies for any unintentional omissions):
+  David Cok, Levent Erkok, Andrew Gacek, Anthony Li, Andrew Reynolds, Tjark Weber.
  "
 
 ;-------
@@ -35,6 +29,11 @@
   (Int 0)    ; integer sort
 )
 
+:notes
+"There was consesus in the community that having a character type is not really 
+ necessary and in fact complicates the theory. So the only way to express
+ characters is to use to use strings of length 1.
+ "
 ; In string fields below (which are double-quote-delimited) we cannot write 
 ; something like "abc" to denote a string constant, we must use ""abc"" instead.
 :notes
@@ -79,21 +78,23 @@
  "
 
  :notes
- "Because of beginning zeros, the same one-character string is denoted by more 
+ "Because of leading zeros, the same one-character string is denoted by more 
   than one constant. 
   Example: (_ char #x2B), (_ char #x02B), (_ char #x002B) and (_ char #x0002B).
  "
 
  :notes 
- "The singleton string constants represent all the Unicode code points in Planes 0 
-  to 2 of Unicode, ranging from 0x00000 to 0x2FFFF. (Planes 3-13 are currently  
-  unassigned and 14-16 are special purpose or private planes.)
+ "The singleton string constants represent all the Unicode code points in 
+  Planes 0 to 2 of Unicode, ranging from 0x00000 to 0x2FFFF (0 to 196607).
+  Planes 3-13 are currently unassigned and 14-16 are special purpose or 
+  private planes.
   
-  The final draft may extend the constants to all 17 Unicode planes.
+  A later version may extend the constants to all 17 Unicode planes.
 
   References: 
-  - https://www.unicode.org/
+  - https://www.unicode.org/main.html
   - http://www.utf8-chartable.de/
+  - https://www.compart.com/en/unicode/
  "
 
 
@@ -109,7 +110,7 @@
  ; String literals (string constants)
  :funs_description 
   "All double-quote-delimited string literals consisting of printable US ASCII 
-   characters, those with Unicode code point from 0x00020 to 0x0007E.
+   characters, i.e., those with Unicode code point from 0x00020 to 0x0007E.
    We refer to these literals as _string constants_.
   "
 
@@ -126,7 +127,7 @@
    where each dᵢ is a hexadecimal digit and d₄ is restricted to the range 0-2.
    These are the **only escape sequences** in this theory. See later.
 
-   In the final draft, the restrictions above on the digits may be extended 
+   In a later version, the restrictions above on the digits may be extended 
    to allow characters from all 17 Unicode planes.
   "
 
@@ -137,7 +138,6 @@
    sequence is at the level of the SMT-LIB frontend of a solver, not at the 
    level of this theory. 
   "
-
 
  :values 
  "The set of values for String is set of all string literals; 
@@ -152,14 +152,19 @@
   expressions values. These restrictions are left to future versions.
  "
 
+ notes:
+ "All functions symbols in this theory denote *total* functions, i.e., 
+  they are fully specified by the theory. This is achieved by returning 
+  _error_ values for inputs where the intended functions are undefined.
+  Error outputs are always outside of the range of the intended function
+  so there is no confusion with non-error outputs.
+ "
+
 ;----------------
 ; Core functions
 ;----------------
-;
-; All core functions are total (i.e., fully specified by the theory).
 
  ; String functions
-
  :funs (
 
   ; String concatenation
@@ -173,7 +178,6 @@
  ) 
 
  ; Regular expression functions
-
  :funs (
  ; String to RE injection
   (str.to_re String RegLan) 
@@ -215,82 +219,81 @@
 ;----------------------------
 ; Additional functions
 ;----------------------------
-;
-; Some functions are partial (i.e., underspecified in the theory).
 
  :fun (
   ; Reflexive closure of lexicographic ordering
-  ; Total
   (str.<= String String Bool :chainable)   
  
   ; Singleton string containing a character at given position 
   ; or empty string when position is out of range.
-  ; Total
+  ; The leftmost position is 0.
   (str.at String Int String)
 
   ; Substring
-  ; (str.substr s i n) denotes the (unscattered) substring of s of length 
-  ; (up to) n starting at position i.
-  ; Total
+  ; (str.substr s i n) evaluates to the longest (unscattered) substring of s 
+  ; of length at most n starting at position i.
+  ; It evaluates to the empty string if n is negative or i is not in 
+  ; the interval [0,l-1] where l is the length of s.
   (str.substr String Int Int String)
   ;
-  ; Discussion: consider alternative proposals for output in case of
-  ;  1. negative index, 
-  ;  2. (index + offset) greater than length, 
-  ;  3. negative offset
 
   ; First string is a prefix of second one.
   ; (str.prefixof s t) is true iff s is a prefix of t.
-  ; Total
   (str.prefixof String String Bool)
 
   ; First string is a suffix of second one.
   ; (str.suffixof s t) is true iff s is a suffix of t.
-  ; Total
   (str.suffixof String String Bool)
 
   ; First string contains second one
   ; (str.contains s t) iff s contains t.
-  ; Total
   (str.contains String String Bool)
   
   ; Index of first occurrence of second string in first one.
-  ; (str.indexof s t i), with t non-empty and 0 <= i <= |s| is the position 
-  ; of the first occurrence of t in s at or after position i, if any. 
+  ; (str.indexof s t i), with 0 <= i <= |s| is the position of the first occurrence 
+  ; of t in s at or after position i, if any. 
   ; Otherwise, it is -1. Note that the result is i whenever i is within range
   ; and t is empty.
-  ; Total
   (str.indexof String String Int Int)
-  ;
-  ; Discussion: alternative behaviors for corner cases could be considered.
-
+  
   ; Replace 
   ; (str.replace s t t') is the string obtained by replacing the first occurrence 
   ; of t in s, if any, by t'. Note that if t is empty, the result is to prepend
   ; t' to s; also, if t does not occur in s then the result is s.
-  ; Total
   (str.replace String String String String)
 
-  ; Digit check
-  ; (str.is_digit s) is true iff s consists of a single character which is 
-  ; a decimal digit, that is, a code point in the range 0x0030 ... 0x0039.
-  ; Total
-  (str.is_digit String Bool)
+  ; (str.replace_all s t t’) is s if t is the empty string. Otherwise, it is
+  ; the string obtained from s by replacing all occurrences of t in s by t’, 
+  ; starting with the first occurrence and 
+  ; proceeding in left-to-right order. 
+  (str.replace_all String String String String) 
 
+  ; (str.replace_re s r t) is the string obtained by replacing the shortest 
+  ; leftmost non-empty match of r in s, if any, by t. Note that if t is empty, 
+  ; the result is to prepend t to s.
+  (str.replace_re String RegLan String String) 
+
+  ; (str.replace_re_all s r t) is the string obtained by replacing, left-to right,
+  ; each shortest *non-empty* match of r in s by t.
+  (str.replace_re_all String RegLan String String) 
+
+   ; RE complement
+   (re.comp RegLan RegLan)
+
+   ; RE difference
+   (re.diff RegLan RegLan RegLan :left-assoc)
+ 
   ; RE Kleene cross
   ; (re.+ e) abbreviates (re.++ e (re.* e)).
-  ; Total
   (re.+ RegLan RegLan) 
 
   ; RE option
   ; (re.opt e) abbreviates (re.union e (str.to_re ""))
-  ; Total
   (re.opt RegLan RegLan) 
 
   ; RE range
   ; (re.range s₁ s₂) is the set of all *singleton* strings s such that
   ; (str.<= s₁ s s₂)
-  ; Total
   (re.range String String) 
 
   ; Function symbol indexed by a numeral n.
@@ -322,36 +325,41 @@
 ;---------------------------
 
  :fun (
-  ; Conversion to integers.
+
+  ; Digit check
+  ; (str.is_digit s) is true iff s consists of a single character which is 
+  ; a decimal digit, that is, a code point in the range 0x0030 ... 0x0039.
+  (str.is_digit String Bool)
+
+  ; (str.to_code s) is the code point of the only character of s, 
+  ; if s is a singleton string; otherwise, it is -1. 
+  (str.to_code String Int) 
+
+  ; (str.from_code n) is the singleton string whose only character is
+  ; code point n if n is in the range [0, 196607]; otherwise, it is the 
+  ; empty string.
+  (str.from_code Int String) 
+
+  ; Conversion to integers
   ; (str.to_int s) with s consisting of digits (in the sense of str.is_digit)
-  ; evaluates to the positive integer denoted by s if seen as a number in base 10.
+  ; evaluates to the positive integer denoted by s when seen as a number in base 10.
   ; It evaluates to -1 if s is empty or contains non-digits. 
-  ; Total
   (str.to_int String Int)
-  ;
-  ; Discussion:
-  ; Should we allow the representation of negative integers – with, e.g.,
-  ; (str.to_int "-123") evaluating to -123?
-  ; If so, to what should we map the empty string and strings with extraneous
-  ; characters?
-  
+
   ; Conversion from integers.
   ; (str.from_int n) with n non-negative is the corresponding string in decimal
   ; notation. Otherwise, it is the empty string. 
-  ; Total
   (str.from_int Int String)
   ;
-  ; Discussion:
-  ; If str.to_int can also accept representations of negative integers
-  ; str.from_int should map negative integers to their corresponding string
-  ; (so that (str.to_int (str.from_int n)) equals n for all n).
+  :notes
+  "(str.to_int "-123") evaluates to -1, an error value, not to -123.
+   (str.from_int -123) evaluates to """", an error value, not to "-123".
+  "
  )
 
-
 :definition
- "For every expanded signature Σ, the instance of Strings with that signature
-  is the theory consisting of all Σ-models that satisfy the constraints detailed
-  below.
+ "For every expanded signature Σ, the instance of Strings with that signature is
+  the theory consisting of all Σ-models that satisfy the constraints detailed below.
   We use 
   - ⟦ _ ⟧ to denote the meaning of a symbol in a given Σ-model.
   - UC to denote the set of all integers from 0x00000 to 0x2FFFF, representing 
@@ -369,7 +377,7 @@
 
     ⟦RegLan⟧ is the powerset of ⟦String⟧, the set of all subsets of ⟦String⟧. 
     Each subset can be seen as a language with alphabet UC. 
-    Each term of sort RegLan denotes a regular language in ⟦RegLan⟧.
+    Each variable-free term of sort RegLan denotes a regular language in ⟦RegLan⟧.
 
   * Int
 
@@ -377,9 +385,9 @@
 
   * Singleton string constants
 
-    Each such constant is interpreted as the corresponding code point.
-    For example, constant (_ char #x3B1) is interpreted as code point 0x003B1,
-    for the letter α.  
+    Each such constant is interpreted as the singleton string consisting of 
+    the corresponding code point. For example, constant (_ char #x3B1) is interpreted 
+    as code point 0x003B1, for the letter α.  
 
   * String constants
 
@@ -419,7 +427,7 @@
        l₁ and l₂ where l₁ is an escape sequence and l₂ is non-empty.
 
        Ex: ⟦""\u002C1a""⟧ = ⟦""\u002C""⟧⟦""1a""⟧ = 0x0002C ⟦""1a""⟧
-           ⟦""\u{2C}1a""⟧ = ⟦""\u{2C}1a""⟧ = 0x0002C ⟦""1a""⟧
+           ⟦""\u{2C}1a""⟧ = ⟦""\u{2C}""⟧⟦""1a""⟧ = 0x0002C ⟦""1a""⟧
 
     Note: Character positions in a string literal are numbered starting at 0, 
           with escape sequences treated as a single character – consistently
@@ -428,7 +436,6 @@
           Ex.: In ""a\u1234T"", character a is at position 0, the character 
                corresponding to ""\u1234"" is at position 1, and character T is
                at position 2.
-
 
   * (str.++ String String String) 
 
@@ -451,21 +458,26 @@
     ⟦str.<⟧(w₁, w₂) is true iff w₁ is smaller than w₂ in the lexicographic 
     extension to UC* of the standard numerical < ordering over UC.
 
+    Note: The order induced by str.< corresponds to alphabetical order
+    for strings composed of characters from the alphabet of a western language 
+    such as English:
+    ⟦(str.< ""a"" ""aardvark"" ""aardwolf"" ... ""zygomorphic"" ""zygotic"")⟧ = true
+
   * (str.to_re String RegLan) 
 
-    ⟦str.to_re⟧(w) = { w }.
+    ⟦str.to_re⟧(w) = { w }
 
-  * (str.in-re String RegLan Bool) 
+  * (str.in_re String RegLan Bool) 
 
-    ⟦str.in-re⟧(w, L) = true iff w ∈ L.
+    ⟦str.in_re⟧(w, L) = true iff w ∈ L
 
   * (re.none RegLan)
 
-    ⟦re.none⟧  = ∅ .
+    ⟦re.none⟧  = ∅
 
   * (re.all RegLan)
 
-    ⟦re.all⟧  = ⟦String⟧ = UC* .
+    ⟦re.all⟧  = ⟦String⟧ = UC*
 
   * (re.allchar RegLan)
 
@@ -530,21 +542,57 @@
 
     ⟦str.indexof⟧(w,w₂,i) = -1  otherwise.
 
-    Note: This function too is total.
 
   * (str.replace String String String String)
 
-    ⟦str.replace⟧(w, w₁, w₂) is the unique word w' such that 
-    for some u₁, u₂
-      - w  = u₁w₁u₂
-      - w' = u₁w₂u₂
-      - |u₁| is minimal
-                                  if ⟦str.contains⟧(w, w₁) = true
-    ⟦str.replace⟧(w, w₁, w₂) = w   otherwise
+    ⟦str.replace⟧(w, w₁, w₂) = w          if ⟦str.contains⟧(w, w₁) = false
 
-  * (str.is_digit String Bool)
+    ⟦str.replace⟧(w, w₁, w₂) = u₁w₂u₂ 
+      where u₁ is the shortest word such that 
+            w = u₁w₁u₂
+                                          if ⟦str.contains⟧(w, w₁) = true
 
-       ⟦str.is_digit⟧(w) = true  iff |w| = 1 and 0x00030 <= w <= 0x00039
+  * (str.replace_all String String String String)
+
+    ⟦str.replace_all⟧(w, w₁, w₂) = w      if ⟦str.contains⟧(w, w₁) = false 
+                                            or 
+                                            w₁ = ε
+
+    ⟦str.replace_all⟧(w, w₁, w₂) = u₁w₂⟦str.replace_all⟧(u₂, w₁, w₂)
+      where u₁ is the shortest word such that 
+            w = u₁w₁u₂
+                                          if ⟦str.contains⟧(w, w₁) = true
+                                            and 
+                                            w₁ ≠ ε
+
+  * (str.replace_re String String String String)
+
+    ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
+
+    ⟦str.replace_re⟧(w, L, w₂) = u₁w₂u₂ 
+      where u₁, w₁ are the shortest words such that 
+            - w = u₁w₁u₂
+            - w₁ ∈ L
+                                          if some substring of w is in L
+
+  * (str.replace_re_all String String String String)
+
+    ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
+
+    ⟦str.replace_re⟧(w, L, w₂) = u₁w₂⟦str.replace_re⟧(u₂, L, w₂)
+      where u₁, w₁ are the shortest words such that 
+            - w = u₁w₁u₂
+            - w₁ ∈ L
+            - w₁ ≠ ε
+                                          if some substring of w is in L
+
+  * (re.comp RegLan RegLan)
+
+    ⟦str.comp⟧(L) = UC* \ L
+
+  * (re.diff RegLan RegLan RegLan :left-assoc)
+
+    ⟦str.diff⟧(L₁, L₂) = L₁ \ L₂
 
   * (re.+ RegLan RegLan) 
 
@@ -566,8 +614,22 @@
 
   * ((_ re.loop i n) RegLan RegLan)
 
-       ⟦(_ re.loop i n)⟧ (L) = Lⁱ ∪ ... ∪ Lⁿ   if i < n       
-       ⟦(_ re.loop i n)⟧ (L) = Lⁱ              if i >= n
+    ⟦(_ re.loop i n)⟧(L) = Lⁱ ∪ ... ∪ Lⁿ   if i <= n       
+    ⟦(_ re.loop i n)⟧(L) = ∅               otherwise
+
+  * (str.is_digit String Bool)
+
+     ⟦str.is_digit⟧(w) = true  iff |w| = 1 and 0x00030 <= w <= 0x00039
+
+  * (str.to_code String Int)
+
+    ⟦str.to_code⟧(w) = -1         if |w| ≠ 1
+    ⟦str.to_code⟧(w) = w          otherwise  (as w consists of a single code point)
+
+  * (str.from_code Int String) 
+                                     
+    ⟦str.from_code⟧(n) = n        if 0x00000 <= n <= 0x2FFFF 
+    ⟦str.from_code⟧(n) = ε        otherwise
 
   * (str.to_int String Int)
 
@@ -595,16 +657,15 @@
   * (str.from_int Int String)
 
     ⟦str.from_int⟧(n) = w  where w is the shortest word such that 
-    ⟦str.to_int⟧(w) = n,  if n >= 0.
-
-    ⟦str.from_int⟧(n) = ε,  if n < 0.
+    ⟦str.to_int⟧(w) = n      if n >= 0
+    ⟦str.from_int⟧(n) = ε    otherwise
 
     Note: This function is made total by mapping negative integers
           to the empty word.
 
     Note: ⟦str.to_int⟧(⟦str.from_int⟧(n)) = n iff n is a non-negative integer.
 
-    Note: ⟦str.from_int⟧(⟦str.to_int⟧(w)) = w iff w consists only of digits and
+    Note: ⟦str.from_int⟧(⟦str.to_int⟧(w)) = w iff w consists only of digits *and*
           has no superfluous zeros.
  "
 )
