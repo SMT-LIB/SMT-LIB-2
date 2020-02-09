@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2020-02-09
+  Theories/UnicodeStrings.smt2
+    Mostly layout fixes in UnicodeStrings
+
 2020-02-01
   Theories/UnicodeStrings.smt2
     To stable version.  Comments are fixed.  A few functions are added.
