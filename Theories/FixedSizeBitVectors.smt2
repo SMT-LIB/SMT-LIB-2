@@ -7,6 +7,7 @@
  :last-updated "2017-06-13"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2020-05-20 Fixed minor typo
   2017-06-13 Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
   2017-05-03 Updated to version 2.6; changed semantics of division and
              remainder operators.
@@ -69,7 +70,7 @@
     - op2 is from {bvand, bvor, bvadd, bvmul, bvudiv, bvurem, bvshl, bvlshr}
     - m is a numeral greater than 0
 
-    The operators in {bvand, bvor, bvadd, bvmul} have the :left_assoc attribute.
+    The operators in {bvand, bvor, bvadd, bvmul} have the :left-assoc attribute.
  "
 
  :funs_description "

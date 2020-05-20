@@ -1,5 +1,12 @@
 Note: history only accounts for content changes, not release changes.
 
+2020-05-20
+  Logics/QF_BV.smt2
+    bvxnor is no longer marked as left associative, as that is
+    inconsistent with its meaning as the negation of bvxor.
+  Theories/FixedSizeBitVectors.smt2
+    Fixed minor typo
+
 2020-02-09
   Theories/UnicodeStrings.smt2
     Mostly layout fixes in UnicodeStrings
