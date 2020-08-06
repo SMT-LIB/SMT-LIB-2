@@ -1,5 +1,9 @@
 Note: history only accounts for content changes, not release changes.
 
+2020-08-06
+  Theories/UnicodeStrings.smt2
+    Fixed an example in Strings constant definition.
+
 2020-05-20
   Logics/QF_BV.smt2
     bvxnor is no longer marked as left associative, as that is
