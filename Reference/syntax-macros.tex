@@ -1,0 +1,849 @@
+%!TEX root = main.tex
+
+\newcommand{\alt}{\ensuremath{~\mid~}}
+\newcommand{\akey}[1]{\textbf{#1}}
+\newcommand{\seque}[1]{l_{\mathrm{#1}}}
+\newcommand{\bool}{\akey{Bool}}
+
+
+\newcommand{\nter}[2][]{{\textcolor{OliveGreen}{\ensuremath{\langle}\emph{\sffamily{#2}}\ensuremath{\rangle^{#1}}}}\xspace}
+
+\newcommand{\expr}[1]{{\textcolor{NavyBlue}{\texttt{#1}}}}
+\newcommand{\ter}[1]{\expr{#1}\xspace}
+\newcommand{\attr}[1]{\expr{:#1}\xspace}
+\newcommand{\kw}[1]{$\backslash$\ter{#1}}
+
+
+\newcommand{\aattr}[1]{\textbf{#1}\xspace}
+
+%\newcommand{\opar}{\text{\bf(}}
+%\newcommand{\cpar}{\text{\bf)}}
+
+
+%----------------------------------------
+% Concrete syntax
+%----------------------------------------
+
+\newcommand{\aLexical}{
+\begin{tabular}{lcl}
+ \nter{white\_space\_char} & ::= &
+ \dec{9} \alt\  
+ \dec{10} \alt\  
+ \dec{13} \alt\  
+ \dec{32}
+ \\[1ex]
+ \nter{printable\_char} & ::= &
+ \dec{32}  \alt\ $\cdots$ \alt\ \dec{126} \alt\ \dec{128} \alt\ $\cdots$ \alt\ \dec{255}
+ \\[1ex]
+ \nter{digit} & ::= & \ter{0} \alt\ $\cdots$ \alt\ \ter{9}
+ \\[1ex]
+ \nter{letter} & ::= &
+ \ter{A}  \alt\ $\cdots$ \alt\ \ter{Z} \alt\ 
+ \ter{a} \alt\ $\cdots$ \alt\ \ter{z}
+\end{tabular}
+}
+
+\newcommand{\tokens}{
+\begin{tabular}{lcl}
+ \nter{numeral} & ::= & \ter{0}
+                  \alt\ \textit{a non-empty sequence of digits not starting with}
+                        \ter{0}
+ \\[1ex]
+ \nter{decimal} & ::= & \nter{numeral}\!\!\ter{.0}\!\!$^*$\nter{numeral}
+ \\[1ex]
+ \nter{hexadecimal} & ::= & \ter{\#x} \textit{followed by a non-empty sequence of digits and letters}\\
+            &     & \textit{from} \ter{A} \textit{to} \ter{F}\textit{, capitalized or not}
+ \\[1ex]
+ \nter{binary} & ::= & \ter{\#b}\textit{followed by a non-empty sequence of} \ter{0} \textit{and} \ter{1} \textit{characters}
+ \\[1ex]
+ \nter{string} & ::= & \textit{sequence of whitespace and printable characters in double quotes 
+                                } \\
+               &     & \textit{with escape sequence \ter{""}}
+ \\[1ex]
+ \nter{simple\_symbol} & ::= & \textit{a non-empty sequence of letters, digits and
+                               the characters} \\
+               &     & \ter{+ - / * = \% ?~!~.~\$ \_ \~{} \& \^{} $<$ $>$ @}
+                       \textit{that does not start} \\
+               &     & \textit{with a digit}
+ \\[1ex]
+ \nter{symbol} & ::= & \nter{simple\_symbol} \\
+               &\alt & \textit{a sequence of whitespace and printable characters that }\\
+               &     & \textit{starts and ends with} \ter{|} \textit{and does not otherwise include} \ter{|} \textit{ or } $\backslash$
+ \\[1ex]
+ \nter{keyword} 
+               & ::= & {\texttt{:}}\nter{simple\_symbol}
+                        
+\end{tabular}
+}
+
+\newcommand{\sexpressions}{
+\begin{tabular}{lcl}
+ \nter{spec\_constant} & ::= & \nter{numeral} \alt\ \nter{decimal}
+                         \alt\ \nter{hexadecimal} \alt\ \nter{binary}
+                         \alt\ \nter{string}
+ \\[1ex]
+ \nter{s\_expr} & ::= & \nter{spec\_constant} \alt\ \nter{symbol}
+                  \alt\ \nter{reserved} \alt\ \nter{keyword} \\
+                & \alt& \ter{(} \nter[*]{s\_expr} \ter{)}
+\end{tabular}
+}
+
+
+\newcommand{\cIdentifiers}{
+\begin{tabular}{lcl}
+ \nter{index} & ::= & \nter{numeral} \alt\ \nter{symbol}
+ \\[1ex]
+ \nter{identifier} & ::= & \nter{symbol}
+                     \alt\ \ter{(} \ter{\_} \nter{symbol} \nter[+]{index} \ter{)}
+\end{tabular}
+}
+
+\newcommand{\cSorts}{
+\begin{tabular}{lcl}
+ \nter{sort} & ::= & \nter{identifier}
+               \alt\ \ter{(} \nter{identifier} \nter[+]{sort} \ter{)}
+\end{tabular}
+}
+
+\newcommand{\cAttributes}{
+\begin{tabular}{lcl}
+ \nter{attribute\_value} & ::= & \nter{spec\_constant} \alt\ \nter{symbol}
+                  \alt\ \ter{(} \nter[*]{s\_expr} \ter{)}
+ \\[1ex]
+ \nter{attribute} & ::= & \nter{keyword}
+                     \alt\ \nter{keyword} \nter{attribute\_value}
+\end{tabular}
+}
+
+\newcommand{\cTerms}{
+\begin{tabular}{lcl}
+ \nter{qual\_identifier} & ::= & \nter{identifier}
+                            \alt\ \ter{(} \ter{as} \nter{identifier} \nter{sort} \ter{)}
+ \\[1ex]
+% \nter{qual\_constructor} & ::= & \nter{symbol}
+%                            \alt\ \ter{(} \ter{as} \nter{symbol} \nter{sort} \ter{)}
+% \\[1ex]
+ \nter{var\_binding} & ::= & \ter{(} \nter{symbol} \nter{term} \ter{)}
+ \\[1ex]
+ \nter{sorted\_var} & ::= & \ter{(} \nter{symbol} \nter{sort} \ter{)}
+ \\[1ex]
+ \nter{pattern} & ::= & \nter{symbol} % \\
+%                & \alt\ & \nter{qual\_constructor} \\
+%                & \alt\ & \ter{(} \nter{qual\_constructor} \nter[+]{symbol} \ter{)}
+                 \alt\ \ter{(} \nter{symbol} \nter[+]{symbol} \ter{)}
+ \\[1ex]
+ \nter{match\_case} & ::= & \ter{(} \nter{pattern} \nter{term} \ter{)}
+ \\[1ex]
+ \nter{term} & ::= & \nter{spec\_constant} \\
+             &\alt&  \nter{qual\_identifier} \\ 
+             &\alt & \ter{(} \nter{qual\_identifier} \nter[+]{term} \ter{)} \\
+             &\alt & \ter{(} \ter{let} 
+                             \ter{(} \nter[+]{var\_binding} \ter{)} \nter{term}
+                     \ter{)} \\
+             &\alt & \ter{(} \ter{forall} 
+                             \ter{(} \nter[+]{sorted\_var} \ter{)} \nter{term}
+                     \ter{)} \\
+             &\alt & \ter{(} \ter{exists} 
+                             \ter{(} \nter[+]{sorted\_var} \ter{)} \nter{term}
+                     \ter{)} \\
+             &\alt & \ter{(} \ter{match} \nter{term}  
+                             \ter{(} \nter[+]{match\_case} \ter{)}
+                     \ter{)} \\
+             &\alt & \ter{(} \ter{!} \nter{term} \nter[+]{attribute} \ter{)}
+\end{tabular}
+}
+
+
+\newcommand{\cTheories}{
+\begin{tabular}{lcl}
+ \nter{sort\_symbol\_decl} 
+  & ::= & \ter{(} \nter{identifier} \nter{numeral} \nter[*]{attribute} \ter{)}
+ \\[1ex]
+ \nter{meta\_spec\_constant}
+  & ::= & \ter{NUMERAL} \alt\ \ter{DECIMAL} \alt\ \ter{STRING}
+ \\[1ex]
+ \nter{fun\_symbol\_decl}
+  & ::= & \ter{(} \nter{spec\_constant} \nter{sort} \nter[*]{attribute} \ter{)}\\
+  & \alt& \ter{(} \nter{meta\_spec\_constant} \nter{sort} \nter[*]{attribute} 
+          \ter{)} \\
+  & \alt& \ter{(} \nter{identifier} \nter[+]{sort} \nter[*]{attribute} \ter{)}
+ \\[1ex]
+ \nter{par\_fun\_symbol\_decl}
+  & ::= & \nter{fun\_symbol\_decl}\\
+  & \alt& \ter{(} \ter{par} \ter{(} \nter[+]{symbol} \ter{)} %\\ &    &  \ \ 
+  \ter{(} \nter{identifier} \nter[+]{sort} \nter[*]{attribute} \ter{)} 
+          \ter{)}
+ \\[1ex]
+ \nter{theory\_attribute}
+  & ::=  & \attr{sorts} \ter{(} \nter[+]{sort\_symbol\_decl} \ter{)} \\
+  & \alt & \attr{funs}\ \ter{(} \nter[+]{par\_fun\_symbol\_decl} \ter{)} \\
+  & \alt & \attr{sorts-description}\ \nter{string}  \\
+  & \alt & \attr{funs-description}\ \nter{string}  \\
+  & \alt & \attr{definition}\ \nter{string}  \\
+%ct  & \alt & \attr{axioms} \ter{(} \nter[+]{term} \ter{)} \\
+  & \alt & \attr{values}\ \nter{string} \\
+  & \alt  & \attr{notes}\ \nter{string}  \\
+  & \alt & \nter{attribute}
+ \\[1ex]
+  \nter{theory\_decl}
+ & ::= & \ter{(} \ter{theory}\ \nter{symbol} \nter[+]{theory\_attribute} \ter{)}
+\end{tabular}
+}
+
+
+\newcommand{\cLogics}{
+\begin{tabular}{lcl}
+ \nter{logic\_attribute}
+  & := & \attr{theories}\ \ter{(} \nter[+]{symbol} \ter{)} \\
+  & \alt & \attr{language}\ \nter{string} \\
+  & \alt & \attr{extensions}\ \nter{string} \\
+  & \alt & \attr{values}\ \nter{string} \\
+  & \alt & \attr{notes}\ \nter{string}  \\
+  & \alt & \nter{attribute}
+ \\[1ex]
+  \nter{logic}
+  & ::= & \ter{(} \ter{logic}\ \nter{symbol} \nter[+]{logic\_attribute} \ter{)}
+\end{tabular}
+}
+
+\newcommand{\cCommandOptions}{
+\begin{tabular}{lcl}
+ \nter{b\_value}
+  & ::= & \ter{true} \alt\ \ter{false}
+ \\[2ex]
+ \nter{option}
+  & ::=  & \attr{diagnostic-output-channel} \nter{string} \\
+%  & \alt & \attr{expand-definitions} \nter{b\_value} \\
+  & \alt & \attr{global-declarations} \nter{b\_value} \\
+  & \alt & \attr{interactive-mode} \nter{b\_value} \\
+  & \alt & \attr{print-success} \nter{b\_value} \\
+  & \alt & \attr{produce-assertions} \nter{b\_value} \\
+  & \alt & \attr{produce-assignments} \nter{b\_value} \\
+  & \alt & \attr{produce-models} \nter{b\_value} \\
+  & \alt & \attr{produce-proofs} \nter{b\_value} \\
+  & \alt & \attr{produce-unsat-assumptions} \nter{b\_value} \\
+  & \alt & \attr{produce-unsat-cores} \nter{b\_value} \\
+  & \alt & \attr{random-seed} \nter{numeral} \\
+  & \alt & \attr{regular-output-channel} \nter{string} \\
+  & \alt & \attr{reproducible-resource-limit} \nter{numeral} \\
+  & \alt & \attr{verbosity} \nter{numeral} \\
+  & \alt & \nter{attribute}
+\end{tabular}
+}
+
+\newcommand{\cInfoFlags}{
+\begin{tabular}{lcl}
+ \nter{info\_flag}
+  & ::=  & \attr{all-statistics} 
+    \alt\  \attr{assertion-stack-levels} 
+    \alt\  \attr{authors} \\
+  & \alt & \attr{error-behavior}
+    \alt\  \attr{name} 
+    \alt\  \attr{reason-unknown} \\
+%    \alt\  \attr{status} \\
+  & \alt & \attr{version}
+    \alt\  \nter{keyword}
+\end{tabular}
+}
+
+\newcommand{\cCommands}{
+\begin{tabular}{lcl}
+ \nter{sort\_dec} & ::= & \ter{(} \nter{symbol} \nter{numeral} \ter{)}
+ \\[1ex]
+ \nter{selector\_dec} & ::= & \ter{(} \nter{symbol} \nter{sort} \ter{)}
+ \\[1ex]
+ \nter{constructor\_dec} & ::= & \ter{(} \nter{symbol} \nter[*]{selector\_dec} \ter{)}
+ \\[1ex]
+ \nter{datatype\_dec} & ::= & \ter{(} \nter[+]{constructor\_dec} \ter{)}
+                       \alt  \ter{(} \ter{par} \ter{(} \nter[+]{symbol} \ter{)} \ter{(} \nter[+]{constructor\_dec} \ter{)} \ter{)}
+ \\[1ex]
+ \nter{function\_dec} & ::= & \ter{(} \nter{symbol} \ter{(} \nter[*]{sorted\_var} \ter{)} \nter{sort} \ter{)}
+ \\[1ex]
+ \nter{function\_def} & ::= & \nter{symbol} \ter{(} \nter[*]{sorted\_var} \ter{)} \nter{sort} \nter{term}
+ \\[1ex]
+ \nter{prop\_literal} & ::= & \nter{symbol} \alt\ \ter{(} \ter{not} \nter{symbol} \ter{)}
+ \\[1ex]
+ \nter{command}
+  & ::=  & \ter{(} \ter{assert} \nter{term} \ter{)}\\
+  & \alt & \ter{(} \ter{check-sat} \ter{)} \\
+  & \alt & \ter{(} \ter{check-sat-assuming} \ter{(} \nter[*]{prop\_literal} \ter{)} \ter{)}
+            \\
+  & \alt & \ter{(} \ter{declare-const} \nter{symbol} \nter{sort} \ter{)}
+            \\
+  & \alt & \ter{(} \ter{declare-datatype} \nter{symbol} \nter{datatype\_dec}\ter{)}
+            \\
+  & \alt & \ter{(} \ter{declare-datatypes} \ter{(} \nter[n+1]{sort\_dec} \ter{)} \ter{(} \nter[n+1]{datatype\_dec} \ter{)} \ter{)}
+            \\
+  & \alt & \ter{(} \ter{declare-fun} \nter{symbol}
+            \ter{(} \nter[*]{sort} \ter{)} \nter{sort}
+           \ter{)} \\
+  & \alt & \ter{(} \ter{declare-sort} \nter{symbol} \nter{numeral} \ter{)}\\
+  & \alt & \ter{(} \ter{define-fun} \nter{function\_def} \ter{)} \\
+  & \alt & \ter{(} \ter{define-fun-rec} \nter{function\_def} \ter{)}
+           \\
+  & \alt & \ter{(} \ter{define-funs-rec} \ter{(} \nter[n+1]{function\_dec} \ter{)} \ter{(} \nter[n+1]{term} \ter{)} \ter{)}
+           \\
+  & \alt & \ter{(} \ter{define-sort} \nter{symbol}
+            \ter{(} \nter[*]{symbol} \ter{)} \nter{sort}
+           \ter{)} \\
+  & \alt & \ter{(} \ter{echo} \nter{string} \ter{)}
+           \\
+  & \alt &  \ter{(} \ter{exit} \ter{)} \\
+  & \alt & \ter{(} \ter{get-assertions} \ter{)} \\
+  & \alt & \ter{(} \ter{get-assignment} \ter{)} \\
+  & \alt & \ter{(} \ter{get-info} \nter{info\_flag} \ter{)} \\
+  & \alt & \ter{(} \ter{get-model} \ter{)}
+           \\
+  & \alt & \ter{(} \ter{get-option} \nter{keyword} \ter{)} \\
+  & \alt & \ter{(} \ter{get-proof} \ter{)}\\
+  & \alt & \ter{(} \ter{get-unsat-assumptions}  \ter{)}
+          \\
+  & \alt & \ter{(} \ter{get-unsat-core}  \ter{)} \\
+  & \alt & \ter{(} \ter{get-value} \ter{(} \nter[+]{term} \ter{)}
+           \ter{)}
+           \\
+  & \alt & \ter{(} \ter{pop} \nter{numeral} \ter{)} \\
+  & \alt & \ter{(} \ter{push} \nter{numeral} \ter{)} \\
+  & \alt & \ter{(} \ter{reset} \ter{)}
+           \\
+  & \alt & \ter{(} \ter{reset-assertions} \ter{)}
+           \\
+  & \alt & \ter{(} \ter{set-info} \nter{attribute} \ter{)} \\
+  & \alt & \ter{(} \ter{set-logic} \nter{symbol} \ter{)} \\
+  & \alt & \ter{(} \ter{set-option} \nter{option} \ter{)}
+ \\[1ex]
+ \nter{script} & ::= & \nter[*]{command}
+\end{tabular}
+}
+
+
+\newcommand{\cResponsesI}{
+\begin{tabular}{lcl}
+ \nter{error-behavior} 
+  & ::= & \ter{immediate-exit} \alt \ter{continued-execution}
+ \\[1ex]
+ \nter{reason-unknown} 
+  & ::= & \ter{memout} \alt \ter{incomplete} \alt \nter{s\_expr}
+ \\[1ex]
+ \nter{model\_response}
+  & ::= & \ter{(} \ter{define-fun} \nter{function\_def} \ter{)} \alt
+          \ter{(} \ter{define-fun-rec} \nter{function\_def} \ter{)}
+          \\
+  & \alt & \ter{(} \ter{define-funs-rec} \ter{(} \nter[n+1]{function\_dec} \ter{)} \ter{(} \nter[n+1]{term} \ter{)} \ter{)}
+ \\[1ex]
+ \nter{info\_response}
+  & ::= & \attr{assertion-stack-levels} \nter{numeral} \\
+  & \alt& \attr{authors} \nter{string}\\
+  & \alt& \attr{error-behavior} \nter{error-behavior} \\
+  & \alt& \attr{name} \nter{string}\\
+  & \alt& \attr{reason-unknown} \nter{reason-unknown}\\
+  & \alt& \attr{version} \nter{string}\\
+  & \alt& \nter{attribute}
+ \\[1ex]
+ \nter{valuation\_pair} 
+  & ::= & \ter{(} \nter{term} \nter{term} \ter{)}
+ \\[1ex]
+ \nter{t\_valuation\_pair} 
+  & ::= & \ter{(} \nter{symbol} \nter{b\_value} \ter{)}
+\end{tabular}
+}
+
+\newcommand{\cGeneralResponse}{
+ \nter{general\_response}
+   & ::=  & \ter{success}
+     \alt\  \nter{specific\_success\_response} \\
+   & \alt & \ter{unsupported}
+     \alt\  \ter{(} \ter{error} \nter{string} \ter{)} 
+}
+
+\newcommand{\cResponsesII}{
+\begin{tabular}{lcl}
+ \nter{check\_sat\_response} & ::= & \ter{sat} \alt\ \ter{unsat} \alt\ \ter{unknown}
+ \\[1ex]
+ \nter{echo\_response} & ::= & \nter{string}
+ \\[1ex]
+ \nter{get\_assertions\_response} & ::= & \ter{(} \nter[*]{term} \ter{)}
+ \\[1ex]
+ \nter{get\_assignment\_response} & ::= & \ter{(} \nter[*]{t\_valuation\_pair} \ter{)}
+ \\[1ex]
+ \nter{get\_info\_response} & ::= & \ter{(} \nter[+]{info\_response} \ter{)}
+ \\[1ex]
+ \nter{get\_model\_response} & ::= & \ter{(} \nter[*]{model\_response} \ter{)}
+ \\[1ex]
+ \nter{get\_option\_response} & ::= & \nter{attribute\_value}
+ \\[1ex]
+ \nter{get\_proof\_response} & ::= & \nter{s\_expr}
+ \\[1ex]
+ \nter{get\_unsat\_assump\_response} & ::= & \ter{(} \nter[*]{symbol} \ter{)}
+ \\[1ex]
+ \nter{get\_unsat\_core\_response} & ::= & \ter{(} \nter[*]{symbol} \ter{)}
+ \\[1ex]
+ \nter{get\_value\_response} & ::= & \ter{(} \nter[+]{valuation\_pair} \ter{)}
+ \\[1ex]
+ \nter{specific\_success\_response}
+   & ::= & \nter{check\_sat\_response}
+     \alt\ \nter{echo\_response}
+   \\
+   & \alt & \nter{get\_assertions\_response}
+     \alt\ \nter{get\_assignment\_response}
+   \\
+   & \alt & \nter{get\_info\_response}
+     \alt\ \nter{get\_model\_response}
+   \\
+   & \alt & \nter{get\_option\_response}
+     \alt\ \nter{get\_proof\_response}
+   \\
+   & \alt & \nter{get\_unsat\_assumptions\_response}
+   \\
+   & \alt & \nter{get\_unsat\_core\_response}
+     \alt\  \nter{get\_value\_response}
+ \\[2ex]
+ \cGeneralResponse
+\end{tabular}
+}
+
+
+
+%----------------------------------------
+% Abstract syntax
+%----------------------------------------
+
+\newcommand{\sortterms}{
+\(
+\begin{array}{llcl}
+ \text{(Sorts)} & 
+ \sigma
+ & ::= & s\: \sigma^*
+ \\[2ex]
+ \text{(Parametric Sorts)} &
+ \tau & ::= & u \alt s\: \tau^*
+\end{array}
+\)
+}
+
+\begin{comment}
+\[
+\begin{array}{llll}
+s \in \mathcal{S}, & \text{the set of sort symbols \ \ } &
+u \in \mathcal{U}, & \text{the set of sort parameters} 
+\end{array}
+\]
+\end{comment}
+
+
+\newcommand{\terms}{
+\(
+\begin{array}{llcl}
+ \text{(Attributes)} &
+  \alpha & ::= & a \alt a = v
+ \\[2.2ex]
+ \text{(Patterns)} &
+  p & ::= & x \alt f\: x^*
+ \\[2.2ex]
+  \text{(Terms)} &
+  \mathit{t} & ::= & x % \alt c
+      \alt f\: t^* \alt f^\sigma\: t^* \\ %\alt t \eqs t \\
+  & & \alt & \exists\, (x{:}\sigma)^+\ t \alt
+              \forall\, (x{:}\sigma)^+\ t \alt
+  %& & \alt & 
+  \akey{let}\ (x = t)^+\ \akey{in}\ t
+      \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+ \\
+  & & \alt & \mathit{t} \ \alpha^+ \\
+ \end{array}
+\)
+}
+
+\begin{comment}
+\[
+\begin{array}{llll}
+a \in \mathcal{A}, &  \text{the set of attribute names\ \ } &
+v \in \mathcal{V}, &  \text{the set of attribute values} \\
+%n \in \mathcal{N}, & \text{the set of numerals} &
+%r \in \mathcal{R}, & \text{the set of positive rationals} \\
+%h \in \mathcal{H}, & \text{the set of hexadecimal constants} &
+%b \in \mathcal{BV}, & \text{the set of bitvector constants} \\
+%w \in \mathcal{W}, & \text{the set of character strings}  &
+x \in \mathcal{X}, & \text{the set of variables} &
+f \in \mathcal{F}, & \text{the set of function symbols}
+\end{array}
+\]
+\end{comment}
+
+
+
+\newcommand{\termrules}{
+%% variable
+\begin{tabular}{ll}
+\derives
+{}
+{\Sigma \vdash x\ \alpha^*:\sigma}
+&
+if $x{:}\sigma \in \Sigma$
+\end{tabular}
+\bigskip
+
+%% function application
+\begin{tabular}{ll}
+\derives{
+\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
+\Sigma \vdash t_k:\sigma_k
+}
+{\Sigma \vdash (f\; t_1\; \cdots\; t_k)\ \alpha^*: \sigma}
+&
+%\text{if $f:\sigma_1 \cdots \sigma_k\sigma \in \Sigma$ and
+%         $f:\sigma_1 \cdots \sigma_k\sigma' \notin \Sigma$ with 
+%         $\sigma' \neq \sigma$}
+if
+\(
+\begin{cases}
+f{:}\sigma_1 \cdots \sigma_k\sigma \in \Sigma, \\
+f{:}\sigma_1 \cdots \sigma_k\sigma' \notin \Sigma \ \text{ for all } \sigma' \neq \sigma
+\end{cases}
+\)
+\end{tabular}
+\bigskip
+
+%% annotated function application
+\begin{tabular}{ll}
+\derives{
+\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
+\Sigma \vdash t_k:\sigma_k
+}
+{\Sigma \vdash (f^\sigma\; t_1\; \cdots\; t_k)\ \alpha^*: \sigma}
+&
+if 
+\(
+\begin{cases}
+f{:}\sigma_1 \cdots \sigma_k\sigma \in \Sigma, \\
+f{:}\sigma_1 \cdots \sigma_k\sigma' \in \Sigma \ \text{ for some } \sigma' \neq \sigma
+\end{cases}
+\)
+\end{tabular}
+\bigskip
+
+%% quantifiers
+\begin{tabular}{ll}
+\derives{\Sigma[x_1{:}\sigma_1,\: \ldots,\: x_{k+1}{:}\sigma_{k+1}]\: \vdash t:\bool}
+{\Sigma \vdash (Q x_1{:}\sigma_1\, \cdots\, x_{k+1}{:}\sigma_{k+1}\; t)\ \alpha^* : \bool}
+&
+if $Q\, \in \{\exists, \forall\}$
+\end{tabular}
+\bigskip
+
+%% let
+\begin{tabular}{ll}
+\derives{
+\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
+\Sigma \vdash t_{k+1}:\sigma_{k+1} \\
+\Sigma[x_1{:}\sigma_1,\: \ldots,\: x_{k+1}{:}\sigma_{k+1}]\: \vdash t:\sigma}
+{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ \alpha^* : \sigma}
+&
+if $x_1, \ldots, x_{k+1}$ are all distinct
+\end{tabular}
+\bigskip
+
+%% match 1
+\begin{tabular}{ll}
+\derives{
+\Sigma \vdash t:\delta \\
+\Sigma[\bar x_i{:}\bar\sigma_i]\: \vdash t_i:\sigma \text{ for } i=1,\ldots,k+1
+}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ \alpha^* : \sigma}
+&
+if 
+\(
+\begin{cases}
+\{c_1,\ldots,c_{k+1}\} = \mathrm{con}_\Sigma(\delta), \\
+\text{ for all } i=1,\ldots,k+1 \\
+\quad c_i{:}\bar\sigma_i\delta \in \Sigma \text{ and}\\
+\quad \bar{x}_i \text{ contains no repetitions}
+\end{cases}
+\)
+\end{tabular}
+\bigskip
+
+%% match 2
+\begin{tabular}{ll}
+\derives{
+\Sigma \vdash t:\delta \\
+\Sigma[\bar x_i{:}\bar\sigma_i]\: \vdash t_i:\sigma \text{ for } i=1,\ldots,k\\
+\Sigma[x_i{:}\delta]\: \vdash t_i:\sigma \text{ for } i=k+1,\ldots,n 
+}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ \alpha^* : \sigma}
+&
+if 
+\(
+\begin{cases}
+\{c_1,\ldots,c_k\} \subseteq \mathrm{con}_\Sigma(\delta) \neq \emptyset,  \\
+\{p_1,\ldots, p_n\} = \{c_1\:\bar x_1, \ldots, c_k\:\bar x_k\} \cup {} \\
+                      \hspace{6.7em} \{x_{k+1}, \ldots, x_n\}, \\
+\;k < n,\\
+\text{ for all } i=1,\ldots,k \\
+\quad c_i{:}\bar\sigma_i\delta \in \Sigma \text{ and}\\
+\quad \bar{x}_i \text{ contains no repetitions}
+\end{cases}
+\)
+\end{tabular}
+\bigskip
+}
+
+
+
+\newcommand{\theories}{
+\(
+\begin{array}{llcl}
+ \text{(Sort symbol declarations)} &
+ \mathit{sdec} & ::= & s\: n\: \alpha^*
+ \\[2ex]
+ \text{(Fun.~symbol declarations)} &
+ \mathit{fdec} & ::= & f\: \sigma^+\: \alpha^*
+ \\[2ex]
+ \text{(Param. fun.~symbol declarations)} &
+ \mathit{pdec} & ::= & \mathit{fdec} \alt \Pi\, u^+\: (f\: \tau^+\: \alpha^*)
+ \\[2ex]
+ \text{(Theory attributes)} &
+ \mathit{tattr} & ::= & \aattr{sorts} = \mathit{sdec}^+
+        \alt \aattr{funs} = \mathit{pdec}^+ \\
+   & & \alt& \aattr{sorts-description} = w \\
+   & & \alt& \aattr{funs-description} = w \\
+   & & \alt& \aattr{definition} = w
+       \alt  \aattr{values} = t^+ \\
+   & & \alt& \aattr{notes} = w
+       \alt  \alpha
+ \\[2ex]
+ \text{(Theory declarations)} &
+ \mathit{tdec} & ::= & 
+ \akey{theory}\ T\  \mathit{tattr}^+
+\end{array}
+\)
+}
+
+\begin{comment}
+\[
+\begin{array}{llll}
+s \in \mathcal{S}, & \text{the set of sort symbols} &
+n \in \mathcal{N}, & \text{the set of numerals} \\
+u \in \mathcal{U}, & \text{the set of sort parameters \ \ } &
+w \in \mathcal{W}, & \text{the set of Unicode character strings} \\
+T \in \mathcal{T}, & \text{the set of theory names}
+\end{array}
+\]
+\end{comment}
+
+\newcommand{\logics}{
+\(
+\begin{array}{llcl}
+ \text{(Logic attributes)} &
+ \mathit{lattr} & ::= & \aattr{theories} = T^+
+       \alt  \aattr{language} = w \\
+   & & \alt& \aattr{extensions} = w
+       \alt  \aattr{values} = w \\
+   & & \alt& \aattr{notes} = w
+       \alt  \alpha
+ \\[2ex]
+ \text{(Logic declarations)} &
+ \mathit{ldec} & ::= & \akey{logic}\ L\  \mathit{lattr}^+
+\end{array}
+\)
+}
+
+\begin{comment}
+\[
+\begin{array}{llll}
+T \in \mathcal{T}, & \text{the set of theory names \ \ } &
+w \in \mathcal{W}, & \text{the set of character strings} \\
+L \in \mathcal{L}, & \text{the set of logic names} \\
+\end{array}
+\]
+\end{comment}
+
+\newcommand{\options}{
+ \text{(Options)} &
+  o & ::= &  \aattr{print-success} = b \\
+  & & \alt&  \aattr{expand-definitions} = b \\
+  & & \alt&  \aattr{interactive-mode} = b \\
+% as removed:
+%  & & \alt& \aattr{timeout} = r \\
+%  & & \alt& \aattr{timeout} = \akey{none}\\
+  & & \alt&  \aattr{produce-proofs} = b \\
+  & & \alt&  \aattr{produce-unsat-cores} = b \\
+  & & \alt&  \aattr{produce-models} = b \\
+  & & \alt&  \aattr{produce-assignments} = b \\
+  & & \alt& \aattr{regular-output-channel} = w \\
+  & & \alt&  \aattr{diagnostic-output-channel} = w \\
+  & & \alt& \aattr{random-seed} = n \\
+  & & \alt&  \aattr{verbosity} = n\\
+  & & \alt&  \alpha
+}
+
+\newcommand{\infoNames}{
+ \text{(Info flags)} &
+  i & ::= & \aattr{all-statistics} \\
+  %ct eliminated these flags
+  %& & \alt& \aattr{decisions} \\
+  %& & \alt& \aattr{conflicts} \\
+  %& & \alt& \aattr{restarts} \\
+  %& & \alt& \aattr{notes} \\
+  %ct eliminated these flags for now
+  %& & \alt& \aattr{time} \\
+  %& & \alt& \aattr{memory} \\
+  & & \alt& \aattr{error-behavior} \\
+  & & \alt& \aattr{name} \\
+  & & \alt& \aattr{authors} \\
+  & & \alt& \aattr{version} \\
+  & & \alt& \aattr{status} \\
+  & & \alt& \aattr{reason-unknown} \\
+  & & \alt& a
+}
+
+
+\newcommand{\commandOptions}{
+\(
+\begin{array}{llcl}
+ \options
+ \\[2ex]
+ \infoNames
+\end{array}
+\)
+}
+
+\newcommand{\commands}{
+\(
+\begin{array}{llcl}
+ \text{(Commands)} &
+  c & ::= & \akey{set-logic}\ L\\
+  & & \alt& \akey{set-option}\ o \\
+  & & \alt & \akey{set-info}\ \alpha \\
+  & & \alt & \akey{declare-sort}\ s\ n \\
+  & & \alt & \akey{define-sort}\ s\ u^*\ \tau \\
+  & & \alt & \akey{declare-fun}\ f\ \sigma^*\ \sigma \\
+  & & \alt & \akey{define-fun}\ f\ (x{:}\sigma)^*\ \sigma\ t \\
+  & & \alt & \akey{push}\ n \\
+  & & \alt & \akey{pop}\ n \\
+  & & \alt & \akey{assert}\ t \\
+  %ct & & \alt & \akey{assert}\ t\ l \\
+  & & \alt & \akey{check-sat}  \\
+  %ct & & \alt & \akey{keep-model}\\
+  & & \alt & \akey{get-assertions} \\
+  %ct  & & \alt & \akey{get-model}\ t^* \\     
+  & & \alt & \akey{get-value}\ t^+ \\
+  & & \alt & \akey{get-proof} \\
+  %ct  & & \alt & \akey{get-rank}\ s \\
+  & & \alt & \akey{get-unsat-core}\\
+  & & \alt & \akey{get-info}\ i \\
+  & & \alt & \akey{get-option}\ a \\
+  & & \alt & \akey{exit}
+ \\[2ex]
+ \text{(Scripts)} &
+  \mathit{scr} & ::= & c^*
+ \end{array}
+\)
+}
+
+\newcommand{\gresponses}{
+ \text{(General response)} &
+  \mathit{gr} & ::= & \akey{unsupported}
+      \alt  \akey{success}
+      \alt  \akey{error}\ w
+}
+
+\newcommand{\csresponses}{
+ \text{(check-sat response)} &
+ \mathit{csr} & ::= & \akey{sat} \alt \akey{unsat} \alt \akey{unknown} 
+}
+
+\newcommand{\iresponses}{
+ \text{(get-info response)} &
+ \mathit{gir}  & ::= & i^+ 
+ \\[2ex]
+ \text{(Info response)} &
+  i & ::= 
+%as removed:
+%& \aattr{decisions} = n \\
+%  & & \alt& \aattr{conflicts} = n\\
+%  & & \alt& \aattr{restarts} = n\\
+%  & & \alt& \aattr{time} = r\\
+%  & & \alt& \aattr{memory} = r\\
+%  & & \alt
+& \aattr{error-behavior} = \mathit{eb}\\
+  & & \alt& \aattr{name} = w\\
+  & & \alt& \aattr{authors} = w\\
+  & & \alt& \aattr{version} = w\\
+  & & \alt& \aattr{reason-unknown} = \mathit{ru}\\
+%  & & \alt& \aattr{notes} = w \\
+  & & \alt& \alpha
+ \\[2ex]
+ \text{(Error behavior)} &
+ \mathit{eb} & ::= & \akey{immediate-exit} \alt \akey{continue-execution}
+ \\[2ex]
+ \text{(Reason unknown)} &
+ \mathit{ru} & ::= & %as removed: \akey{timeout}\alt
+ \akey{memout} \alt \akey{incomplete}
+}
+
+\newcommand{\garesponses}{
+ \text{(get-assertions response)} &
+ \mathit{gar} & ::= & t^* 
+}
+
+\newcommand{\gpresponses}{
+ \text{(get-proof response)} &
+ \mathit{gpr} & ::= & p
+}
+
+\newcommand{\gucresponses}{
+ \text{(get-unsat-core response)} &
+ \mathit{gucr} & ::= & f^*
+}
+
+\newcommand{\gvresponses}{
+ \text{(get-value responses)} &
+ \mathit{gvr}  & ::= & (t\ t)^+
+}
+
+\newcommand{\gtaresponses}{
+ \text{(get-assignment response)} &
+ \mathit{gta} & ::= & (f\ b)^* 
+}
+
+\newcommand{\goresponses}{
+ \text{(get-option response)} &
+ \mathit{go} & ::= & v
+}
+
+\newcommand{\responses}{
+\(
+\begin{array}{llcl}
+ \gresponses
+ \\[2ex]
+ \iresponses
+ \\[2ex]
+ \csresponses
+ \\[2ex]
+ \garesponses
+ \\[2ex]
+ \gpresponses
+ \\[2ex]
+ \gucresponses
+ \\[2ex]
+ \gvresponses
+ \\[2ex]
+ \gtaresponses
+ \\[2ex]
+ \goresponses
+ \end{array}
+\)
+}
+
+\begin{comment}
+\[
+\begin{array}{llll}
+n \in \mathcal{N}, & \text{the set of numerals\ \ \ }  &
+w \in \mathcal{W}, & \text{the set of character strings}
+\end{array}
+\]
+\end{comment}
+
+
+
+

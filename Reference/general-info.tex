@@ -1,0 +1,401 @@
+% general-info.tex
+
+%!TEX root = main.tex
+
+%===============================================================================
+\chapter{General Information}
+%===============================================================================
+\thispagestyle{empty}
+
+%\rem{CT}{Chapter synopsis}
+
+%-------------------------------------------------------------------------------
+\section{About This Document}
+%-------------------------------------------------------------------------------
+
+This document is mostly self-contained, though 
+it assumes some familiarity with first-order logic, \emph{aka} predicate calculus.
+The reader is referred to any of several textbooks on the to\-pic~\cite{Gal-86,Fit-96,Hen-01,Men-09}. 
+Previous knowledge of Version 1.2 of the SMT-LIB standard~\cite{RanTin-RR-06}
+is not necessary.
+In fact, Version 1.2 users are warned that this version,
+while largely based on Version 1.2, 
+is \emph{not} backward compatible with it.
+See the Version 2.0 document~\cite{BarST-RR-10} for a summary of the major differences.
+
+This document provides BNF-style abstract and concrete syntax 
+for a number of SMT-LIB languages.
+\emph{Only the concrete syntax is part of the official SMT-LIB standard.}
+The abstract syntax is used here mainly for descriptive convenience;
+adherence to it is not prescribed.
+Implementors are free to use whatever internal structure 
+they please for their abstract syntax trees.
+\medskip
+
+New releases of the document are identified by their release date.
+Each new release of the same version of the SMT-LIB standard 
+contains, by and large, only \emph{conservative} additions and 
+changes with respect to the standard described in the previous release,
+as well as improvements to the presentation.
+The only non-conservative changes may be error fixes.
+
+Historical notes and 
+explanations of the rationale of design decisions
+in the definition of the SMT-LIB standard are provided 
+in Appendix~\ref{chap:notes}, 
+with reference in the main text given as a superscript number 
+enclosed in parentheses.
+
+%-------------------------------------------------------------------------------
+\subsection{Change log for Version 2.6}
+%-------------------------------------------------------------------------------
+
+\paragraph{Release: 2021-05-12}
+\begin{itemize}
+\item Fixed misleading example of usage of \expr{as} to disambiguate symbol sorts.
+\end{itemize}
+
+\paragraph{Release: 2021-04-02}
+\begin{itemize}
+\item Now allowing reserved words in s-expression (as arguments of attributes).
+\item Disambiguated description of in-line definition (\attr{named} annotation).
+\end{itemize}
+
+
+\paragraph{Release: 2017-07-18}
+\begin{itemize}
+\item First release of Version 2.6.
+\end{itemize}
+
+%-------------------------------------------------------------------------------
+\subsection{Differences between Version 2.6 and Version 2.5}
+%-------------------------------------------------------------------------------
+
+The SMT-LIB 2 language and logic now supports user-defined algebraic datatypes.
+Such types can be introduced with two new commands:
+\ter{declare-datatype}, to declare a single algebraic datatype, and
+\ter{declare-datatypes}, to declare two or more mutually recursive datatypes
+(see Section~\ref{sec:new-symbols}).
+The language of terms now includes a new binder, \ter{match}, 
+for pattern-matching-based case analysis over datatype values
+(see Section~\ref{sec:binders}).
+The variables bound by \ter{match} are those that occur in \emph{patterns},
+also a new addition to the language.
+The underlying logic has also been modified to provide built-in semantics
+for the constructor, selector and tester symbols defined 
+with each new algebraic datatype
+(see Chapter~\ref{chap:logical-semantics}).
+
+This version also makes official a number of \ter{set-info} attributes
+used in benchmarks from the official SMT-LIB repository
+and specifies some requirements on their occurrence and order
+(see Section~\ref{sec:benchmarks} and Section~\ref{sec:script-info}).
+Any other differences in this document are only edits to improve 
+the presentation.
+Except for the addition of algebraic datatypes, 
+which is fully backward compatible,
+the rest of the SMT-LIB language is unchanged.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Change log for Version 2.5}
+%-------------------------------------------------------------------------------
+
+\paragraph{Release: 2015-06-28}
+\begin{itemize}
+\item 
+Clarified in Section~\ref{sec:modes} that the \ter{exit} command can be issued in any mode.
+\end{itemize}
+
+
+\paragraph{Release: 2015-05-28}
+\begin{itemize}
+\item 
+First release of Version 2.5.
+\end{itemize}
+
+%-------------------------------------------------------------------------------
+\subsection{Differences between Version 2.5 and Version 2.0}
+%-------------------------------------------------------------------------------
+
+Version 2.5 is an extension of Version 2.0 and, with two minor exceptions,
+is fully backward compatible with it.
+There is then no need to have separate support for 2.0 
+if one supports \thisversion.
+The following list summarizes notable differences and extensions.
+The first two items are the only non-backward compatible changes.
+
+
+\begin{itemize}
+\item
+There is now a different set of escape sequences for string literals.
+It consists of a single sequence, \ter{""}, used to represent the double quote
+character within the literal.
+
+\item
+The predefined option \attr{expand-definitions} has been removed
+because there are now no cases in which it applies. 
+
+\item
+SMT-LIB source files are not limited to the US-ASCII format anymore
+and can now consist of Unicode characters.  
+The concrete encoding is currently left unspecified, but should be 
+a compatible 8-bit extension of the 7-bit US-ASCII set, such as UTF-8.
+
+\item
+We have clarified several points about the character set used 
+by the SMT-LIB language and specified more precisely which characters are allowed
+in string literals, identifiers and symbols.
+
+\item
+We have made explicit several details on the scoping and shadowing rules
+for identifiers, in particulars those occurring in binders.
+
+\item
+Identifiers can now be indexed not just with numerals but also with symbols.
+
+\item
+The use of the term attribute \attr{pattern} and its related syntax 
+for quantifier patterns has been made official.
+
+%\item
+%The command \ter{set-info} has been renamed \ter{meta-info}.
+%The old name is still accepted but its use is now deprecated.
+ 
+\item
+The solver option \attr{interactive-mode} has been renamed 
+\attr{produce-assertions}.
+The old name is still accepted but its use is now deprecated.
+
+\item
+There is now a predefined argument, \ter{ALL}, for the \ter{set-logic} command
+which refers to the most general logic supported by the solver executing the command.
+
+\item
+We have introduced a notion of \emph{execution mode} for a solver
+to better describe the restriction on when commands can be executed 
+or options set.
+
+\item
+There is a new solver option \attr{global-declarations} 
+that makes all definitions and declarations global and 
+not removable by \ter{pop} operations.
+Global declarations can be removed only 
+by the new command \ter{reset}.
+
+\item
+The new command \ter{reset} brings the state of a solver
+to the state it had immediately after start up (resetting everything).
+
+\item
+The new command \ter{reset-assertions} empties the assertion stack
+and removes all assertions.
+If \attr{global-declarations} is set to \ter{false}, it also removes 
+all declarations and definitions.
+
+\item
+The new command \ter{check-sat-assuming} checks the satisfiability 
+of the current context under an additional number of assumptions provided 
+as input to the command.
+When it returns \ter{unsat}, a new companion command, 
+\ter{get-unsat-assumptions}, returns the subset of input assumptions
+used by the solver to prove the context unsatisfiable. 
+The latter command is enabled or disabled with the new option 
+\attr{produce-unsat-assumptions}.
+The old \ter{check-sat} command can now be defined, conservatively,
+as a special case of \ter{check-sat-assuming} with an empty set of assumptions.
+
+\item
+The new command \ter{declare-const} can now be used to declare 
+nullary function symbols.
+
+\item
+The new command \ter{echo} prints back on the regular output channel
+a string provided as input.
+
+\item
+The new commands \ter{define-fun-rec} and \ter{define-funs-rec} respectively
+allow the definition of recursive functions and of sets of mutually recursive
+functions.
+
+\item
+The new command \ter{get-model} returns a representation of a model computed
+by the solver in response to an invocation of the \ter{check-sat} or 
+\ter{check-sat-assuming} command.
+
+\item
+The new \ter{get-info} flag \attr{assertion-stack-levels} returns 
+the current number of levels in the assertion stack.
+
+\item
+The new option \attr{reproducible-resource-limit} can be used to set 
+a solver-defined resource limit that applies to each invocation of 
+\ter{check-sat} or \ter{check-sat-assumptions}.
+
+\end{itemize}
+
+
+
+
+
+%-------------------------------------------------------------------------------
+\subsection{Typographical and notational conventions}
+%-------------------------------------------------------------------------------
+
+The concrete syntax of the SMT-LIB language is defined
+by means of BNF-style production rules.
+In the concrete syntax notation,
+terminals are written in typewriter font, as in \ter{false},
+while syntactic categories (non-terminals) are written 
+in slanted font and enclosed in angular brackets, as in \nter{term}.
+In the production rules, the meta-operators $::=$ and $\mid$ are used as usual 
+in BNF. 
+Also, as usual, the meta-operators $\_^*$ and $\_^+$ denote zero, respectively, 
+one, or more repetitions of their argument.
+We use $\_^n$ and $\_^{n+1}$ instead of $\_^*$ and $\_^+$ 
+when we want to indicate that multiple occurrences to the latter operators 
+have the same number of repetitions.
+%We refer to input characters by their decimal or hexadecimal code 
+%in the Extended ASCII character set.
+We use the notation \dec{$d$} (resp., \hex{$e$}) to represent 
+the Unicode character with decimal code $d$ (resp., hexadecimal code $e$).  Remember that the US-ASCII character with code $d < 128$ is also 
+the \href{http://www.utf8-chartable.de/unicode-utf8-table.pl?utf8=dec}{Unicode character} \dec{$d$}.
+Examples of concrete syntax expressions are provided in shaded boxes like the following.
+\begin{lstlisting}[linewidth=10em]
+(f (- x) x) 
+\end{lstlisting}
+ 
+In the abstract syntax notation,
+which uses the same meta-operators as the concrete syntax,
+words in $\akey{boldface}$ as well as the symbols $\eqs, \exists, \forall$, 
+and $\Pi$ denote terminal symbols,
+while words in $\mathit{italics}$ and Greek letters denote 
+syntactic categories.
+For instance, $x, \sigma$ are non-terminals and $\bool$ is a terminal.
+Parentheses are meta-symbols, used just for grouping---they are not part
+of the abstract language.
+Function applications are denoted simply by juxtaposition, 
+which is enough at the abstract level.
+
+To simplify the notation, 
+when there is no risk of confusion,
+the name of an abstract syntactic category is also used,
+possibly with subscripts, to denote individual elements of that category.
+For instance, $t$ is the category of terms
+and $t$ (as well as $t_1, t_2$ and so on) is also used to denote individual terms. 
+
+The meta-syntax $\bar{x}$ denotes a sequence of the form $x_1 x_2 \cdots x_n$
+for some $x_1, x_2, \ldots, x_n$ and $n \geq 0$.
+
+
+%-------------------------------------------------------------------------------
+\section{Overview of SMT-LIB}
+%-------------------------------------------------------------------------------
+
+Satisfiability Modulo Theories (SMT)\index{SMT} is an area of automated deduction 
+that studies methods for checking the satisfiability of first-order formulas 
+with respect to some logical theory $\T$ of interest~\cite{BarSST-09}.
+What distinguishes SMT from general automated 
+deduction is that the background theory $\T$ need not be finitely or even first-order 
+axiomatizable, and that specialized inference methods are used for each theory. 
+By being theory-specific and restricting their language to certain classes 
+of formulas (such as, typically but not exclusively, quantifier-free formulas), 
+these specialized methods can be implemented in solvers 
+that are more efficient in practice than general-purpose theorem provers. 
+
+While SMT techniques have been traditionally 
+used to support deductive software verification, they have found applications 
+in other areas of computer science such as, for instance, planning, model checking and 
+automated test generation. 
+Typical theories of interest in these applications
+include formalizations of various forms of arithmetic, arrays, finite sets, 
+bit vectors, algebraic datatypes, strings, floating point numbers,
+equality with uninterpreted functions, and various combinations of these.
+
+
+%-------------------------------------------------------------------------------
+\subsection{What is SMT-LIB?}
+
+%The main goal of the SMT-LIB\index{SMT-LIB} initiative~\cite{SMT},
+%coordinated by these authors,
+%is to provide an on-line library of benchmarks for 
+%\emph{Satisfiability Modulo Theories}\index{satisfiability!modulo theories}.  
+
+%A lot of work has been done in the last few years by several research groups
+%on building systems for satisfiability modulo theories\cite{systems}.
+
+%Examples of background theories typically used in computer science
+%are the theory of real numbers, the theory of integer numbers,  
+%and the theories of various data structures 
+%such as lists, arrays, bit vectors and so on.
+
+SMT-LIB is an international initiative,
+coordinated by the authors of this document and 
+endorsed by a large number of research groups world-wide,
+aimed at facilitating research and development in SMT~\cite{SMT-LIB}\index{SMT-LIB}.
+Since its inception in 2003, the initiative has pursued these aims
+by focusing on the following concrete goals:
+provide standard rigorous descriptions of background theories used in SMT systems;
+develop and promote common input and output languages for SMT solvers;
+establish and make available to the research community a large library of
+benchmarks for SMT solvers. 
+
+The main motivation of the SMT-LIB initiative was the expectation that 
+the availability of common standards and of a library of benchmarks would 
+greatly facilitate the evaluation and the comparison of SMT systems,
+and advance the state of the art in the field,
+in the same way as, for instance,
+the TPTP library~\cite{Sut-JAR-09} has done for theorem proving,
+or the SATLIB library~\cite{HooStu-SAT-00} did 
+for propositional satisfiability.
+These expectations have been largely met, 
+thanks in no small part 
+to extensive benchmark contributions from the research community and
+to an annual SMT solver competition, SMT-COMP~\cite{BardMS-CAV-05},
+based on benchmarks from the library.
+
+At the time of this writing, 
+the library contains more than 100,000 benchmarks and continues to grow.
+Formulas in SMT-LIB format are accepted by the great majority 
+of current SMT solvers.
+Moreover, much published experimental work in SMT relies significantly 
+on SMT-LIB benchmarks.
+
+
+\subsection{Main features of the SMT-LIB standard}
+
+The previous main version of the SMT-LIB standard, Version 1.2, 
+provided a language for specifying theories, logics (see later), and benchmarks,
+where a benchmark was, in essence, a logical formula to be checked for 
+satisfiability with respect to some theory.
+
+Version 2.0 sought to improve the usefulness of the SMT-LIB standard
+by simplifying its logical language 
+while increasing its expressiveness and flexibility.
+In addition, 
+it introduced a command language for SMT solvers that 
+expanded their SMT-LIB interface considerably,
+allowing users to tap the numerous functionalities 
+that most modern SMT solvers provide.
+
+Like Version 2.0 and later versions, \thisversion defines:
+\begin{itemize}
+\item
+a language for writing \emph{terms and formulas} in a sorted (i.e., typed) 
+version of first-order logic;
+\item
+a language for specifying \emph{background theories} and 
+fixing a standard vocabulary of sort, function, and predicate symbols for them;
+\item
+a language for specifying \emph{logics}, 
+suitably restricted classes of formulas to be checked 
+for satisfiability with respect to a specific background theory;
+\item
+a \emph{command} language for interacting with SMT solvers
+via a textual interface
+that allows asserting and retracting formulas, 
+querying about their satisfiability, examining their models or 
+their unsatisfiability proofs, and so on.
+
+\end{itemize}
+

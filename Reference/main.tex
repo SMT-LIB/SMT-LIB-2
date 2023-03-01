@@ -1,0 +1,202 @@
+% file: main.tex
+
+
+% TODO
+
+% Add clarification on semantics of define-fun for case of n=0
+% Add more entries to Index
+
+
+%\documentclass[10pt,twoside]{report}
+\documentclass[11pt]{report}
+\usepackage[Sonny]{fncychap}
+% Sonny, Lenny, Glenn, Conny, Rejne, Bjarne, PetersLenny, Bjornstrup
+\ChTitleVar{\huge\sf}
+\ChNameVar{\large\sf}
+\ChNumVar{\Huge}
+\ChRuleWidth{1pt}
+
+\usepackage[T1]{fontenc}
+%\usepackage{lxfonts}
+%\usepackage[math]{kurier}
+%\usepackage[sfmath]{kpfonts}
+%\usepackage{kpfonts}
+%\usepackage[math]{iwona}
+%\usepackage{arev}
+\usepackage[sc]{mathpazo}
+\linespread{1.04}         % Palladio needs more leading (space between lines)
+
+\usepackage{multicol}
+
+% This gives an acceptable placement of the bounding box on the page:
+%\usepackage[a4paper]{geometry}
+\usepackage{geometry}
+\geometry{
+textwidth=160mm,
+top=35mm,
+bottom=25mm,
+%textheight=26cm,
+nofoot,
+headsep=8mm,
+headheight=14pt
+}
+
+\newcommand{\headerfont}{\textnormal}
+
+%\usepackage{draftwatermark}
+%\SetWatermarkScale{1.1}
+%\SetWatermarkLightness{0.97}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+%\renewcommand{\subsectionmark}[1]{\markright{\thesection\quad #1}}
+\lhead[\fancyplain{}{\thepage}]{\fancyplain{}{\headerfont{\rightmark}}}
+%  i.e. empty on ``plain'' pages, \thepage on even, \rightmark on odd pages
+\chead{}
+\rhead[\fancyplain{}{\headerfont{\nouppercase{\leftmark}}}]{\fancyplain{}{\thepage}}
+%  i.e. empty on ``plain'' pages, \leftmark on even, \thepage on odd pages
+\lfoot{}
+\cfoot{} % page number
+\rfoot{}
+
+\usepackage{verbatim}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{xspace}
+\usepackage{makeidx}
+\usepackage{tocbibind}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+
+
+\usepackage{pgf}
+\usepackage{tikz}
+%\usepackage[active,tightpage]{preview}
+%%\PreviewEnvironment{tikzpicture}
+%%\setlength\PreviewBorder{5pt}%
+\usepackage[utf8]{inputenc}
+\usetikzlibrary{arrows,automata}
+\usetikzlibrary{positioning}
+\tikzset{
+    state/.style={
+           rectangle,
+           rounded corners,
+           draw=black, very thick,
+           minimum height=2em,
+           inner sep=2pt,
+           text centered,
+           },
+}
+
+
+\usepackage{listings}
+\lstset{%
+%frameround=tttt,
+frame=shadowbox, 
+basicstyle=\small\ttfamily\color{NavyBlue},
+%frame=trBL,
+%color=\color{blue},
+rulesepcolor=\color{black},
+showstringspaces=false,
+xleftmargin=2em,
+aboveskip=\bigskipamount,
+belowskip=\bigskipamount}
+%language=Lisp}
+%\lstloadlanguages{Lisp}
+
+
+\usepackage{hyperref}
+\hypersetup{
+ colorlinks=true,
+ linkcolor=Grey, %DarkSlateBlue
+ citecolor=Grey,
+ urlcolor=Grey,
+ pdftitle=The SMT-LIB Standard,
+ pdfauthor=Clark Barrett; Pascal Fontaine; Aaron Stump; Cesare Tinelli
+ pdfkeywords=SMT-LIB standard
+}
+\usepackage{endnotes}
+\input{endnotes-fix}
+
+% Toggle switch in order to turn on/off back-links in the endnote-section:
+\enotelinkstrue
+%\enotelinksfalse
+
+\makeindex
+
+\input{macros}
+\input{syntax-macros}
+
+\bibliographystyle{alpha}
+
+\begin{document}
+
+\title{\Huge
+The SMT-LIB Standard\\[1ex]
+\thisversion\\[1ex]
+%Reference Manual\\[2ex]
+}
+
+\author{
+Clark Barrett
+\and 
+Pascal Fontaine
+\and
+Cesare Tinelli
+\\[2ex]
+}
+
+\date{{\bf Release:} 2021-05-12} %\today}
+\vfill
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+\noindent Copyright \copyright\ 2015-21 Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+\medskip
+
+\noindent {\em
+Permission is granted to anyone to make or distribute verbatim copies of this document, in any medium, provided that the copyright notice and permission notice are preserved, and that the distributor grants the recipient permission for further redistribution as permitted by this notice. Modified versions may not be made.
+}
+\thispagestyle{empty}
+
+\include{preface}
+\include{acknowledgments}
+
+\newpage
+\thispagestyle{empty}
+\tableofcontents
+
+\newpage
+\listoffigures
+
+\setcounter{chapter}{0}
+
+\part{Introduction}
+ \include{general-info}
+ \include{basic-assumptions}
+
+\part{Syntax} \label{part:syntax}
+ \include{concrete-syntax}
+
+\part{Semantics} \label{part:semantics}
+ \include{operational-semantics}
+ \include{logical-semantics}
+ 
+\part{References}
+\thispagestyle{empty}
+\bibliography{biblio}
+
+
+\part{Appendices}
+\appendix
+\input{design-notes}
+\include{syntax-summary}
+%\include{concrete-to-abstract}
+
+\newpage
+\printindex
+
+\end{document}
+
+
+

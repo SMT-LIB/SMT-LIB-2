@@ -1,0 +1,128 @@
+%!TEX root = main.tex
+
+% macros.tex
+
+\newcommand{\thisversion}{Version 2.6\xspace}
+
+\newcommand{\rem}[2]{\textsf{[#1: #2]}}
+\newcommand{\cbrem}[1]{\rem{CB}{#1}}
+\newcommand{\asrem}[1]{\rem{AS}{#1}}
+\newcommand{\ctrem}[1]{\rem{CT}{#1}}
+%\newcommand{\ctrem}[1]{\ignorespaces}
+
+\newcommand{\new}[1]{{\color{FireBrick} #1}}
+\newenvironment{newver}{\color{FireBrick}}{}
+%\newcommand{\new}[1]{#1}
+%\newenvironment{newver}{}{}
+\newcommand{\adt}{\marginpar{[adts]}}
+
+\newcommand{\Section}[1]{
+ \newpage
+ \section{#1}}
+
+\theoremstyle{definition} 
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{constraint}{Constraint}
+\newtheorem{remark}{Remark}
+%\newtheorem{example}{Example}
+
+
+\newenvironment{com}
+{\rule{1ex}{1ex}%
+\hspace{\stretch{1}}} 
+{\hspace{\stretch{1}}%
+\rule{1ex}{1ex}}
+
+%\newcommand{\define}[1]{{\textcolor{MediumBlue}{\textsl{#1}}}}
+\newcommand{\define}[1]{{\textcolor{Maroon}{\textsl{#1}}}}
+
+\newcommand{\mode}[1]{\textsf{#1}}
+
+\newcommand{\note}[1]{$^{\langle\ref{#1}\rangle}$}
+
+\newcommand{\notetext}[2]{
+\begin{designNote} \label{#1}
+#2
+\end{designNote}}
+
+
+%\newcommand{\extra}[1]{{\small \sf #1}}
+\newcommand{\extra}[1]{}
+
+\newcommand{\dec}[1]{{#1}$_\mathrm{dec}$}
+\newcommand{\hex}[1]{{#1}$_\mathrm{hex}$}
+
+\newcommand{\str}[1]{\mathbf{#1}}
+\newcommand{\inter}[1]{\mathcal{#1}}
+\newcommand{\uni}[1]{\mathrm{#1}}
+\newcommand{\eqs}{\approx}
+\newcommand{\true}{\akey{true}}
+\newcommand{\false}{\akey{false}}
+\newcommand{\sorts}[1]{#1^\mathrm{S}}
+\newcommand{\funs}[1]{#1^\mathrm{F}}
+\newcommand{\cons}[1]{#1^\mathrm{C}}
+\newcommand{\sels}[1]{#1^\mathrm{G}}
+\newcommand{\tests}[1]{#1^\mathrm{T}}
+\newcommand{\sortt}[1]{\mathit{Sort}(#1)}
+%\newcommand{\subsorts}[1]{#1^{<:}}
+\newcommand{\abset}[1]{\mathcal{#1}}
+\newcommand{\so}{\abset{S}}
+\newcommand{\fu}{\abset{F}}
+\newcommand{\va}{\abset{X}}
+\newcommand{\val}{\abset{V}}
+\newcommand{\bo}{\abset{B}}
+\newcommand{\at}{\abset{A}}
+\newcommand{\ra}{\abset{R}}
+\newcommand{\st}{\abset{W}}
+\newcommand{\na}{\abset{N}}
+\newcommand{\sop}{\abset{U}}
+\newcommand{\la}{\abset{L}}
+\newcommand{\te}{\abset{TN}}
+\newcommand{\lo}{\abset{L}}
+\newcommand{\pf}{\abset{P}}
+
+
+\newcommand{\T}{\mathcal{T}}
+
+\newcommand{\ar}{\mathrm{ar}}
+
+\newlength{\brackt}
+\settowidth{\brackt}{$[$}
+\newcommand{\db}[1]{[\hspace{-.5\brackt}[{#1}]\hspace{-.5\brackt}]}
+\newcommand{\mea}[2]{\db{#2}^{#1}}
+
+
+\newcommand{\vars}[1]{\mathcal{V}\mathit{ar}(#1)}
+%\newcommand{\fol}{$\mathit{FOL}^=$\xspace}
+
+%\newcommand{\setof}[2]{\{#1 \:|\: #2 \}}
+
+%% \newcommand{\opar}{'('}
+%% \newcommand{\cpar}{')'}
+%\newcommand{\rel}[1]{\mathbf{Tr}(#1)}
+%\newcommand{\rel}[1]{{#1}^\mathrm{T}}
+\newcommand{\rel}[1]{{#1}^\tau}
+%\newcommand{\seq}{\approx}
+\newcommand{\limplies}{\Rightarrow}
+\newcommand{\lxor}{\oplus}
+
+\newcommand{\proves}{\:\vdash\:}
+\newcommand{\tproves}{\:\vdash_{\mathrm{t}}\:}
+\newcommand{\fproves}{\:\vdash_{\mathrm{f}}\:}
+
+\newcommand{\derives}[2]{
+\renewcommand\arraystretch{1.2}
+\(
+\begin{array}{c}
+ #1 \\
+ \hline
+ #2
+\end{array}
+\)}
+
+
+
+
+%\newcommand{\psigma}{\sigma_\mathrm{p}}
+

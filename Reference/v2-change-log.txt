@@ -1,0 +1,101 @@
+
+===========
+Version 2.0
+===========
+
+----------------
+09-09-12 Release
+----------------
+
+Fixed a few minor errors in the text. Updated the number of benchmarks.
+
+Significant changes with respect to the previous release:
+
+- Clarified the role of sort, function and let variable definitions
+  with respect to the language of a logic (see Section 3.8).
+
+
+----------------
+21-12-10 Release
+----------------
+
+Another minor release, fixing a number errors, clarifying the text in
+a few points, and adjusting the standard in minor ways.
+
+Significant changes with respect to the previous release:
+
+- Clarified and generalized the definition of string literals. For
+  generality the standard defines only two escape sequences: \" and \\ .
+  The first is used as usual to allow the double quote character to appear 
+  in a string literal, the second to allow a string literal to end with
+  backslash.
+  There only two escape sequences for achieve maximum generality in the 
+  SMT-LIB standard and independence from programming language conventions.
+  In particular, and contrary to most programming languages, \n and \012, 
+  say, are not escape sequences denoting the new line character but
+  regular sequences of characters denoting themselves. Future SMT-LIB
+  theories of strings that use string literals as constant symbols will 
+  have the liberty to define certain string constants, such as "\n"
+  and "\012", as equivalent (or not).
+
+- The argument of set-logic can refer to *any* logic supported by a solver
+  including logics not in the official SMT-LIB catalog.
+
+- Specified more precisely which commands can be called and which options 
+  can be set  before set-logic.
+
+- Specified more precisely the expected solver behavior for unsupported
+  commands.
+
+- Clarified the role of set-info invocations.
+
+
+----------------
+28-08-10 Release
+----------------
+
+This is a minor release, fixing a number errors, clarifying the text in
+a few points, and adjusting the standard in minor ways.
+
+Significant changes with respect to the previous release:
+
+- Fixed the text at the beginning of Section 3.1 which specifies the 
+  legal character set (ASCII) and clarifies the definition and lexical 
+  role of comments.
+  
+- Quoted symbols, i.e., vertical-bar-delimited symbols, cannot contain 
+  the backslash character (\) anymore. (This is for simplicity.)
+
+- Clarified that enclosing a symbol in vertical bars does not produce 
+  a new symbol. For instance, |xyz| is the same as xyz.
+
+- The notion of *reserved word* has been introduced. Reserved words are
+
+    par  NUMERAL  DECIMAL  STRING  _  !  as  let  forall  exists
+
+  as well as each command name. The syntactic category <symbol> now 
+  explicitly excludes all the reserved words.
+
+- In the concrete grammar the proof production of <attribute> has changed
+  from
+  <attribute> ::= <keyword> | <keyword> <s_expr>
+  to
+  <attribute> ::= <keyword> | <keyword> <attribute_value>
+  the originally intended one.
+
+- Added a new theory function symbol annotation called :pairwise
+  for function symbols of rank (s s Bool) for some sort s.
+  If f is declared with :pairwise then (f x1 x2 x3 x4) is syntactic sugar for
+  (and (f x1 x2) (f x1 x3) (f x1 x4)
+                 (f x2 x3) (f x2 x4)
+                           (f x3 x4)).
+  
+- Eliminated 'distinct' as a special construct. It is now a function symbol
+  of the Core theory (like =, true, false, etc), declared with :pairwise. 
+
+
+----------------
+30-03-10 Release
+----------------
+
+This is the first release of Version 2.0 of the SMT-LIB format. 

@@ -1,0 +1,248 @@
+% basic-assumptions.tex
+
+%!TEX root = main.tex
+
+
+%===============================================================================
+\chapter{Basic Assumptions and Structure} 
+%===============================================================================
+\thispagestyle{empty}
+
+
+This chapter introduces the defining basic assumptions 
+of the SMT-LIB standard and 
+describes its overall structure.
+
+
+\bigskip
+
+\section{Satisfiability Modulo Theories}
+
+The defining problem of Satisfiability Modulo Theories is checking 
+whether a given (closed) logical formula $\varphi$ is \emph{satisfiable},
+not in general but in the context of some background theory $\T$
+which constrains the interpretation of the symbols used in $\varphi$.
+Technically, the SMT problem for $\varphi$ and $\T$ is 
+the question of 
+whether there is a model of $\T$ that makes $\varphi$ true.
+%For instance, \trem{example here}
+ 
+A dual version of the SMT problem, 
+which we could call \emph{Validity Modulo Theories},
+asks whether a formula $\varphi$ is \emph{valid} in some theory $\T$,
+that is, satisfied by every model of $\T$.
+As the name suggests, SMT-LIB focuses only on the SMT problem.
+However, at least for classes of formulas that are closed under logical negation,
+this is no restriction because the two problems are inter-reducible:
+a formula $\varphi$ is valid in a theory $\T$ exactly when 
+its negation is not satisfiable in the theory.
+
+Informally speaking, SMT-LIB calls an \define{SMT solver}\index{SMT!solver}
+any software system that implements 
+a procedure for satisfiability modulo some given theory.
+In general,
+one can distinguish among a solver's 
+\begin{enumerate}
+\item
+\emph{underlying logic},
+e.g., first-order, modal, temporal, second-order, and so on,
+
+\item
+\emph{background theory},
+the theory against which satisfiability is checked,
+
+\item
+\emph{input formulas}, 
+the class of formulas the solver accepts as input,
+and
+
+\item
+\emph{interface}, 
+the set of functionalities provided by the solver.
+\end{enumerate}
+
+For instance, in a solver for linear arithmetic
+the underlying logic is first-order logic with equality,
+the background theory is the theory of real numbers, and
+the input language may be limited to conjunctions of inequations 
+between linear polynomials.
+The interface may be as simple as accepting a system
+of inequations and returning a binary response indicating 
+whether the system is satisfiable or not.
+More sophisticated interfaces include
+the ability to return concrete solutions for satisfiable inputs,
+return proofs for unsatisfiable ones,
+allow incremental and backtrackable input, and so on.
+
+For better clarity and modularity, 
+the aspects above are kept separate in SMT-LIB.
+SMT-LIB's commitment to each of them is described in the following.
+
+
+%-------------------------------------------------------------------------------
+\section{Underlying Logic}
+%-------------------------------------------------------------------------------
+
+
+\thisversion of the SMT-LIB format adopts as its underlying logic
+a version of many-sorted first-order logic with equality~\cite{Man-MSL-93,Gal-86,Hen-01}.
+Like traditional many-sorted logic, it has sorts (i.e., basic types) 
+and sorted terms.
+Unlike that logic, however,
+it does not have a syntactic category of formulas distinct from terms.
+Formulas are just sorted terms of a distinguished Boolean sort,
+which is interpreted as a two-element set in every SMT-LIB theory.\footnote{This is similar
+to some formulations of classical higher-order logic, such as that of~\cite{andrews86}.}
+Furthermore, the SMT-LIB logic uses a language of sort terms,
+as opposed to just sort constants, to denote sorts:
+sorts can be denoted by sort constants like \texttt{Int}
+as well as sort terms like
+\texttt{(List (Array Int Real))}.
+Finally,
+in addition to the usual existential and universal quantifiers, 
+the logic includes a \emph{let} binder
+and a \emph{match} binder
+analogous to constructs with the same name
+found in functional programming languages.
+
+SMT-LIB's underlying logic,
+henceforth \define{SMT-LIB logic},
+provides the formal foundations of the SMT-LIB standard.
+The concrete syntax of the logic is part of the SMT-LIB language
+of formulas and theories, which is defined in Part~\ref{part:syntax} 
+of this document.
+An abstract syntax for SMT-LIB logic and 
+the logic's formal semantics are provided in Part~\ref{part:semantics}.
+
+
+
+%-------------------------------------------------------------------------------
+\section{Background Theories}
+%-------------------------------------------------------------------------------
+
+One of the goals of the SMT-LIB initiative is 
+to clearly define a catalog of background theories,
+starting with a small number of popular ones,
+and adding new ones as solvers for them are developed.\footnote{
+This catalog is available, separately from this document,
+from the SMT-LIB website (\href{http://www.smt-lib.org}{www.smt-lib.org}).
+}
+Theories are specified in SMT-LIB independently of any benchmarks or solvers.
+On the other hand, 
+each SMT-LIB script refers, indirectly, to one or more theories 
+in the SMT-LIB catalog.
+
+This version of the SMT-LIB standard distinguishes 
+between \emph{basic}\index{theory!basic} theories and 
+\emph{combined}\index{theory!combined} theories.
+Basic theories,
+such as the theory of real numbers, the theory of arrays, 
+the theory of fixed-size bit vectors and so on,
+are those explicitly defined in the SMT-LIB catalog.
+Combined theories are defined implicitly in terms of basic theories 
+by means of a general modular combination operator.
+The difference between a basic theory and a combined one
+in SMT-LIB is essentially operational.
+Some SMT-LIB theories, 
+such as the theory of finite sets with a cardinality operator, 
+are defined as basic theories,
+even if they are in fact a combination of smaller theories,
+because they cannot be obtained by modular combination.
+%
+%This document defines a standard format for specifying not single basic theories,
+%but basic \emph{theory schemas},
+%where a theory schema defines an \emph{infinite family} of basic theories 
+%with similar features.
+%For example, \trem{More}.
+
+Theory specifications have mostly documentation purposes.
+They are meant to be standard references for human readers.
+For practicality then, the format insists that only the \emph{signature} of 
+a theory (essentially, its set of sort symbols and sorted function symbols) 
+be specified formally---provided it is finite.\footnote{
+The finiteness condition can be relaxed a bit for signatures
+that include certain commonly used sets of constants such as 
+the set of all numerals.
+}
+By ``formally'' here 
+we mean written in a machine-readable and processable format,
+as opposed to written in free text, no matter how rigorously.
+By this definition, theories themselves are defined informally, 
+in natural language.
+%
+Some theories, such as the theory of bit vectors, have an infinite signature.
+For them, the signature too is specified informally in English.\endnote{
+\label{informal-signature}
+To define such theory signatures formally,
+SMT-LIB would need to rely on a more powerful underlying logic,
+for instance one with dependent types.
+}
+
+%-------------------------------------------------------------------------------
+\section{Input Formulas}
+%-------------------------------------------------------------------------------
+
+SMT-LIB adopts a single and general first-order (sorted) language 
+in which to write logical formulas.
+It is often the case, however, that 
+SMT applications work with formulas expressed in some particular fragment 
+of the language.
+The fragment in question matters
+because one can often write a solver specialized on that sublanguage 
+that is much more efficient than a solver meant for a larger sublanguage.\footnote{
+By efficiency here we do not necessarily refer to worst-case time complexity,
+but efficiency in practice.
+}
+
+An extreme case of this situation occurs
+when satisfiability modulo a given theory $\T$
+is decidable for a certain fragment (quantifier-free, say)
+but undecidable for a larger one (full first-order, say),
+as for instance happens with the theory of arrays~\cite{BraMS-VMCAI-06}.
+But a similar situation occurs even
+when the decidability of the satisfiability problem is preserved 
+across various fragments.
+For instance, 
+if $\T$ is the theory of real numbers,
+the satisfiability in $\T$ of full-first order formulas
+built with the symbols $\{0,1,+,*,<,=\}$ is decidable.
+However, one can implement increasingly faster solvers by restricting
+the language respectively to quantifier-free formulas, 
+linear equations and inequations,
+difference inequations (inequations of the form $x < y + n$),
+and
+inequations between variables~\cite{Bozzanoetal2005TACAS}.
+
+Certain pairs of theories and input languages are very common in the field
+and are often conveniently considered as a single entity.
+In recognition of this practice,
+the SMT-LIB format allows one to pair together 
+a background theory and an input language into a \emph{sublogic}, 
+or, more briefly, \define{logic}.
+We call these pairs (sub)logics because,
+intuitively, 
+each of them defines a sublogic of SMT-LIB logic
+for restricting 
+both the set of allowed models---to the models of the background theory---and 
+the set of allowed formulas---to the formulas in the input language.
+
+
+%-------------------------------------------------------------------------------
+\section{Interface}
+%-------------------------------------------------------------------------------
+
+Starting with Version 2.0, the SMT-LIB standard includes a scripting language that 
+defines a textual interface for SMT solvers.
+SMT solvers implementing this interface act as interpreters
+of the scripting language.
+The language is command-based,
+and defines a number of input/output functionalities
+that go well beyond simply checking the satisfiability of an input formula.
+It includes commands for 
+setting various solver parameters,
+declaring new symbols, 
+asserting and retracting formulas, 
+checking the satisfiability of the current set of asserted formulas, 
+inquiring about models of satisfiable sets,
+printing various diagnostics, and so on.
+

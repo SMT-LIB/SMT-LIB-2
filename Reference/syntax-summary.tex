@@ -1,0 +1,330 @@
+% syntax-summary.tex
+
+%!TEX root = main.tex
+
+
+%===============================================================================
+\chapter{Concrete Syntax} \label{app:concrete-syntax}
+%===============================================================================
+\thispagestyle{empty}
+
+{\small
+
+\begin{minipage}{.95\linewidth}
+
+\subsection*{Predefined symbols}
+
+These symbols have a predefined meaning in \thisversion.
+Note that they are not reserved words.
+For instance, 
+they could also be used in principle as user-defined sort or function symbols 
+in scripts.
+\medskip
+
+\ter{Bool} \ 
+\ter{continued-execution} \ 
+\ter{error} \ 
+\ter{false} \ 
+\ter{immediate-exit} \ 
+\ter{incomplete} \ 
+\ter{logic} \ 
+%\ter{none} \ 
+\ter{memout} \ 
+\ter{sat} \ 
+\ter{success} \ 
+\ter{theory} \ 
+%\ter{timeout} \ 
+\ter{true} \ 
+\ter{unknown} \ 
+\ter{unsupported} \ 
+\ter{unsat}
+
+
+\subsection*{Predefined keywords}
+
+These keywords have a predefined meaning in \thisversion.
+\medskip
+
+\attr{all-statistics} \ 
+\attr{assertion-stack-levels} \ 
+\attr{authors} \ 
+%\attr{axioms} \ 
+\attr{category} \ 
+\attr{chainable} \ 
+\attr{definition} \ 
+\attr{diagnostic-output-channel} \ 
+\attr{error-behavior}
+%\attr{expand-definitions} \ 
+\attr{extensions} \ 
+\attr{funs} \ 
+\attr{funs-description} \ 
+\attr{global-declarations} \ 
+\attr{interactive-mode} \ 
+\attr{language} \ 
+\attr{left-assoc} \ 
+\attr{license} \ 
+\attr{name} \ 
+\attr{named} \ 
+\attr{notes} \ 
+\attr{pattern} \ 
+\attr{print-success} \ 
+\attr{produce-assignments} \ 
+\attr{produce-models} \ 
+\attr{produce-proofs} \ 
+\attr{produce-unsat-assumptions} \ 
+\attr{produce-unsat-cores} \ 
+\attr{random-seed} \ 
+\attr{reason-unknown} \ 
+\attr{regular-output-channel} \ 
+\attr{reproducible-resource-limit} \ 
+\attr{right-assoc} \ 
+\attr{smt-lib-version} \ 
+\attr{sorts} \ 
+\attr{sorts-description} \ 
+\attr{source} \ 
+\attr{status} \ 
+\attr{theories} \ 
+\attr{values} \ 
+\attr{verbosity} \ 
+\attr{version}
+
+\end{minipage}
+
+%\newpage
+\subsection*{Auxiliary Lexical Categories}
+
+\aLexical
+
+\newpage
+\subsection*{Tokens}
+
+\begin{description}
+
+\item[Reserved Words]
+\ 
+\medskip
+
+\begin{minipage}{.95\linewidth}
+\textbf{General:} \ 
+\ter{!} \ 
+\verb|_| \ 
+\ter{as} \ 
+\ter{BINARY} \ 
+\ter{DECIMAL} \ 
+\ter{exists} \ 
+\ter{HEXADECIMAL} \ 
+\ter{forall} \ 
+\ter{let} \ 
+\ter{match} \ 
+\ter{NUMERAL} \ 
+\ter{par} \ 
+\ter{STRING}
+\medskip
+
+
+\textbf{Command names:}
+\ter{assert} \ 
+\ter{check-sat} \ 
+\ter{check-sat-assuming} \ 
+\ter{declare-const} \ 
+\ter{declare-datatype} \ 
+\ter{declare-datatypes} \ 
+\ter{declare-fun} \ 
+\ter{declare-sort} \ 
+\ter{define-fun} \ 
+\ter{define-fun-rec} \ 
+\ter{define-sort} \ 
+\ter{echo} \ 
+\ter{exit} \ 
+\ter{get-assertions} \ 
+\ter{get-assignment} \ 
+\ter{get-info} \ 
+\ter{get-model} \ 
+\ter{get-option} \ 
+\ter{get-proof} \ 
+\ter{get-unsat-assumptions} \ 
+\ter{get-unsat-core} \ 
+\ter{get-value} \ 
+\ter{pop} \ 
+\ter{push} \ 
+\ter{reset} \ 
+\ter{reset-assertions} \ 
+\ter{set-info} \ 
+\ter{set-logic} \ 
+\ter{set-option}
+\end{minipage}
+\medskip
+
+
+\item[Other tokens]
+\ 
+\medskip
+
+\ \ter{(} 
+
+\ \ter{)}
+
+\tokens
+\medskip
+
+\noindent
+Members of the \nter{symbol} category starting with the character
+\ \ter{@} \ or \ \ter{.} \  are reserved for solver use.
+Solvers can use them respectively as identifiers for abstract values and
+solver generated function symbols other than abstract values.
+\end{description}
+
+
+\subsection*{S-expressions}
+\ 
+
+\sexpressions
+
+
+\subsection*{Identifiers}
+\ 
+
+\cIdentifiers
+
+\newpage
+\subsection*{Sorts}
+\ 
+
+\cSorts
+\medskip
+
+
+\subsection*{Attributes}
+\ 
+
+\cAttributes
+\medskip
+
+
+\subsection*{Terms}
+\ 
+
+\cTerms
+
+\newpage
+\subsection*{Theories}
+\ 
+
+\cTheories
+\medskip
+
+\subsection*{Logics}
+\ 
+
+\cLogics
+\medskip
+
+\newpage
+\subsection*{Info flags}
+\ 
+
+\cInfoFlags
+\medskip
+
+\subsection*{Command options}
+\ 
+
+\cCommandOptions
+
+\newpage
+\subsection*{Commands}
+\ 
+
+\cCommands
+
+\newpage
+\subsection*{Command responses}
+\ 
+
+\cResponsesI
+
+\cResponsesII
+}
+
+
+
+%===============================================================================
+\chapter{Abstract Syntax}\label{app:abstract-syntax}
+%===============================================================================
+\thispagestyle{empty}
+
+{\small
+
+\subsection*{Common Notation}
+\smallskip
+
+% as removed for now:
+%\trem{revise}
+
+\[
+\begin{array}{llll}
+b \in \bo, & \text{the set of boolean values}  &
+r \in \ra, & \text{the set of non-negative rational numbers} \\
+n \in \na, & \text{the set of natural numbers}  &
+w \in \st, & \text{the set of character strings} \\
+s \in \so, & \text{the set of sort symbols} &
+u \in \sop, & \text{the set of sort parameters} \\
+f \in \fu, & \text{the set of function symbols\ \ } &
+x \in \va, & \text{the set of variables} \\
+a \in \at, &  \text{the set of attribute names\ \ } &
+v \in \val, &  \text{the set of attribute values} \\
+T \in \te, & \text{the set of theory names} &
+L \in \lo, & \text{the set of logic names}
+\end{array}
+\]
+
+\subsection*{Sorts}
+\ 
+
+\sortterms
+
+
+\subsection*{Terms}
+\ 
+
+\terms
+
+
+\newpage
+\subsection*{Well-sorting rules for terms}
+\ 
+
+\termrules
+\medskip
+
+\subsection*{Theories}
+\ 
+
+\theories
+\medskip
+
+\subsection*{Logics}
+\ 
+
+\logics
+\medskip
+
+%\subsection*{Command options and info names}
+%\ 
+%
+%\commandOptions
+%
+%\newpage
+%\subsection*{Commands}
+%\ 
+%
+%\commands
+%\newpage
+%
+%\subsection*{Command responses}
+%\ 
+%
+%\responses
+
+}
+

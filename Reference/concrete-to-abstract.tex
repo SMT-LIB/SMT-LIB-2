@@ -1,0 +1,308 @@
+% concrete-to-abstract.tex
+
+%!TEX root = reference-manual.tex
+
+
+%===============================================================================
+\chapter{Concrete to Abstract Syntax} \label{app:concrete-abstract}
+%===============================================================================
+\thispagestyle{empty}
+
+
+[To be provided in a later release]
+
+%\begin{comment}
+
+\newcommand{\tr}[1]{\ulcorner#1\urcorner}
+
+\ctrem{To be revised and completed}
+This appendix defines a translation from the concrete syntax
+of the SMT-LIB language to the abstract syntax used in 
+Part~\ref{part:semantics} of this document.
+To do that we assume as given the following mappings:
+
+\begin{itemize}
+\item
+$a_{\so}: \nter{identifier} \to \so$ such that 
+$a_{\so}(\ter{Bool}) = \bool$,
+\item
+$a_{\sop}: \nter{symbol} \to \sop$,
+\item
+$a_{\va}: \nter{symbol} \to \va$,
+\item
+$a_{\fu}: \nter{spec\_constant} \cup \nter{identifier} \to \fu$
+such that 
+$a_{\fu}(\ter{not}) = \lnot$ and
+$a_{\fu}(\ter{and}) = \land$,
+\item
+$a_{\at}: \nter{keyword} \to \at$,
+\item
+$a_{\val}: \nter{attribute\_value} \to \val$,
+\item
+$a_{\lo}: \nter{symbol} \to \lo$,
+\item
+$a_{\st}: \nter{string} \to \st$,
+mapping each string literal to the string it contains,
+\item
+$a_{\na}: \nter{numeral} \to \na$,
+mapping each numeral to its corresponding natural number as expected,
+\item
+$a_{\ra}: \nter{decimal} \to \ra$,
+mapping each decimal to its corresponding rational number as expected.
+\end{itemize}
+%\bigskip
+
+\begin{remark}
+Some of these mappings have overlapping domains.
+The reason is that certain concrete syntactic categories 
+(such as, \nter{symbol} or \nter{numeral})
+play different roles in the language.
+Also, for generality, the mappings are not assumed to be injective.
+Some (such as $a_{\na}$) definitely are, 
+some (such as $a_{\ra}$) definitely are not\footnote{
+Observe that $a_\ra(\ter{0.0}) = a_\ra(\ter{0.00})$.
+},
+some other may or not, depending on specific cases.\footnote{
+For instance, 
+in a logic of arithmetic modulo 4 allowing all numerals
+as constant symbols,
+it might be convenient for $a_{\fu}$ to map its
+\nter{numeral} subdomain onto the set $\{0,1,2,3\}$.
+}
+The mappings $a_{\at}$ and $a_{\val}$ will be used 
+to provide an abstraction for user-defined attributes.
+In contrast, predefined attributes will be translated directly.
+\qed
+\end{remark}
+
+
+\section*{Abstraction Function}
+
+With the mappings above, the translation can be given formally
+as an abstraction function $\tr{\_}$ from concrete syntax expressions $e$
+to abstract syntax ones.
+The function is parametrized by a mapping from 
+ is defined by induction on the concrete syntax rules as follows.\bigskip
+
+\noindent \nter{sort} \\
+
+\(
+\begin{array}{llll}
+ \tr{e}_x & := & a_{\so}(e)
+ & \text{if } e \in \nter{identifier}
+ \\[1ex]
+ \tr{\ter{(}e\ e_1\ \cdots\ e_n \ter{)}}  & := & s\ \sigma_1\ \cdots \sigma_n &
+ \text{with } \begin{cases} s = a_{\so}(e)\\ \sigma_i = \tr{e_i}\end{cases}
+\end{array}
+\)
+\bigskip
+
+\noindent \nter{attribute} \\
+
+\(
+\begin{array}{llll}
+ \tr{e} & := & a_{\at}(e)
+ & \text{if } e \in \nter{keyword}
+ \\[1ex]
+ \tr{e_1\ e_2}  & := & a\ v &
+ \text{with } \begin{cases} a = a_{\at}(e_1)\\ v = a_{\val}(e_2)\end{cases}
+\end{array}
+\)
+\bigskip
+
+\noindent \nter{qual\_identifier} \\
+
+\(
+\begin{array}{llll}
+ \tr{e} & := & a_{\fu}(e)
+ & \text{if } e \in \nter{identifier}
+ \\[1ex]
+ \tr{\ter{(as } e_1\ e_2 \ter{)}}  & := & f^\sigma &
+ \text{with } \begin{cases}f = a_{\fu}(e_1)\\ \sigma = \tr{e_2}\end{cases}
+\end{array}
+\)
+\bigskip
+
+\noindent \nter{var\_binding}
+
+\(
+\begin{array}{llll}
+ \tr{\ter{(} e_1\ e_2 \ter{)}}  & := & x = t
+ & \text{with } \begin{cases}x = a_{\va}(e)\\ t = \tr{e_2}\end{cases}
+\end{array}
+\)
+\bigskip
+
+\noindent \nter{sorted\_var}
+
+\(
+\begin{array}{llll}
+ \tr{\ter{(} e_1\ e_2 \ter{)}}  & := & x{:}\sigma
+ & \text{with } \begin{cases} x = a_{\va}(e)\\ \sigma = \tr{e_2}\end{cases}
+\end{array}
+\)
+\bigskip
+
+\newpage
+\noindent 
+\nter{term}\\
+
+\(
+\begin{array}{llll}
+ \tr{e} & := & a_{\fu}(e)
+ & \text{if } e \in \nter{spec\_constant}
+ \\[1ex]
+ \tr{\ter{(= } e_1\ e_2 \ter{)}} & := & 
+ \tr{e_1}\; \eqs\; \tr{e_2}
+ \\[1ex]
+ \tr{\ter{(= } e_1\ \cdots\ e_n \ter{)}} & := & 
+ \tr{\ter{(= } e_1\ e_2 \ter{)}} \;\land\;
+ \tr{\ter{(= } e_2\ \cdots\ e_n \ter{)}}
+ & \text{if } n > 2
+ \\[1ex]
+ \tr{\ter{(distinct } e_1\ e_2 \ter{)}} & := & 
+ \lnot\ (\tr{e_1}\; \eqs\ \tr{e_2})
+ \\[1ex]
+ \tr{\ter{(distinct } e_1\ \cdots\ e_n \ter{)}} & := & 
+ \bigwedge \left(\begin{array}{c}
+             \lnot\ (\tr{e_1}\; \eqs\; \tr{e_2}) \\
+             \vdots \\
+             \ \lnot\ (\tr{e_1}\; \eqs\; \tr{e_n}) \\
+             \tr{\ter{(distinct } e_2\ \cdots\ e_n \ter{)}}
+             \end{array}
+             \right)
+ & \text{if } n > 2
+ \\[7ex]
+ \tr{\ter{(let (} e_1\ \cdots e_n\ \ter{) } e \ter{)}} & := & 
+ \akey{let}\ \tr{e_1}\ \cdots\ \tr{e_n}\ \akey{in}\ \tr{e}
+ \\[1ex]
+ \tr{\ter{(forall (} e_1\ \cdots\ e_n \ter{) } e \ter{)}} & := & 
+ \forall\; (\tr{e_1}\ \cdots\ \tr{e_n})\ \tr{e}
+ \\[1ex]
+ \tr{\ter{(exits (} e_1\ \cdots\ e_n \ter{) } e \ter{)}} & := & 
+ \exists\; (\tr{e_1}\ \cdots\ \tr{e_n})\ \tr{e}
+ \\[1ex]
+ \tr{\ter{(!}\ e\ e_1\ \cdots\ e_n \ter{)}} & := & 
+ t\ \alpha_1\ \cdots\ \alpha_n
+ & \text{with } \begin{cases} t = \tr{e}\\ \alpha_i = \tr{e_i}\end{cases}
+\end{array}
+\)
+\bigskip
+
+\noindent 
+In the last definition above,
+$\eqs$ and $\land$ are used as infix symbols,
+as customary.
+Furthermore,
+$\bigwedge\: (t_1 \ \cdots \ t_n)$ abbreviates
+$t_1\; \land \; \bigwedge\: (t_2\ \cdots \ t_n)$
+for $n>2$ and stands for $t_1 \land t_2$ for $n=2$. 
+\bigskip
+
+
+\noindent \nter{option} \\
+
+\(
+\begin{array}{llll}
+ \tr{\attr{print-success}\ e} & := & \akey{print-success}\ b &
+ \text{with } b = \tr{e}
+ \\[1ex] 
+ \tr{\attr{expand-definitions}\ e} & := & \akey{expand-definitions}\ b &
+ \text{with } b = \tr{e}
+ \\[1ex] 
+ \tr{\attr{interactive-mode}\ e} & := & \akey{interactive-mode}\ b &
+ \text{with } b = \tr{e}
+ \\[1ex] 
+ \tr{\attr{timeout}\ \ter{none}} & := & \akey{timeout}\ \akey{none}
+ \\ 
+ \tr{\attr{timeout}\ e} & := & \akey{timeout}\ r
+ & \text{if } \begin{cases} e \in \nter{decimal}\\ r = a_{\ra}(e)\end{cases}
+ \\[3ex] 
+ \tr{\attr{regular-output-channel}\ e} & := & \akey{regular-output-channel}\ w
+ & \text{with } w = a_{\st}(e)
+ \\[1ex] 
+ \tr{\attr{diagnostic-output-channel}\ e} & := & \akey{diagnostic-output-channel}\ w
+ & \text{with } w = a_{\st}(e)
+ \\[1ex] 
+ \tr{\attr{random-seed}\ e} & := & \akey{random-seed}\ n
+ & \text{with } n = a_{\na}(e)
+ \\[1ex] 
+ \tr{\attr{verbosity}\ e} & := & \akey{verbosity}\ n
+ & \text{with } n = a_{\na}(e)
+ \\[1ex] 
+ \tr{e_1\ e_2} & := & a\ v
+ & \text{with } \begin{cases} a = a_{\at}(e_1)\\ v = a_{\val}(e_2)\end{cases}
+ \\[1ex] 
+\end{array}
+\)
+\bigskip
+
+\noindent \nter{bin\_value} \\
+
+\(
+\begin{array}{llll}
+ \tr{\ter{true}} & := & \akey{true} \\
+ \tr{\ter{false}} & := & \akey{false} 
+\end{array}
+\)
+\bigskip
+
+\noindent \nter{command} \\
+
+\(
+\begin{array}{llll}
+ \tr{\ter{(set-logic}\ e \ter{)}} & := & \akey{set-logic}\ L
+ & \text{with } L = a_{\lo}(e)
+ \\[1ex] 
+ \tr{\ter{(set-option}\ e \ter{)}} & := & \akey{set-option}\ \tr{e}
+ \\[1ex] 
+ \tr{\ter{(set-info}\ e \ter{)}} & := & \akey{set-info}\ \tr{e}
+ \\ 
+ \tr{\ter{(declare-sort}\ e_1\ e_2 \ter{)}} & := & \akey{declare-sort}\ s\ n
+ & \text{with } \begin{cases} s = a_{\so}(e_1)\\ n = a_{\na}(e_2)\end{cases}
+ \\[3ex] 
+ \tr{\ter{(define-sort}\ e\ \ter{(}e_1\ \cdots\ e_n \ter{)}\ e'\ter{)}} & := & \akey{define-sort}\ s\ u_1\ \cdots u_n\ \tau
+ & \text{with } 
+   \begin{cases}
+    s = a_{\so}(e)\\
+    u_i = a_{\sop}(e_i)\\
+    \tau = \tr{e'}\\
+   \end{cases}
+ \\[4ex] 
+ \tr{\ter{(push}\ e \ter{)}} & := & \akey{push}\ n
+ & \text{with } n = a_{\na}(e)
+ \\[1ex] 
+ \tr{\ter{(pop}\ e \ter{)}} & := & \akey{pop}\ n
+ & \text{with } n = a_{\na}(e)
+ \\[1ex] 
+ \tr{\ter{(assert}\ e \ter{)}} & := & \akey{assert}\ t
+ & \text{with } t = \tr{e}
+ \\[1ex] 
+ \tr{\ter{(assert}\ e\ e' \ter{)}} & := & \akey{assert}\ t\ l
+ & \text{with } \begin{cases}t = \tr{e}\\ l = a_{\la}(e')\end{cases}
+ \\[1ex] 
+ \tr{\ter{(check-sat)}} & := & \akey{check-sat}
+ \\[1ex] 
+ \tr{\ter{(get-assertions)}} & := & \akey{get-assertions}
+ \\[1ex] 
+ \tr{\ter{(check-sat)}} & := & \akey{check-sat}
+ \\[1ex] 
+ \tr{\ter{(get-model)}} & := & \akey{get-model}
+ \\[1ex] 
+ \tr{\ter{(get-value (} e_1\ \cdots\ e_n\ter{))}} & := & \akey{get-value}\ t_1\ \cdots\ t_n
+  & \text{with } t_i = \tr{e_i}
+ \\[1ex] 
+ \tr{\ter{(get-proof)}} & := & \akey{get-proof}
+ \\[1ex] 
+ \tr{\ter{(get-unsat-core)}} & := & \akey{get-unsat-core}
+ \\[1ex] 
+ \tr{\ter{(get-info}\ e \ter{)}} & := & \akey{get-info}\ \tr{e}
+ \\[1ex] 
+ \tr{\ter{(get-option}\ e \ter{)}} & := & \akey{get-option}\ \tr{e}
+ \\[1ex] 
+ \tr{\ter{(exit)}} & := & \akey{exit}
+\end{array}
+\)
+\bigskip
+
+%\end{comment}

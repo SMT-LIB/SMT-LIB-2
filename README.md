@@ -1,5 +1,7 @@
+# Content
+
 This repository contains the official versions of the following
 
-* The SMT-LIB 2 language reference (PDF only)
-* The SMT-LIB 2 theories
-* The SMT-LIB 2 logics
+* The SMT-LIB 2.6 language reference
+* The SMT-LIB 2.6 theories
+* The SMT-LIB 2.6 logics

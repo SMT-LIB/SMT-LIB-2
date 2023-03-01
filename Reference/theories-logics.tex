@@ -1,0 +1,375 @@
+% theories-logics.tex
+
+%!TEX root = reference-manual.tex
+
+%===============================================================================
+\chapter{Theory and Sublogic Specifications} 
+%===============================================================================
+\thispagestyle{empty}
+
+
+%-------------------------------------------------------------------------------
+\section{Theory Declarations}
+%-------------------------------------------------------------------------------
+
+\begin{figure}
+\theories
+\caption{Abstract syntax for theories}
+\label{fig:abstract-theories}
+\end{figure}
+
+
+The catalog of SMT-LIB theories consists of theory declarations
+in a format specified in this section.
+In the previous version of the SMT-LIB standard,
+a \define{theory declaration} defines both 
+a many-sorted signature for a theory and the theory itself.
+The signature is specified by individual declarations of sort 
+and function symbols with their rank.
+In this version, additionally,
+a function symbol declaration can be \emph{schematic} and 
+stand in fact for an infinite number of them.
+This is achieved with the use of \emph{parametric ranks}, as explained below.
+A parametric rank stands for a family of ranks
+obtained by instantiating its parameters with all sorts in the signature.
+
+The abstract syntax for theory declarations
+is provided in Figure~\ref{fig:abstract-theories}.
+The syntax defines an attribute-value-based format.
+In addition to the symbols and syntactic categories defined previously,
+the production rules in the figure assume as given 
+the following sets of symbols:
+\begin{itemize}
+\item
+the set $\mathcal{N}$ of all \define{numerals};
+\item
+an infinite set $\mathcal{W}$ of \define{character strings},
+meant to contain free text;
+\item
+an infinite set $\mathcal{T}$ of \define{theory names},
+used to give a name to each basic theory;
+\item
+an infinite set $\mathcal{U}$ of \define{sort parameters},
+used in schematic function symbol declarations.
+\end{itemize}
+
+The terminals 
+$\aattr{funs}$, 
+$\aattr{axioms}$, 
+$\aattr{notes}$, 
+$\aattr{sorts}$,
+and
+$\aattr{definition}$
+are reserved attribute names from $\mathcal{A}$. 
+The sets of values for the attribute they name are as specified in the rules.
+In addition to the predefined attributes,
+a theory declaration $D_T$ can contain an unspecified number of 
+user-defined attributes, and their values---formalized in the grammar 
+simply as annotations $\alpha$.
+Note that
+in the abstract syntax of a theory declaration,
+attribute-value pairs can appear in any order.
+However, they are subject to the restrictions below.
+
+\begin{definition}[Theory Declarations]
+\label{def:theory}
+The only legal theory declarations in the SMT-LIB format are those 
+that satisfy the following restrictions.
+\begin{enumerate}
+\item
+They contain at least one instance of the $\aattr{sorts}$ attribute and 
+exactly one instance of the $\aattr{definition}$ attribute\footnote{
+Which makes both attributes non-optional.
+}.
+
+\item
+Each sort symbol used in a $\aattr{funs}$ attribute is declared 
+in some $\aattr{sorts}$ attribute.
+
+\item
+The definition of the theory, however provided in the $\aattr{definition}$ attribute,
+refers only to sort and function symbols formally declared
+in $\aattr{sorts}$ and $\aattr{funs}$ attributes or 
+mentioned in $\aattr{sorts-description}$ and $\aattr{funds-description}$ attributes.
+
+\item
+The formulas in the $\aattr{axioms}$ attributes, if any,
+are built over the symbol declared in the $\aattr{sort}$ and $\aattr{funs}$
+attributes.
+
+\item
+In parametric function symbol declarations $\Pi\, u^+\: f\: \tau^+\: \alpha^*$,
+all sort parameters occurring in $\tau^+$ are listed in $u^+$. 
+\end{enumerate}
+\end{definition}
+
+
+Some attributes, such as $\aattr{definition}$ for instance,
+are \define{informal attributes} in the sense that 
+their value ($w$) is free text.
+When possible,
+the signature of a theory is defined by 
+the collection of all the $\aattr{sorts}$ and $\aattr{funs}$ 
+in the theory declaration.
+This is the case for theories with a finite signature.
+However, some SMT-LIB theories have an infinite number of sort 
+or function symbols.
+In that case, 
+those symbols are defined informally, in plain text,
+in $\aattr{sorts-description}$ and $\aattr{funds-description}$ attributes.
+
+The value of a $\aattr{sorts}$ attribute is a non-empty sequence
+of sort symbol declarations $\mathit{sdec}$.
+A declaration $\mathit{sdec}$ declares 
+a sort symbol $s$ to have some arity $n$ and 
+contains zero or more annotations $\alpha$.
+In this version, there are no predefined annotations for sort declarations.
+
+The value of a $\aattr{funs}$ attribute is a non-empty sequence
+of possibly parametric function symbol declarations $\mathit{pdec}$.
+A non-parametric function symbol declaration $\mathit{fdec}$ 
+declares a function symbol $f$ to have a rank $\sigma^+$,
+and contains zero or more annotations.
+A parametric function symbol declaration $\Pi\, u^+\: (f\: \tau^+\: \alpha^*)$,
+on the other hand,
+declares a class of function symbols, 
+all named $f$ and each with a rank obtained from $\tau^+$ 
+by instantiating the parameters of $\tau^+$ with (non-parametric) sorts
+in the theory.
+For every $n > 0$ and $u_1, \ldots, u_n \in \mathit{U}$
+the prefix construct $(\Pi\:u_1\:\cdots\:u_n\ \_)$ is 
+a \define{universal sort binder (or quantifier)}\index{binder!sort binder}
+for $u_1, \ldots, u_n$.
+
+There are three predefined annotations for function symbol declarations.
+All of them, however, concern the concrete syntax,
+so they are discussed in Chapter~\ref{chap:concrete-syntax}.
+
+The $\aattr{funs}$ attributes is optional in theory declaration
+because a theory might lack function symbols---although 
+such a theory would not be not very interesting.
+The $\aattr{sorts}$ attribute, however, is not optional
+because sorted frameworks require the existence of at least one sort.\note{at-least-one-sort}
+
+The non-optional $\aattr{definition}$ attribute is meant to contain
+a natural language definition of the theory.
+While this definition is expected to be as rigorous as possible,
+it does not have to be a formal one.
+Some theories (such as the theory of integer numbers) are well known,
+hence just a reference to their common name might be enough.
+For theories that have a small set of axioms (or axiom schemas),
+it might be convenient to list the actual axioms in that attribute.
+For other theories, 
+a mix of formal notation and informal explanation might be more appropriate.
+  
+Formal first-order axioms 
+that define a theory, or part of it, can be additionally
+provided in the optional $\aattr{axioms}$ attribute 
+as a list of \emph{closed formulas},
+that is, well-sorted terms of sort \ter{Bool} all of whose variables are bound.
+
+
+The optional attribute $\aattr{notes}$ is meant 
+to contain documentation information on the theory declaration 
+such as authors, date, version, references, etc.,
+although this information can also be provided 
+with more specific user-defined attributes.
+
+
+%-------------------------------------------------------------------------------
+\subsection*{The Core theory}
+%-------------------------------------------------------------------------------
+
+%\begin{figure}[t]
+%\[
+%\begin{array}{l}
+%\akey{theory}\ \akey{Core} \\
+%\ 
+%\begin{array}{ll}
+%\aattr{sorts}&  \bool\ 0 \\
+%\akey{funs} & \top\ \bool \quad
+%              \bot\ \bool \quad
+%              \lnot\ \bool\ \bool \\
+%            & \land\ \bool\ \bool\ \bool \quad
+%              \lor\ \bool\ \bool\ \bool \\
+%            & \lxor\ \bool\ \bool\ \bool \quad
+%              \limplies\ \bool\ \bool\ \bool \\
+%            & \Pi\ u\ (\akey{ite}\ \bool\ u\ u) \\
+%\akey{definition} 
+%& \text{$\bool$ is the two-element domain of Boolean values.} \\
+%& \text{For any sort $\sigma$, $(\akey{ite}\ \bool\ \sigma\ \sigma)$ is the function that returns}\\
+%& \text{its second argument or its third depending on whether}\\
+%& \text{the first argument evaluates to true or not.} \\
+%& \text{The other function symbols are defined as usual} \\
+%& \text{(with $\lxor$ being exclusive or).}
+%\end{array}
+%\end{array}
+%\]
+%\caption{The $\akey{Core}$ theory}
+%\label{fig:core-theory}
+%\end{figure}
+
+
+To provide the usual set of Boolean connectives for building formula,
+this version defines a basic core theory 
+which is implicitly included in every other SMT-LIB theory.
+More precisely, every theory declaration is implicitly assumed to contain
+the $\aattr{sorts}$ and $\aattr{funs}$ attributes of the $\akey{Core}$ theory
+defined in Figure~\ref{fig:core-theory},
+and to define those symbols in the same way as in $\akey{Core}$.
+
+Note that $\akey{Core}$ does not define a symbol for double implication.
+Such a connective is superfluous because now the equality symbol $\eqs$ 
+can be used in its place. 
+Similarly, 
+the if-then-else connective of Version 1.2 is also absent
+because $\akey{ite}$ can now be used with formulas as well.
+
+%NOTE: The theory Empty currently in SMT-LIB is superseded by the theory declaration schema above.
+
+
+
+%-------------------------------------------------------------------------------
+\section{Sublogics} \label{sec:sublogics}  % referenced in commands.tex
+%-------------------------------------------------------------------------------
+
+\begin{figure}
+\logics
+\caption{Abstract syntax for logics}
+\label{fig:abstract-logics}
+\end{figure}
+
+% as remove for now:
+% \trem{Revise section}
+
+%The SMT-LIB format allows the explicit definition of sublogics of 
+%its main logic---many-sorted first-order logic with equality---that 
+%restrict both the main logic's syntax and semantics.
+%A new (sub)logic is defined in the SMT-LIB language by 
+%a \emph{logic declaration}
+%whose abstract syntax is provided in Figure~\ref{fig:abstract-logics}.
+
+%In addition to the already defined symbols and syntactical categories,
+%the production rules in Figure~\ref{fig:abstract-theories} assume as given 
+%an infinite set $\mathcal{L}$ of \emph{logic names},
+%used to give a name to each logic.
+%In the rules,
+%the letter $L$ denotes logic names.
+
+%The symbols 
+%$\aattr{theory}$, 
+%$\aattr{language}$, 
+%$\aattr{extensions}$, 
+%and
+%$\aattr{notes}$
+%are reserved attribute symbols from $\mathcal{A}$. 
+%Their sets of values are as specified in the rules.
+%As for theories, 
+%a logic declaration $D_L$ can contain an unspecified number of 
+%user defined attributes, and their values---formalized in the grammar 
+%simply as annotations $\alpha$.
+
+%
+%\begin{definition}[Logic Declarations]
+%The only legal logic declarations in the SMT-LIB format are those 
+%that satisfy the following restrictions:
+
+%\begin{enumerate}
+
+%\item
+%They include a declaration of the attributes 
+%$\aattr{theory}$ and $\aattr{language}$.
+
+%\item 
+%They contain at most one declaration per attribute.
+
+%\item
+%The value of the attribute $\aattr{theory}$ coincides with 
+%the name of a theory $T$ for some theory declaration $D_T$ in SMT-LIB;
+%\end{enumerate}
+%\end{definition}
+
+%The text attribute $\aattr{notes}$ serves the same purpose as in theory declarations. 
+
+%The attribute $\aattr{theory}$ refers to a theory $T$ in SMT-LIB.
+%As we will see,
+%the effect of this attribute is to declare that the logic's
+%sort, function and predicate symbols
+%are restricted to those in the signature of $T$,
+%and that
+%the logic's semantics is restricted to the models of $T$.
+
+%The attribute $\aattr{language}$ describes in free text
+%the logic's \emph{language},
+%that is,
+%the specific subset of SMT-LIB formulas that are allowed in the logic.
+%As explained in Section~\ref{sec:logics},
+%this information is useful for tailoring solvers to the specific
+%sublanguage of formulas used in a set of benchmarks.
+%\extra{
+%The attribute is text valued because it has mostly documentation purposes
+%for the benefit of benchmark users.
+%A natural language description of the logic's language seems therefore
+%adequate for this purpose.
+%However, we expect that the language will be at 
+%least partially specified in some formal fashion in this attribute,
+%for instance by using BNF rules.
+%}
+
+%It is understood that the formulas in the logic's language 
+%are built over the signature $\Sigma$ of the associated theory
+%unless this signature is explicitly expanded in the text of attribute $\aattr{language}$ with new\footnote{
+%That is, \emph{uninterpreted}, or \emph{free}, in logic parlance.
+%}
+%symbols.
+%In that case,
+%\emph{the text must explicitly indicate which 
+%new sort, function or predicate symbols
+%are included in the expansion}.
+%\extra{
+%See later for why it is convenient to expand the language with 
+%free symbols.
+%}
+%In effect then, an SMT-LIB logic's language is really parametric
+%in such a signature expansion.
+
+%
+%The optional attribute $\aattr{extensions}$ is meant 
+%to document any notational conventions, or syntactic sugar, allowed in
+%formulas of this logic---and hence in benchmarks for the logic.
+%\extra{
+%This is useful because in common practice the syntax of 
+%a logic is often extended for convenience with syntactic sugar.
+%}
+
+%One example of a logic declaration that uses the attributes
+%$\aattr{theory}$, $\aattr{language}$ and $\aattr{extensions}$
+%is what we could call \emph{linear Presburger arithmetic}.
+%In this logic,
+%the theory $T$ is the theory of natural numbers 
+%with signature $\{0, s, +, <\}$ ($s$ for the successor function)
+% as axiomatized by Presburger~\cite{pres}.
+%The language is the set of Boolean combinations of atomic formulas over
+%this signature expanded with an infinite number of free constants.
+%Examples of syntactic conventions 
+%defined in the $\aattr{extension}$ attribute could be 
+%the use of a numeral $n$ for the $n$-fold application of $s$ to $0$,
+%and the use of  the expression $n*t$ for the term 
+%$\underbrace{t + \cdots + t}_{n \text{ times}}$.
+
+%Note that 
+%function or predicate symbols introduced as syntactic sugar are not formally
+%defined in the $\aattr{funs}$ or $\aattr{pred}$ symbols, or anywhere else.
+%In a sense, syntactic sugar does not officially exist, 
+%even if it is allowed in benchmarks for convenience.
+%\extra{
+%This deficiency of the SMT-LIB language,
+%which is meant to be resolved in future versions,
+%is mostly due to the impossibility of 
+%(formally) defining an infinite signature at the moment.
+%That is why, for instance,
+%in the example above numerals are introduced as syntactic sugar
+%for ground terms over $\{s, 0\}$.
+%}
+
+

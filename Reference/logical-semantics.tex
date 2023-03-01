@@ -1,0 +1,1408 @@
+% underlying-logic.tex
+
+%!TEX root = main.tex
+
+
+
+%===============================================================================
+\chapter{Logical Semantics of SMT-LIB Formulas} \label{chap:logical-semantics}
+%===============================================================================
+\thispagestyle{empty}
+
+The underlying logic of the SMT-LIB language is a variant of many-sorted 
+first-order logic (FOL) with equality~\cite{Man-MSL-93,Gal-86,Hen-01},
+although it incorporates some syntactic features of higher-order logics:
+in particular, the identification of formulas with terms 
+of a distinguished Boolean sort, and the use of sort symbols of arity 
+greater than 0.
+
+
+These features make for a more flexible and syntactically more uniform 
+logical language.
+However, while not exactly syntactic sugar, they do not change the essence 
+of SMT-LIB logic with respect to traditional many-sorted FOL.
+Quantifiers are still first-order, the sort structure is flat (no subsorts),
+the logic's type system has no function (\emph{arrow}) types,
+no type quantifiers, no dependent types,
+no provisions for parametric or subsort polymorphism.
+The only polymorphism is of the \emph{ad-hoc} variety (a function symbol 
+can be given more than one rank), although there is a syntactical mechanism 
+for approximating parametric polymorphism.
+As a consequence, all the classical meta-theoretic results from many-sorted 
+FOL apply to SMT-LIB logic when considered in its full generality, that is,
+with no restrictions on the possible models other than those imposed 
+by the \akey{Core} background theory introduced 
+in Subection~\ref{sec:theory-examples}.
+Those results still hold with \define{recursively axiomatizable} 
+background theories, i.e., theories defined as the set of all models
+of a recursive set of closed formulas (or \define{axioms}).
+As pointed out in Section~\ref{sec:theory-examples} the ability 
+to use non-recursively axiomatizable theories as background theories
+actually gives SMT-LIB logic the expressive power of higher-order logics.
+However, a formal treatment of this aspect is beyond the scope of this document.
+\medskip
+
+To define SMT-LIB logic and its semantics it is convenient to work 
+with a more abstract syntax than the concrete S-expression-based syntax 
+of the SMT-LIB language.
+The formal semantics of concrete SMT-LIB expressions is then given by means of 
+a translation into this abstract syntax.
+A formal definition of this translation might be provided in later releases 
+of this document.
+Until then, we will appeal to the reader's intuition and on the fact that 
+the translation is defined as one would expect.
+
+The translation also maps concrete predefined symbols and keywords
+to their abstract counterpart.
+To facilitate reading, usually the abstract version of 
+a predefined concrete symbol is denoted by the symbol's name 
+in Roman bold font (e.g., \akey{Bool} for \ter{Bool}).
+The same is done for keywords (e.g., \akey{definition} for \attr{definition}).
+
+To define our target abstract syntax we start by fixing the following pairwise disjoint
+sets of (abstract) symbols and values:
+\begin{itemize}
+\item
+an infinite set $\so$ of \define{sort symbols} $s$ 
+containing the symbol $\bool$,
+
+\item
+an infinite set $\sop$ of \define{sort parameters} $u$,
+
+\item
+an infinite set $\va$ of \define{variables}\index{variable} $x$,
+
+\item
+an infinite set $\fu$ of \define{function symbols}\index{symbol!function symbol} $f$
+containing the symbols $\eqs$, $\land$, and $\lnot$,
+
+\item
+an infinite set $\mathcal{A}$ of \define{attribute names}\index{attribute name} $a$, 
+
+\item
+an infinite set $\val$ of \define{attribute values}\index{attribute values} $v$,
+
+\item
+the set $\st$ of \define{Unicode character strings} $w$,
+
+\item
+a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$,
+
+\item
+the set $\na$ of \define{natural numbers} $n$,
+
+\item
+an infinite set $\te$ of \define{theory names} $T$,
+
+\item
+an infinite set $\lo$ of \define{logic names} $L$.
+
+
+\end{itemize}
+
+
+%-------------------------------------------------------------------------------
+\section{The language of sorts}
+%-------------------------------------------------------------------------------
+
+\begin{figure}[t]
+\sortterms
+\caption{Abstract syntax for sort terms}
+\label{fig:abstract-sorts}
+\end{figure}
+
+
+In many-sorted logics, terms are typed, or \define{sorted}. 
+Each sort, which stands for a non-empty set of elements, is denoted 
+by a sort symbol.
+In SMT-LIB logic, the language of sorts is extended from sort symbols 
+to \emph{sort terms} built with symbols from the set $\so$ above.
+Formally, we have the following.
+
+\begin{definition}[Sorts]
+For all non-empty subsets $S$ of $\so$ and 
+all mappings $\ar:S \to \mathbb{N}$,
+the set $\sortt S$ of all \define{sorts}\index{sort} over $S$ 
+(with respect to $\ar$)
+is defined inductively as follows:
+\begin{enumerate}
+\item
+every $s \in S$ with $\ar(s) = 0$ is a sort;
+\item
+If $s \in S$ and $\ar(s) = n > 0$ and
+$\sigma_1, \ldots, \sigma_n$ are sorts,
+then the term
+$s\,\sigma_1\,\cdots\,\sigma_n\:$ is a sort.
+\end{enumerate}
+We say that $s \in S$ has (or is of) \define{arity} $n$ 
+if $\ar(s) = n$.
+\qed
+\end{definition}
+
+
+As an example of a sort,
+if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0,
+and $\akey{List}$ and $\akey{Array}$ are sort symbols of respective arity 1 and 2,
+then the expression
+$\akey{List}\ (\akey{Array}\ \akey{Int}\ (\akey{List}\ \akey{Real}))$ 
+and all of its subexpressions are sorts.
+
+Function symbol declarations in theory declarations (defined later)
+use also \define{parametric sorts}.
+These are defined similarly to sorts above except that
+they can be built also over 
+a further set $\mathcal{U}$ of \define{sort parameters},
+used like sort symbols of arity 0.
+Similarly to the example above,
+if $u_1, u_2$ are elements of $\mathcal{U}$,
+the expression $\akey{List}\ (\akey{Array}\ u_1\ (\akey{List}\ u_2))$ 
+and all of its subexpressions are parametric sorts.
+
+An abstract syntax for sorts $\sigma$ and parametric sorts $\tau$,
+which ignores arity constraints for simplicity, 
+is provided in Figure~\ref{fig:abstract-sorts}.
+Note that every sort is a parametric sort, but not vice versa.
+Also note that parametric sorts are used only in theory declarations;
+they are not part of the SMT-LIB logic proper.
+In the following, we say ``sort'' to refer exclusively to non-parametric sorts.
+
+%
+%\trem{More}
+
+%\subsection{Concrete to abstract syntax mapping}
+
+
+%-------------------------------------------------------------------------------
+\section{The language of terms} \label{sec:language}
+%-------------------------------------------------------------------------------
+
+\begin{figure}
+\terms
+\caption{Abstract syntax for unsorted terms}
+\label{fig:abstract-terms}
+\end{figure}
+
+%\emph{Terms} are the main syntactical category of the SMT-LIB logic language.
+In the abstract syntax,
+terms are built out of variables from $\va$, 
+function symbols from $\fu$, 
+%a distinguished binary symbol ($\eqs$) for equality,\index{symbol!equality symbol}
+and a set of \emph{binders}.
+%
+The logic considers, in fact, only \emph{well-sorted terms},
+a subset of all possible terms determined 
+by a \emph{sorted signature}, as described below.
+
+The set of all terms is defined by the abstract syntax rules of 
+Figure~\ref{fig:abstract-terms}.
+The rules do not distinguish between constant and function symbols
+(they are all members of the set $\fu$). 
+These distinctions are really a matter of arity, 
+which is taken care of later by the well-sortedness rules.
+
+\subsubsection{Binders}
+
+For all $n \geq 0$,
+distinct variables $x_1, \ldots, x_n \in \va$, and 
+sorts $\sigma_1, \ldots, \sigma_n$,
+
+\begin{itemize}
+\item
+the prefix construct
+\ $\exists\,x_1{:}\sigma_1\:\cdots\:x_n{:}\sigma_n\ \_$ \ is 
+a \define{sorted existential binder (or existential quantifier)}\index{binder!existential binder}
+for $x_1, \ldots, x_n$;
+
+\item
+the prefix construct
+\ $\forall\,x_1{:}\sigma_1\:\cdots\:x_n{:}\sigma_n\ \_$ \ is 
+a \define{sorted universal binder (or universal quantifier)}\index{binder!universal binder}
+for $x_1, \ldots, x_n$;
+
+\item
+the mixfix construct
+\ $\akey{let}\,x_1 = \_\:\cdots\:x_n = \_\ \akey{in}\ \_$ \ is 
+a \define{(parallel-)let binder}\index{binder!let binder}
+for $x_1, \ldots, x_n$.
+
+\item
+the mixfix construct 
+\ $\akey{match}\,\_\,\akey{with}\,p_1 \to \_\:\cdots\:p_n \to \_$ \ is 
+a \define{match binder} for the variables that occur in the pattern $p_i$ for each $i=1,\ldots,n$.
+\end{itemize}
+
+Occurrences of variables in terms are defined to be \define{free}\index{free} or
+\define{bound}\index{bound} as in the case of the concrete syntax;
+the scope of each bound variable is defined similarly as well
+(see Subsection~\ref{sec:free}).
+Terms are \define{closed}\index{closed term} 
+if they contain no free variables, and \define{open}\index{open term} otherwise.
+Terms are \define{ground}\index{ground term} if they are variable-free.
+% as removed for now:
+%\trem{Add formal definition of bound variables and \define{closed} term}
+
+For simplicity,
+the defined language does not contain any logical symbols
+other than the binders.
+Logical connectives for negation, conjunction and so on 
+and the equality symbol, which we denote here by $\eqs$,
+are just function symbols of the basic theory \akey{Core},
+implicitly included in all SMT-LIB theories
+(see Subsection~\ref{sec:theory-examples}). 
+
+\subsubsection{Annotations}
+
+Terms can be optionally annotated with zero or more \define{attributes}\index{attribute}.
+Attributes have no logical meaning, 
+but they are a convenient mechanism for adding meta-logical information,
+as illustrated in Section~\ref{sec:concrete-terms}. 
+Syntactically, 
+an attribute is either an attribute name $a \in \at$ or 
+a pair the form $a = v$ where 
+$a \in \at$ and 
+$v$ is an attribute value in $\val$.\footnote{%
+At this abstract level,
+the syntax of attribute values is intentionally left unspecified.
+}
+
+Function symbols themselves may be annotated with a sort, as in $f^\sigma$.
+Sort annotations simplify the sorting rules of the logic,
+which determine the set of well-sorted terms.
+
+
+\subsection{Signatures} \label{sec:signature}
+
+Well-sorted terms in SMT-LIB logic are terms that can be associated
+with a unique sort by means of a set of \emph{sorting rules}
+similar to typing rules in programming languages.
+The rules are based on the following definition of 
+a (many-sorted) signature.
+
+\begin{definition}[SMT-LIB Signature]
+\label{def:signature}
+An \define{SMT-LIB signature}, or simply a \define{signature},
+is a tuple $\Sigma$ consisting of:
+
+\begin{itemize}
+\item
+a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$;
+
+\item
+a set $\funs{\Sigma} \subseteq \fu$ of \define{function} symbols;
+%%CT eliminated because unnecessary
+%% these symbols are declared in the theory Core
+% containing $\eqs$, $\land$, and $\lnot$;
+
+\item
+a distinguished finite set $\cons{\Sigma} \subseteq \funs{\Sigma}$ 
+of \define{constructor} symbols;
+
+\item
+a distinguished finite set $\sels{\Sigma} \subseteq \funs{\Sigma}$ 
+of \define{selector} symbols,
+disjoint with $\cons{\Sigma}$;
+
+\item
+a distinguished finite set $\tests{\Sigma} \subseteq \funs{\Sigma}$ 
+of \define{tester} symbols,
+disjoint with $\cons{\Sigma}$ and $\sels{\Sigma}$, and with the same cardinality
+as $\cons{\Sigma}$;
+
+\item
+a total mapping $\mathrm{con}_\Sigma:\sorts{\Sigma} \to 2^{\cons \Sigma}$,
+assigning a (possibly empty) set of constructors to each sort symbol;
+
+\item
+a total mapping $\ar:\sorts{\Sigma} \to \mathbb{N}$,
+assigning an arity to each sort symbol,
+with $\ar(\bool) = 0$;
+
+\item
+a total mapping $\mathrm{sel}_\Sigma:\cons{\Sigma} \to (\sels \Sigma)^*$,
+assigning a sequence of $n$ distinct selectors to each constructor of arity $n$
+so that no selector is assigned to more than one constructor;
+
+\item
+a bijective mapping $\mathrm{tes}_\Sigma:\cons{\Sigma} \to \tests{\Sigma}$,
+assigning a tester to each constructor;
+
+\item
+a partial mapping from $\va$ to $\sortt{\sorts\Sigma}$,
+assigning a sort to some of the variables in $\va$;%
+%so that there are infinitely many variables of sort $\sigma$ 
+%for each $\sigma \in \sortt{\sorts\Sigma}$;
+\footnote{%
+Note that $\sortt{\sorts \Sigma}$, the set of all sorts over $\sorts\Sigma$, is 
+non-empty because at least one sort in $\sorts{\Sigma}$, $\bool$, has arity 0.
+}
+
+\item
+a left-total \define{ranking} relation\footnote{%
+A binary relation $R \subseteq X \times Y$ is \define{left-total}
+if for each $x \in X$ there is (at least) a $y \in Y$ such that $xRy$.
+}
+$R$ from $\funs{\Sigma}$ to $\sortt{\sorts \Sigma}^+$,
+assigning at least one \define{rank} to each function symbol and
+such that
+\begin{enumerate}
+%%CT eliminated because unnecessary
+%\item
+%$({\lnot},\, \bool\,\bool),\; ({\land},\, \bool\,\bool\,\bool) \in R$;
+%
+%\item
+%$(\eqs,\, \sigma\sigma\,\bool) \in R$ for all $\sigma \in \sortt{\sorts \Sigma}$;
+
+\item
+for all constructors $c \in \cons{\Sigma}$, 
+selectors $g_1 \cdots g_n = \mathrm{sel}_\Sigma(c)$, and
+sorts $\sigma_1,\ldots,\sigma_n,\sigma \in \sortt{\sorts \Sigma}$,
+if $(c, \sigma_1\cdots\sigma_n\sigma) \in R$
+then $(g_i,\sigma\sigma_i) \in R$ for all $i=1,\ldots,n$;
+
+\item
+for all constructors $c \in \cons{\Sigma}$ and 
+testers $p = \mathrm{tes}_\Sigma(c)$,
+if $(c, \sigma_1\cdots\sigma_n\sigma) \in R$
+then $(p,\sigma\bool) \in R$;
+
+\item
+there is no constructor $c \in \cons{\Sigma}$ such that
+$(c, \bar{\sigma}_1\sigma), (c, \bar{\sigma}_2\sigma) \in R$ 
+for distinct $\bar{\sigma}_1$ and $\bar{\sigma}_2$.\endnote{
+Because of this constraint, the return sort of a constructor uniquely determines 
+the sort of its arguments.
+That removes the need to specify the sort of the pattern variables
+in a \akey{match} expression.
+}
+\end{enumerate}
+\end{itemize}
+
+A sort in $\Sigma$ is an \define{algebraic data type}
+if it is assigned a non-empty set of constructors.
+%\ctrem{notes on constructors, selectors and testers}
+\qed
+\end{definition}
+
+\begin{remark}
+The restrictions imposed on theory declarations and on the various commands
+for declaring new symbols in SMT-LIB scripts make sure that 
+the signature defined by an SMT-LIB script is in fact a signature 
+in the sense of Definition~\ref{def:signature}.
+\end{remark}
+
+
+In the following, we will write $\sortt{\Sigma}$ as an abbreviation 
+of $\sortt{\sorts \Sigma}$.
+We will work with \emph{ranked} function symbols and \emph{sorted} variables
+in a signature.
+Formally,
+given a signature $\Sigma$,
+a \define{ranked function symbol} is 
+a pair $(f, \sigma_1\cdots\sigma_n\sigma)$ in $\fu \times \sortt{\Sigma}^+$,
+which we write as $f{:}\sigma_1\cdots\sigma_n\sigma$.
+A \define{sorted variable} is 
+a pair $(x,\sigma)$ in $\va \times \sortt{\Sigma}$,
+which we write as $x{:}\sigma$.
+We write 
+$f{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ and
+$x{:}\sigma \in \Sigma$
+to denote that $f$ has rank $\sigma_1\cdots\sigma_n\sigma$ in $\Sigma$ and 
+$x$ has sort $\sigma$ in $\Sigma$.
+
+We also consider signatures that differ from a given signature $\Sigma$
+only the sort they assign to variables.
+We will also consider signatures that conservatively expand a given signature $\Sigma$
+with additional sort and function symbols or additional ranks 
+for $\Sigma$'s function symbols.
+
+\begin{definition}[Signature variants and expansions] 
+A signature $\Sigma'$ is a \define{variant} of a signature $\Sigma$ 
+if it is identical to $\Sigma$ possibly except for its mapping 
+from variables to sorts.
+
+A signature $\Omega$ is a \define{expansion} of a signature $\Sigma$
+if all of the following hold:
+$\sorts{\Sigma} \subseteq \sorts{\Omega}$;
+$\funs{\Sigma} \subseteq \funs{\Omega}$;
+the sort symbols of $\Sigma$ have the same arity in $\Sigma$ and in $\Omega$;
+every sort of $\Sigma$ has the same constructors in $\Omega$ that it has in $\Sigma$;
+every constructor of $\Sigma$ has the same selectors and testers in $\Omega$ 
+that it has in $\Sigma$;
+for all $x \in \va$ and $\sigma \in \sortt{\Sigma}$,
+$x{:}\sigma \in \Sigma$ iff $x{:}\sigma \in \Omega$;
+for all $f \in \fu$ and $\bar{\sigma} \in \sortt{\Sigma}^+$,
+if $f{:}\bar{\sigma} \in \Sigma$ then $f{:}\bar{\sigma} \in \Omega$.
+In that case, $\Sigma$ is a \define{subsignature} of $\Omega$.
+\qed
+\end{definition}
+
+
+\subsubsection{Overloading}
+The rank of a function symbol in a signature specifies, in order,
+the expected sort of the symbol's arguments and result.
+Note that it is possible for a function symbol
+to be \define{overloaded}\index{overloaded function symbol} in a signature $\Sigma$
+by being associated to more than one rank in $\Sigma$.
+This form of \emph{ad-hoc polymorphism} is entirely unrestricted: 
+a function symbol can have completely different ranks---even varying in arity. 
+For example,
+in a signature with sorts $\akey{Int}$ and $\akey{Real}$ (with the expected meaning),
+it is possible for the minus symbol $-$ to have all of the following ranks:  
+$\akey{Real}\:\akey{Real}$ (for unary negation over the reals),
+$\akey{Int}\:\akey{Int}$ (for unary negation over the integers),
+$\akey{Real}\:\akey{Real}\:\akey{Real}$ (for binary subtraction over the reals),
+and
+$\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
+
+Together with the mechanisms used 
+to declare theories (described in Section~\ref{sec:theories})
+and algebraic datatypes (described in Section~\ref{sec:new-symbols}),
+overloading also provides an approximate form of \emph{parametric polymorphism}
+by allowing one to declare function symbols with ranks
+all having the \emph{same shape}.
+For instance,
+it is possible to declare an array access symbol with rank
+$(\akey{Array}\:\sigma_1\:\sigma_2)\:\sigma_1\:\sigma_2$ 
+for all sorts $\sigma_1, \sigma_2$ in a theory signature. 
+%
+Strictly speaking, this is still ad-hoc polymorphism
+because SMT-LIB logic itself does not allow parametric sorts.\footnote{%
+Parametric sort terms that occur in theory declarations 
+and algebraic datatype declarations
+are meta-level syntax as far as SMT-LIB logic is concerned.
+They are \emph{schemas} standing for concrete sorts.
+}
+However, it provides most of the convenience of parametric polymorphism 
+while remaining within the confines of the standard semantics
+of many-sorted FOL.
+%\endnote{
+%\label{parametric-polymorphism}
+%\trem{Comment on why we do not have have real parametric polymorphism in SMT-LIB logic.}
+%}
+
+A function symbol can be \define{ambiguous}\index{ambiguous symbol}
+in an SMT-LIB signature for having distinct ranks of the form
+$\bar{\sigma}\sigma_1$ and $\bar{\sigma}\sigma_2$ 
+where $\bar{\sigma}$ is a sequence of sorts and 
+$\sigma_1$ and $\sigma_2$ are different sorts.
+Thanks to the requirement in Definition~\ref{def:signature} that
+variables have exactly one sort in a signature,
+in signatures with no ambiguous function symbols
+every term can have at most one sort.
+In contrast,
+with an ambiguous symbol $f$ whose different ranks are
+$\bar{\sigma}\sigma_1, \ldots, \bar{\sigma}\sigma_n$,
+a term of the form $f\, \bar{t}$,
+where the terms $\bar t$ have sorts $\bar \sigma$, can be given 
+a unique sort only if $f$ is annotated with one of the result sorts
+$\sigma_1, \ldots, \sigma_n$,
+that is, only if it is written as $f^{\sigma_i}\bar{t}$ 
+for some $i \in \{i,\ldots, n\}$.
+
+
+\subsection{Well-sorted terms}
+
+\begin{figure}
+ \termrules
+\caption{Well-sortedness rules for terms.}
+\label{fig:well-sorted-terms}
+\end{figure}
+
+Figure~\ref{fig:well-sorted-terms} provides a set of rules defining 
+well-sorted terms with respect to an SMT-LIB signature $\Sigma$.
+Strictly speaking then, and similarly to more conventional logics,
+the SMT-LIB logic language is a family of languages parametrized 
+by the signature $\Sigma$.
+As explained later, 
+for each script working in the context of a background theory $\T$,
+the specific signature is jointly defined by the declaration of $\T$ plus
+any additional sort and function symbol declarations contained in the script.
+
+The format and meaning of the sorting rules in Figure~\ref{fig:well-sorted-terms} 
+is fairly standard and should be largely self-explanatory 
+to readers familiar with type systems.
+In more detail, the letter $\sigma$ (possibly primed or with subscripts) 
+denotes sorts in $\sortt \Sigma$,
+the letter $k$ denotes a natural number.
+%
+%the notation $x : \sigma \in \Sigma$ means that 
+%$\Sigma$ maps variable $x$ to sort $\sigma$.
+%The notation $f:\sigma_1 \cdots \sigma_{k+1} \in \Sigma$ means that 
+%$f$ is an element of $\funs{\Sigma} \cup \{\eqs\}$ 
+%and 
+%has rank $\sigma_1 \cdots \sigma_{k+1}$ in $\Sigma$. 
+Expressions of the form $\Sigma[x_1:\sigma_1,\: \ldots,\: x_n:\sigma_n]$ 
+denotes the signature 
+that maps $x_i$ to sort $\sigma_i$ for $i=1,\ldots,n$, and 
+coincides otherwise with $\Sigma$.
+Finally, $\alpha^*$ denotes a possibly empty sequence of attributes.
+The rules operate over \define{sorting judgments}
+which are triples of the form $\Sigma \vdash t : \sigma$.
+
+\begin{definition}[Well-sorted Terms]
+For every SMT-LIB signature $\Sigma$,
+a term $t$ generated by the grammar in Figure~\ref{fig:abstract-terms}
+is \define{well-sorted (with respect to $\Sigma$)}
+if $\Sigma \vdash t : \sigma$ is derivable 
+by the sorting rules in Figure~\ref{fig:well-sorted-terms}
+for some sort $\sigma \in \sortt{\Sigma}$.
+In that case, 
+we say that \define{$t$ has, or is of, sort $\sigma$}.
+\qed
+\end{definition}
+
+With this definition, it is possible to show that every term has at
+most one sort.\endnote{
+  It would have been reasonable to adopt an
+  alternative version of the rule for well-sortedness of terms
+  $(f^\sigma\; t_1\; \cdots\; t_k)\ \alpha^*$ with annotated function
+  symbols $f^\sigma$, without the second conjunct of the rule's side
+  condition.  This would allow formation of terms with annotated
+  function symbols $f^\sigma$, even when $f$ lacked two ranks of the
+  forms $\sigma_1 \cdots \sigma_k\sigma$ and $\sigma_1 \cdots
+  \sigma_k\sigma'$, for distinct $\sigma$ and $\sigma'$.  The
+  rationale for keeping this second conjunct is that with it, function
+  symbols are annotated when used iff they are overloaded in this way.
+  This means that it is clear from the use of the function symbol,
+  whether or not the annotation is required.  This in turn should help
+  to improve human comprehension of scripts written using overloaded
+  function symbols. 
+}
+
+\begin{remark}[Match rules]
+The two rules for the \akey{match} binder in Figure~\ref{fig:well-sorted-terms} 
+require that the match cases be \define{exhaustive}:
+every constructor term of sort $\delta$ must match one of the patterns;
+but allow it to be \define{redundant}:
+the same term may match more than one pattern.
+Exhaustiveness is necessary to make sure each \akey{match} expression is
+semantically well defined.
+The first rule deals with \akey{match} expressions where no patterns consist 
+of a variable.
+In that case, exhaustiveness is enforced by requiring that each constructor
+of the datatype appear in one of the patterns.
+The second rule deals with \akey{match} expressions where one or more patterns 
+consist of a variable.
+In that case, exhaustiveness is guaranteed simply by the presence 
+of those variables.
+In both cases, the preconditions ensure that $\delta$ is a datatype, 
+not just any sort, by requiring it to have a non-empty set of constructors.
+\end{remark}
+
+
+\begin{definition}[SMT-LIB formulas]
+For each signature $\Sigma$,
+the language of SMT-LIB logic is the set of all well-sorted terms
+wrt $\Sigma$.
+\define{Formulas} are well-sorted terms of sort $\bool$.
+\qed
+\end{definition}
+
+In the following, we will use $\varphi$ and $\psi$ to denote formulas.
+\medskip
+
+\begin{constraint}
+SMT-LIB scripts consider only closed formulas,
+or \define{sentences}\index{sentence}, closed terms of sort $\bool$.\endnote{
+\label{only-closed-formulas}
+This is mostly a technical restriction,
+motivated by considerations of convenience.
+In fact,
+with a closed formula $\varphi$ of signature $\Sigma$
+the signature's mapping of variables to sorts is irrelevant.
+The reason is that 
+the formula itself contains its own sort declaration for its term variables,
+either explicitly, for the variables bound by a quantifier, 
+or implicitly, for the variables bound by a $\akey{let}$ binder.
+Using only closed formulas then simplifies 
+the task of specifying their signature,
+as it becomes unnecessary to specify 
+how the signature maps the elements of $\va$ to the signature's sorts.
+}
+\qed
+\end{constraint}
+
+There is no loss of generality in the restriction above because,
+as far as satisfiability is concerned,
+every formula $\varphi$ with free variables 
+$x_1, \ldots, x_n$ of respective sort $\sigma_1, \ldots, \sigma_n$,
+can be rewritten as 
+\[
+ \exists\: x_1{:}\sigma_1 \ldots x_n{:}\sigma_n\: \varphi\ .
+\]
+An alternative way to avoid free variables in scripts is 
+to replace them by fresh constant symbols of the same sort.
+%defined within the script itself (see Section~\ref{sec:benchmarks}).
+This is again with no loss of generality because,
+for satisfiability modulo theories purposes,
+a formula's free variables can be treated equivalently as 
+\emph{free symbols} (see later for a definition).
+
+
+%-------------------------------------------------------------------------------
+\section{Structures and Satisfiability} \label{sec:models}
+%-------------------------------------------------------------------------------
+
+The semantics of SMT-LIB is essentially the same as that 
+of conventional many-sorted logic,
+relying on a similar notion of \emph{$\Sigma$-structure}.
+
+
+\begin{definition}[$\Sigma$-structure]
+%\label{def:structure}
+Let $\Sigma$ be a signature.
+A \define{$\Sigma$-structure} $\str A$ is a pair consisting of 
+a set $A$,  the \define{universe} of $\str A$, and 
+a mapping that interprets 
+
+\begin{itemize}
+\item
+each $\sigma \in \sortt{\Sigma}$ as a \emph{non-empty} subset $\sigma^{\str A}$ of $A$,
+which we call the \define{domain} of $\sigma$ in $\str A$,
+with $A = \bigcup_{\sigma \in \sorts\Sigma} \sigma^{\str A}$;\endnote{
+Distinct sorts can have non-disjoint domain in a structure.
+However, whether they do that or not is irrelevant in SMT-LIB logic.
+The reason is that 
+the logic has no sort predicates, such as a subsort predicate, and 
+does not allow one to equate terms of different sorts
+(the term $t_1 \eqs t_2$ is ill-sorted unless $t_1$ and $t_2$ have 
+the same sort).
+As a consequence, a formula is satisfiable in a structure 
+where two given sorts have non-disjoint domain 
+iff it is satisfiable in a structure 
+where the two sorts do have disjoint domains.
+}
+
+\item
+each (ranked function symbol) $f{:}\sigma \in \Sigma$ 
+as an element $(f{:}\sigma)^{\str A}$ of  $\sigma^{\str A}$;
+
+\item
+each $f{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n > 0$ 
+as a total function 
+$(f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}$ 
+from $\sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A}$ to $\sigma^{\str A}$.
+\end{itemize}
+
+If $\str B$ is an $\Omega$-structure with universe $B$ and 
+$\Sigma$ is a subsignature of $\Omega$,
+the \define{reduct} of $\str B$ to $\Sigma$ is the (unique) 
+$\Sigma$-structure with universe $B$
+that interprets its sort and function symbols exactly as $\str B$.
+A structure $\str B$ is an \define{expansion} of a $\Sigma$-structure $\str A$
+if $\str A$ is the $\Sigma$-reduct of $\str B$.
+\qed
+\end{definition}
+
+Note that, as a consequence of overloading,
+a $\Sigma$-structure does not interpret plain function symbols
+but ranked function symbols.
+Also note that 
+any $\Sigma$-structure is also a $\Sigma'$-structure 
+for every variant $\Sigma'$ of $\Sigma$.
+
+
+\begin{definition}[Absolutely free structure]
+Let $\str A$ be a $\Sigma$-structure with universe $A$ and 
+let $G \subseteq A$.
+Let $\Sigma_G$ be the expansion of $\Sigma$ obtained by adding to $\Sigma$
+a constant symbol $a$ of rank $\sigma$
+for every $a \in G$ and sort $\sigma \in \sorts\Sigma$ 
+such that $a \in \sigma^{\str A}$.
+Then, $\str A$ is an \define{absolutely free structure (with generators $G$)}
+if 
+\begin{itemize}
+\item
+for all $\sigma \in \sorts\Sigma$, $\sigma^{\str A}$ is the set 
+of well-sorted ground terms of signature $\Sigma_G$;
+
+\item
+$\str A$ interprets every function symbol 
+$f{:}\sigma_1 \cdots \sigma_n \sigma \in \Sigma_G$ as the function that maps each tuple 
+$(t_1,\ldots,t_n) \in \sigma_1^{\str A} \times \ldots \times \sigma_n^{\str A}$ 
+to the term $f(t_1,\ldots,t_n)$.
+\qed
+\end{itemize}
+\end{definition}
+
+Intuitively, an absolutely free $\Sigma$-structure with a set $G$ of generators
+interprets every well-sorted ground $\Sigma_G$-term as itself.
+Note that the choice of generators affects the property of being absolutely free.
+For instance, no structure without constant symbols can be absolutely free 
+with an empty set of generators.
+\medskip
+
+The SMT-LIB logic considers only structures that interpret in a special way 
+the sort \bool\ and any constructor, selector, and tester symbols in their signature.
+
+\begin{definition}[SMT-LIB $\Sigma$-structure]
+\label{def:structure}
+An SMT-LIB structure is a $\Sigma$-structure $\str A$ such that
+
+\begin{enumerate}
+\item $\bool^{\str A} = \bo = \{ \false, \true \}$ with \false\ and \true\ distinct;
+
+%CT unnecessary
+%\item
+%${\eqs}{:}\sigma\sigma\,\bool$ is interpreted as the identity predicate over $\sigma^{\str A}$ \footnote{%
+%That is,
+%for all $\sigma \in \sortt{\Sigma}$ and all $a,b \in \sigma^{\str A}$,\ 
+%${\eqs}^{\str A}(a,b) = \true$ iff $a$ is the same as $b$.
+%};
+
+%CT previous, incomplete restrictions on constructors
+%\item
+%for all (ranked) constructors $c{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n>0$,
+%$c^{\str A}$ is injective;
+%
+%\item
+%for all sorts $\sigma$ with a set $\{c_1, \ldots, c_n\}$ of $n>0$ constructors,
+%the ranges of $c_1^{\str A}, \ldots, c_n^{\str A}$ form a partition of $\sigma^{\str A}$;
+
+\item
+if $\Omega$ is the signature obtained from $\Sigma$ by removing 
+all of its non-constructor function symbols,
+the $\Omega$-reduct of $\str A$ is an absolutely free algebra with 
+generators $\bigcup_{ \sigma \in S} \sigma^{\str A}$
+where $S$ collects the sorts of $\Sigma$ that are not datatypes;
+
+\item
+for all constructors $c{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n>0$,
+selectors $g_1{:}\sigma\sigma_1, \ldots, g_n{:}\sigma\sigma_n$ 
+with $\mathrm{sel}_\Sigma(c) = g_1\cdots g_n$, 
+values $(v_1, \ldots, v_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A}$,
+and
+$i=1,\ldots,n$,
+\[
+ g_i^{\str A}(c^{\str A}(v_1, \ldots, v_n)) = v_i\ ;
+\]
+
+\item
+for all constructors $c{:}\bar{\sigma}\sigma \in \Sigma$,
+testers $q$ with $\mathrm{tes}_\Sigma(c) = q$, and 
+values $v \in \sigma^{\str A}$,
+\begin{center}
+ $q^{\str A}(v) = \true$ iff $v$ is in the range of $c^{\str A}$.
+\end{center}
+\end{enumerate}
+\end{definition}
+
+
+From now on, when we say ``structure'' we will mean ``SMT-LIB structure.''
+
+\begin{remark}
+The restrictions in SMT-LIB structures on the interpretation 
+of constructors, selectors and testers,
+together with the well-foundedness restrictions on those constructs in signatures,
+guarantee that sorts with constructors indeed denote algebraic datatypes
+as traditionally understood in the literature.
+\end{remark}
+
+\begin{remark}[Partiality of selectors]
+As in classical first-order logic, all function symbols in a signature $\Sigma$ 
+are interpreted as total functions in a $\Sigma$-structure $\str A$.  
+This means in particular that if $g{:}\sigma\sigma_i \in \Sigma$ is a selector,
+the function $g^{\str A}$ returns a value even for inputs
+outside the range of $g$'s constructor.
+Definition~\ref{def:structure} imposes no constraints on that value,
+other than it belongs to $\sigma_i^{\str A}$.
+For instance, in a structure $\str A$ with a sort for integer lists with constructors
+$\mathrm{nil}$ and $\mathrm{insert}$ and 
+selectors $\mathrm{head}$ and $\mathrm{tail}$ for $\mathrm{insert}$,
+the function $\mathrm{head}^{\str A}$ maps $\mathrm{nil}^{\str A}$ 
+to \emph{some} integer value.
+Similarly,
+$\mathrm{tail}^{\str A}$ maps $\mathrm{nil}^{\str A}$ to \emph{some} integer list.
+This is consistent with the general modeling of partial functions 
+in SMT-LIB as underspecified total functions---which requires a solver 
+to consider all possible (well-sorted) ways to make a partial function total.
+\end{remark}
+
+
+The notion of isomorphism between structures introduced below 
+is needed for Definition~\ref{def:theorycomb}, Theory Combination,
+in Section~\ref{sec:theories}.
+
+\begin{definition}[Isomorphism]
+Let $\str A$ and $\str B$ be two $\Sigma$-structures 
+with respective universes $A$ and $B$.
+A mapping $h:A \to B$ is a \define{homomorphism} from $\str A$ to $\str B$
+if
+\begin{enumerate}
+\item
+for all $\sigma \in \sortt{\Sigma}$ and $a \in \sigma^{\str A}$,
+\[
+ h(a) \in  \sigma^{\str B}\ ;
+\]
+\item
+for all $f{:}\sigma_1\ldots\sigma_n\sigma \in \Sigma$ with $n > 0$
+and 
+\(
+ (a_1, \ldots, a_n) \in 
+ \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A} ,
+\)
+\[
+ h((f{:}\sigma_1\ldots\sigma_n\sigma)^{\str A}(a_1, \ldots, a_n)) = 
+ (f{:}\sigma_1\ldots\sigma_n\sigma)^{\str B}(h(a_1), \ldots, h(a_n)) \ . 
+\]
+\end{enumerate}
+%
+A homomorphism between $\str A$ and $\str B$ is 
+an \define{isomorphism} of $\str A$ onto $\str B$
+if it is invertible and its inverse is a homomorphism from $\str B$ to $\str A$. 
+\qed
+\end{definition}
+
+Two $\Sigma$-structures $\str A$ and $\str B$ are \define{isomorphic}
+if there is an isomorphism from one onto the other.
+Isomorphic structures are interchangeable for satisfiability purposes
+because one satisfies a set of $\Sigma$-sentences if and only if the other one does.
+
+
+
+\subsection{The meaning of terms}
+
+A \define{valuation} into a $\Sigma$-structure $\str A$ is 
+a partial mapping $v$ from $\va \times \sortt{\Sigma}$ to the set 
+of all domain elements of $\str A$ such that,
+for all $x \in \va$ and $\sigma \in \sortt{\Sigma}$, 
+$v(x{:}\sigma) \in \sigma^{\str A}$.
+%
+We denote by $v[x_1{:}\sigma_1 \mapsto a_1,\;\ldots,\;x_n{:}\sigma_n \mapsto a_n]$
+the valuation that maps $x_i{:}\sigma_i$ to $a_i \in \sigma_i^{\str A}$ 
+for $i=1,\ldots,n$ and is otherwise identical to $v$.
+%Note that 
+%$v[x_1 \mapsto a_1, \ldots, x_n \mapsto a_n]$ need not be 
+%a $\Sigma$-valuation\footnote{%
+%Because each $a_i$ need not be in $\sigma_i^{\str A}$ 
+%where $\sigma_i$ is the sort of $x_i$ in $\Sigma$.
+%}
+%but it is definitely a $\Sigma'$-valuation 
+%for some variant $\Sigma'$ of $\Sigma$.\endnote{
+%This is technicality necessary to make 
+%the function $\mea{\_}{\_}$ well-defined.
+%It is a consequence of the fact that 
+%while all variables are assigned a sort a signature $\Sigma$,
+%quantifiers in a $\Sigma$-formulas can freely change 
+%the sort of their bound variables.
+%This means, for instance that
+%if $\exists x{:}\sigma \varphi$ is a formula of some signature $\Sigma$,
+%its subformula $\varphi$ is, for typing \emph{and} semantic purposes, 
+%a formula of signature $\Sigma[x{:}\sigma]$.
+%}
+
+If $v$ is a valuation into $\Sigma$-structure $\str A$,
+the pair $\inter{I} = (\str A, v)$ is a \define{$\Sigma$-interpretation}.
+We write $\inter{I}[x_1{:}\sigma_1 \mapsto a_1,\;\ldots,\;x_n{:}\sigma_n \mapsto a_n]$
+as an abbreviation for the $\Sigma'$-interpretation
+\[
+ (\str A', v[x_1{:}\sigma_1 \mapsto a_1,\;\ldots,\; x_n{:}\sigma_n \mapsto a_n])
+\]
+where $\Sigma' = \Sigma[x_1{:}\sigma_1,\;\ldots,\; x_n{:}\sigma_n]$
+and
+$\str A'$ is just $\str A$ but seen as a $\Sigma'$-structure.
+
+A $\Sigma$-interpretation $\inter{I}$ assigns a meaning 
+to well-sorted $\Sigma$-terms by means of a uniquely determined
+(total) mapping $\mea{\inter I}{\_}$ of such terms into the universe 
+of its structure.
+
+\begin{definition}
+Let $\Sigma$ be an SMT-LIB signature
+and 
+let $\inter{I}$ be a $\Sigma$-interpretation.
+For every well-sorted term $t$ of sort $\sigma$ with respect to $\Sigma$,
+$\mea{\inter I}{t}$ is defined recursively as follows.
+
+\begin{enumerate}
+\item
+$\mea{\inter I}{u\;\alpha_1\;\cdots\;\alpha_n} = \mea{\inter I}{u}$
+
+\item
+$\mea{\inter I}{x} = v(x{:}\sigma)$ 
+\quad if $\inter I = (\str A, v)$  
+
+\item
+$\mea{\inter I}{\hat{f}\;t_1\;\ldots\;t_n} = 
+ (f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}(a_1,\ldots,a_n)
+$ 
+\quad if \  
+\(
+\begin{cases}
+ \inter I = (\str A, v) \text{ with signature } \Sigma,\\
+ \hat{f} = f \text{ or } \hat{f} = f^\sigma,\\
+ \text{for } i=1,\ldots,n \\
+ \quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}
+\end{cases}
+\)
+
+\item
+$\mea{\inter I}{\akey{let}\ x_1 = t_1\;\cdots\; x_n = t_n\ \akey{in}\ t} = 
+ \mea{\inter I'}{t}
+$ 
+\ if \  
+\(
+\begin{cases}
+ \inter{I} \text{ has signature } \Sigma, \\
+ \text{for } i=1,\ldots,n \\
+ \quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
+ \inter{I}' = {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n]
+\end{cases}
+\)
+
+\item
+$\mea{\inter I}{\exists\, x_1{:}\sigma_1\, \cdots\, x_n{:}\sigma_n\; t} = \true$ 
+iff \ $\mea{\inter I'}{t} = \true$ 
+for some $\inter I'$
+
+\qquad such that
+\(
+\begin{cases}
+ \inter{I}'= {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n],\\
+ (a_1,\ldots,a_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A},\\
+ \inter I = (\str A, v),\\
+\end{cases}
+\)
+
+\item
+$\mea{\inter I}{\forall\, x_1{:}\sigma_1\, \cdots\, x_n{:}\sigma_n\; t} = \true$ 
+iff \ $\mea{\inter I'}{t} = \true$ 
+for all $\inter I'$
+
+\qquad such that
+\(
+\begin{cases}
+ \inter{I}'= {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n],\\
+ (a_1,\ldots,a_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A},\\
+ \inter I = (\str A, v),\\
+\end{cases}
+\)
+
+\item
+\(
+ \mea{\inter I}{\akey{match}\ t\ \akey{with}\ c \to t_0\ \:p_1 \to t_1 \;\cdots\; p_n \to t_n} = \mea{\inter I}{t_0}
+\)
+
+\qquad if \  
+\(
+\begin{cases}
+ \inter I = (\str A, v),\\
+ \mea{\inter I}{t} \text{ is in the range of } c^{\str A}
+\end{cases}
+\)
+
+\item
+\(
+ \mea{\inter I}{\akey{match}\ t\ \akey{with}\ (c\: x_1 \cdots x_{k+1}) \to t_0\ \:p_1 \to t_1 \;\cdots\; p_n \to t_n} =
+\)
+
+\(
+ \mea{\inter I}{\akey{let}\ x_1 = g_1(t) \;\cdots\; x_{k+1} = g_{k+1}(t)\ \akey{in}\ t_0}
+\)
+
+\qquad if \  
+\(
+\begin{cases}
+ \inter I = (\str A, v) \text{ with signature } \Sigma,\\
+ \mea{\inter I}{t} \text{ is in the range of } c^{\str A}, \\
+ \mathrm{sel}_\Sigma(c) = g_1\cdots g_{k+1}
+\end{cases}
+\)
+
+\item
+\(
+ \mea{\inter I}{\akey{match}\ t\ \akey{with}\ (c\: \bar x) \to t_0\ \:p_1 \to t_1 \;\cdots\; p_n \to t_n} =
+\)
+
+\(
+ \mea{\inter I}{\akey{match}\ t\ \akey{with}\ \:p_1 \to t_1 \;\cdots\; p_n \to t_n\ (c\: \bar x) \to t_0}
+\)
+
+\qquad if \ 
+\(
+\begin{cases}
+ \inter I = (\str A, v),\\
+ \mea{\inter I}{t} \text{ is not in the range of } c^{\str A}
+\end{cases}
+\)
+
+\item
+\(
+ \mea{\inter I}{\akey{match}\ t\ \akey{with}\ x_0 \to t_0\ \:p_1 \to t_1 \;\cdots\; p_n \to t_n} = 
+ \mea{\inter I}{\akey{let}\ x_0 = t\ \akey{in}\ t_0}
+\)
+\qed
+\end{enumerate}
+\end{definition}
+
+\noindent 
+One can show that $\mea{\inter I}{\_}$ is well-defined, and hence total, over
+\emph{closed} terms that are \emph{well-sorted} with respect to $\inter I$'s signature.
+
+
+A $\Sigma$-interpretation $\inter I$ \define{satisfies}
+a $\Sigma$-formula $\varphi$ if $\mea{\inter I}{\varphi} = \true$,
+and \define{falsifies} it if $\mea{\inter I}{\varphi} = \false$.
+The formula $\varphi$ is \define{satisfiable} 
+if there is a $\Sigma$-interpretation $\inter I$ that satisfies it,
+and is \define{unsatisfiable} otherwise.
+
+For a closed term $t$,
+its meaning $\mea{\inter I}{t}$ 
+in an interpretation $\inter{I} = (\str A, v)$ is independent of the choice 
+of the valuation $v$---because the term has no free variables.
+For such terms then, 
+we can write $\mea{\str A}{t}$ instead of $\mea{\inter I}{t}$.
+Similarly,
+for sentences, we can speak directly of a \emph{structure} 
+satisfying or falsifying the sentence.
+A $\Sigma$-structure that satisfies a sentence is also called 
+a \define{model} of the sentence.  
+
+
+
+%-------------------------------------------------------------------------------
+\section{Theories} \label{sec:theories}
+%-------------------------------------------------------------------------------
+
+%In SMT, one is not usually interested in arbitrary models 
+%of sentences
+%but models belonging to a given \emph{theory}
+%$\T$ constraining the interpretation of the symbols of $\Sigma$.
+Theories are traditionally defined as sets of sentences.
+Alternatively, and more generally, 
+in SMT-LIB a theory is defined as a class of structures with the same signature.
+
+\begin{definition}[Theory]
+For any signature $\Sigma$,
+a \define{$\Sigma$-theory} is a class of $\Sigma$-structures.
+Each of these structures is a \define{model} of the theory.
+\end{definition}
+
+Typical SMT-LIB theories consist of a single model 
+(e.g., the integers)
+or 
+of the class of all structures that satisfy some set of sentences---the
+\define{axioms} of the theory.
+Note that in SMT-LIB there is no requirement that the axiom set be
+finite or even recursive.
+
+%A $\Sigma$-theory is \define{axiomatizable} 
+%if it consists of all the models of some recursive set of $\Sigma$-sentences.
+%Note that in SMT-LIB, 
+%background theories are not restricted to be axiomatizable.
+
+\subsection{Combined Theories} \label{sec:comb-theories}
+
+SMT-LIB uses both \emph{basic} theories, 
+obtained as instances of a theory declaration schema,
+and \emph{combined} theories, obtained by combining together
+suitable instances of different theory sche\-mas.
+The combination mechanism is defined below.
+
+Two signatures $\Sigma_1$ and $\Sigma_2$ are \define{compatible} 
+if they have the same sort symbols, 
+have the same datatype constructors, selectors and testers, and they agree 
+on both the arity they assign to sort symbols and 
+the sorts they assign to variables.\footnote{%
+Observe that compatibility is an equivalence relation on signatures.
+}
+Two theories are \define{compatible} if they have compatible signatures.
+The \define{combination} $\Sigma_1 + \Sigma_2$
+of two compatible signatures $\Sigma_1$ and $\Sigma_2$
+is the smallest compatible signature
+that is an expansion of both $\Sigma_1$ and $\Sigma_2$,
+i.e., the unique signature $\Sigma$ compatible 
+with $\Sigma_1$ and $\Sigma_2$ such that,
+for all $f \in \fu$ and $\bar{\sigma} \in \sortt{\Sigma}^+$,
+$f{:}\bar{\sigma} \in \Sigma$ iff 
+$f{:}\bar{\sigma} \in \Sigma_1$ or
+$f{:}\bar{\sigma} \in \Sigma_2$.
+
+\begin{definition}[Theory Combination]
+\label{def:theorycomb}
+Let $\T_1$ and $\T_2$ be two theories 
+with compatible signatures $\Sigma_1$ and $\Sigma_2$, respectively. 
+The \define{combination} $\T_1 + \T_2$ of $\T_1$ and $\T_2$
+consists of all $(\Sigma_1+\Sigma_2)$-structures
+whose reduct to $\Sigma_i$ is isomorphic to a model of $\T_i$,
+for $i=1,2$.
+\qed
+\end{definition}
+
+Over pairwise compatible signatures
+the signature combination operation $+$ is associative and commutative.
+The same is also true for the theory combination operation $+$ over
+compatible theories.
+This induces, for every $n > 1$,
+a unique $n$-ary combination $\T_1 + \cdots + \T_n$ 
+of mutually compatible theories $\T_1,\ldots,\T_n$
+in terms of nested binary combinations.
+\define{Combined} theories in SMT-LIB are exclusively
+theories of the form $\T_1 + \cdots + \T_n$ 
+for some basic SMT-LIB theories $\T_1,\ldots,\T_n$.
+
+SMT is about checking the satisfiability or the entailment 
+of formulas \emph{modulo} some (possibly combined) theory $\T$.
+This standard adopts the following precise formulation of such notions.
+
+\begin{definition}[Satisfiability and Entailment Modulo a Theory]
+For any $\Sigma$-theory $\T$,
+a $\Sigma$-sentence is \define{satisfiable in $\T$}
+iff it is satisfied by one of $\T$'s models.
+A set $\Gamma$ of $\Sigma$-sentences
+\define{$\T$-entails} a $\Sigma$-sentence $\varphi$,
+written $\Gamma \models_\T \varphi$,
+iff every model of $\T$ that satisfies all sentences in $\Gamma$
+satisfies $\varphi$ as well.
+\end{definition}
+
+
+\subsection{Theory declarations} \label{sec:theory-decl}
+
+\begin{figure}[t]
+\theories
+\caption{Abstract syntax for theory declarations}
+\label{fig:theory-declaration}
+\end{figure}
+
+In SMT-LIB, basic theories are obtained as instances of theory declarations.
+(In contrast, combined theories are defined in logic declarations.)
+An abstract syntax of theory declarations is defined in 
+Figure~\ref{fig:theory-declaration}.
+The symbol $\Pi$ in parametric function symbol declarations 
+is a (universal) binder for the sort parameters---and corresponds 
+to the symbol \ter{par} in the concrete syntax.
+
+To simplify the meta-notation let $T$ denote 
+a theory declaration with theory name $T$.
+Given such a theory declaration,
+assume first that $T$ has no \akey{sorts-description} and
+\akey{funs-description} attributes,
+and
+let $S$ and $F$ be respectively the set of all sort symbols and 
+all function symbols occurring in $T$.
+Let $\Omega$ be a signature
+\emph{whose set of sort symbols that are not datatypes
+includes all the symbols in $S$, with the same arity}.
+The definition provided in the \akey{definition} attribute of $T$
+must be such that
+every signature like $\Omega$ above uniquely determines 
+a theory $\widehat T = T[\Omega]$ as an instance of $T$
+with signature $\widehat\Omega$ defined as follows:
+\begin{enumerate}
+\item
+$\sorts{\widehat\Omega} = \sorts{\Omega}$
+and
+$\funs{\widehat\Omega} = F \cup \funs{\Omega}$,
+
+\item
+no variables are sorted in $\widehat\Omega$,\endnote{
+This requirement is for concreteness.
+Again, since we work with closed formulas, 
+which internally assign sorts to their variables,
+the sorting of variables in a signature is irrelevant.
+}
+
+\item
+for all $f \in \funs{\widehat\Omega}$ and 
+$\bar{\sigma} \in (\sorts{\widehat\Omega})^+$, 
+
+$f{:}\bar{\sigma} \in \widehat\Omega$ iff
+\begin{enumerate}
+\item
+$f{:}\bar{\sigma} \in \Omega$, or
+
+\item \label{decl-i}
+$T$ contains a declaration of the form $f\;\bar{\sigma}\;\bar{\alpha}$, or
+
+\item \label{decl-ii}
+$T$ contains a declaration of the form $\Pi\;\bar{u}\;(f\;\bar{\tau}\;\bar{\alpha})$ and
+$\bar{\sigma}$ is an instance of $\bar \tau$.
+\end{enumerate}
+
+\item
+A function symbol of $\widehat\Omega$ is a datatype constructor/selector/tester 
+in $\widehat\Omega$ iff it is so in $\Omega$.
+\end{enumerate}
+
+We say that a ranked function symbol $f{:}\bar{\sigma}$ of $\widehat\Omega$ 
+is \define{declared in $T$} 
+if $f{:}\bar{\sigma} \in \widehat\Omega$
+because of Point~\ref{decl-i} or \ref{decl-ii} above.
+The \define{free sort symbols} of $\widehat T$ are
+the sort symbols of $\widehat\Omega$ that are not in $S$
+and are not datatypes.
+Similarly, the \define{free function symbols} of $\widehat T$
+are the ranked function symbols of $\widehat\Omega$
+that are not declared in $T$
+and are not datatype constructors, selectors or testers.\footnote{%
+Note that because of overloading 
+we talk about \emph{ranked} function symbols being free or not,
+not just function symbols.
+}
+This terminology is justified by the following additional requirement on $T$.
+
+The definition of $T$ must be \emph{parametric}, in this sense: 
+it must not constrain the free symbols of 
+any instance $T[\Omega]$ of $T$ in any way.
+Technically, $T$ must be defined so that
+the set of models of $T[\Omega]$ is closed 
+under any changes in the interpretation of the free symbols.
+That is,
+every structure obtained from a model of $T[\Omega]$
+by changing only the interpretation of $T[\Omega]$'s free symbols should be 
+a model of $T[\Omega]$ as well.\endnote{
+Admittedly,
+this requirement on theory declarations is somewhat hand-wavy.
+Unfortunately, it is not possible to make it a lot more rigorous
+because a theory declaration can use natural language 
+to define its class of instance theories.
+The point is again that 
+the definition of the class should impose no constraints on 
+the interpretation of free sort symbols and free function symbols.
+}
+
+
+The case of theory declarations with \akey{sorts-description} and
+\akey{funs-description} attributes is similar.
+
+
+%-------------------------------------------------------------------------------
+\section{Logics} \label{sec:logics}
+%-------------------------------------------------------------------------------
+
+\begin{figure}[t]
+\logics
+\caption{Abstract syntax for logic declarations}
+\label{fig:logic-declaration}
+\end{figure}
+
+
+A logic in SMT-LIB is any sublogic of the main SMT-LIB logic obtained by 
+\begin{itemize}
+\item
+fixing a signature $\Sigma$ and a $\Sigma$-theory $\T$,
+
+\item
+restricting the set of structures to the models of $\T$,
+and 
+
+\item
+restricting the set of sentences to some subset of 
+the set of all $\Sigma$-sentences.
+\end{itemize}
+
+A \define{model} of a logic with theory $\T$ is any model of $\T$;
+a sentence is \define{satisfiable} in the logic iff it is satisfiable in $\T$.
+
+
+
+\subsection{Logic declarations} \label{sec:logic-decl}
+
+Logics are specified by means of logic declarations.
+Contrary to the theory declarations, 
+a logic declaration specifies a \emph{single} logic, 
+not a class of them,
+so we call the logic $L$ too.
+An abstract syntax of logic declarations is defined in 
+Figure~\ref{fig:logic-declaration}.
+
+Let $L$ be a logic declaration whose \akey{theories} attribute has value
+$T_1, \ldots, T_n$.
+
+\paragraph{Theory.}
+The logic's theory is the theory $\T$ uniquely determined as follows.
+For each $i=1,\ldots,n$,
+let $S_i$ be the set of all sort symbols occurring in $T_i$.
+The text in the \akey{language} attribute of $L$ may specify
+an additional set $S_0$ of sort symbols and 
+an additional set of ranked function symbols with ranks over $\sortt{S}^+$
+where $S = \bigcup_{i=0,\ldots,n} S_i$.
+Let $\Omega$ be the smallest signature with $\sorts{\Omega} = S$
+containing all those ranked function symbols.
+Then for each $i=1,\ldots,n$, 
+let $T_i[\Omega]$ be the instance of $T_i$ determined by $\Omega$ 
+as described in Subsection~\ref{sec:theory-decl}.
+The theory of $L$ is 
+\[
+ \T = T_1[\Omega] + \cdots + T_n[\Omega]\ .
+\]
+
+Note that $\T$ is well defined.
+To start, $\Omega$ is well defined 
+because any sort symbols shared by two declarations among
+$T_1, \ldots, T_n$ have the same arity in them.
+The theories $T_1[\Omega], \ldots, T_n[\Omega]$ are well defined 
+because $\Omega$ satisfies the requirements in Subsection~\ref{sec:theory-decl}.
+Finally, 
+the signatures of $T_1[\Omega], \ldots, T_n[\Omega]$ are pairwise compatible
+because they all have the same sort symbols, 
+each with the same arity in all of them.
+
+ 
+
+\paragraph{Values.}
+The $\akey{values}$ attribute is expected to designate 
+for each sort $\sigma$ of the logic's theory $\T$ 
+a distinguished set $V_\sigma$ of ground terms called \define{values}.  
+The definition of $V_\sigma$ should be such that 
+every sentence satisfiable in the logic $L$ is satisfiable
+in a model $\str A$ of $\T$ 
+where each element of $\sigma^{\str A}$
+is denoted by some element of $V_\sigma$.
+In other words, if $\Sigma$ is $\T$'s signature,
+$\str A$ is such that,
+for all $\sigma \in \sorts{\Sigma}$ and 
+all $a \in \sigma^{\str A}$,
+$a = \mea{\inter A}{t}$ for some $t \in V_\sigma$.
+For example,
+in a logic of the integers,
+the set of values for the integer sort
+might consist of all the terms of the form $0$ or $[-]n$
+where $n$ is a non-zero numeral.
+
+For flexibility, we do not require that $V_\sigma$ be minimal.
+That is, it is possible for two terms of $V_\sigma$ to denote 
+the same element of $\sigma^{\str A}$.
+For example,
+in a logic of rational numbers, the set of values for the rational sort
+might consist of all the terms of the form $[-]m/n$
+where $m$ is a numeral and $n$ is a non-zero numeral.
+This set covers all the rationals 
+but, in contrast with the previous example, is not minimal
+because, for instance, $3/2$ and $9/6$ denote the same rational.
+
+Note that the requirements on $V_\sigma$ can be always trivially satisfied 
+by $L$ by making sure that the signature
+$\Omega$ above contains 
+a distinguished set of infinitely many additional free constant symbols of 
+sort $\sigma$,
+and defining $V_\sigma$ to be that set.
+We call these constant symbols \define{abstract values}.
+Abstract values are useful to denote the elements of uninterpreted  
+sorts or sorts standing for structured data types
+such as lists, arrays, sets and so on.\footnote{%
+The concrete syntax reserves a special format for constant symbols 
+used as abstract values: 
+they are members of the \nter{symbol} category 
+that start with the character \ter{@}.
+}
+
+Recall that algebraic datatypes are not defined in theories but directly 
+at the level of the underlying SMT-LIB logic. 
+For each such sort, the set of values is fixed to the set 
+of constructor terms built over values from other sorts.
+For example, in a parametric list datatype $\delta$ 
+with the usual $\mathrm{nil}$ and $\mathrm{cons}$ constructors,
+the set of values for $\delta$ consists of $\mathrm{nil}$ and 
+all terms of the form 
+$\mathrm{cons}\ v_1\ (\mathrm{cons}\ v_2\ \cdots\ (\mathrm{cons}\ v_n\ \mathrm{nil})\ \cdots\ )$
+where $n > 0$ and 
+$v_1, \ldots, v_n$ are (recursively) values of the same sort.
+
+
+
+
+
+

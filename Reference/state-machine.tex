@@ -1,0 +1,128 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Welcome to Overleaf --- just edit your LaTeX on the left,
+% and we'll compile it for you on the right. If you give
+% someone the link to this page, they can edit at the same
+% time. See the help menu above for more info. Enjoy!
+%
+% Note: you can export the pdf to see the result at full
+% resolution.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% EPC flow charts
+% Author: Fabian Schuh
+\documentclass{minimal}
+
+\usepackage{pgf}
+\usepackage{tikz}
+%%%<
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{5pt}%
+%%%>
+
+\begin{comment}
+:Title:  EPC flow charts
+:Grid: 1x2
+
+
+\end{comment}
+\usepackage[utf8]{inputenc}
+\usetikzlibrary{arrows,automata}
+\usetikzlibrary{positioning}
+
+
+\tikzset{
+    state/.style={
+           rectangle,
+           rounded corners,
+           draw=black, very thick,
+           minimum height=2em,
+           inner sep=2pt,
+           text centered,
+           },
+}
+
+\begin{document}
+
+\begin{tikzpicture}[->,>=stealth']
+
+ % Position of QUERY 
+ % Use previously defined 'state' as layout (see above)
+ % use tabular for content to get columns/rows
+ % parbox to limit width of the listing
+ \node[state] (ASSERT) 
+ {\begin{tabular}{l}
+  \textbf{Assert mode}\\
+   \parbox{4cm}{} %\begin{itemize}
+%    \item Start
+%    \item Parameter $Q$
+%    \item Zufallszahl aus \mbox{$[0, 2^Q-1]$} in Slotzähler $SC$
+%   \end{itemize}
+%   }\\[4em]
+%   \textbf{QueryAdjust}\\
+%   \parbox{4cm}{\begin{itemize}
+%    \item Variiere Q
+%    \item neue Zufallszahl
+%   \end{itemize}
+%  }
+ \end{tabular}};
+  
+ % State: SAT with different content
+ \node[state,    	% layout (defined above)
+  text width=3cm, 	% max text width
+  yshift=2cm, 		% move 2cm in y
+  right of=ASSERT, 	% Position is to the right of ASSERT
+  node distance=6.5cm, 	% distance to ASSERT
+  anchor=center] (SAT) 	% posistion relative to the center of the 'box'
+ {%
+ \begin{tabular}{l} 	% content
+  \textbf{Sat mode}\\
+  \parbox{2.8cm}{} %{Bestätigen mit $RN_{16}$}
+ \end{tabular}
+ };
+ 
+ % STATE UNSAT
+ \node[state,
+  below of=SAT,
+  yshift=-3cm,
+  anchor=center,
+  text width=3cm] (UNSAT) 
+ {%
+ \begin{tabular}{l}
+  \textbf{Unsat mode}\\
+  \parbox{2.8cm}{} %{Dekrementiere Slotzähler}
+ \end{tabular}
+ };
+
+%  % STATE EPC
+%  \node[state,
+%   right of=ACK,
+%   node distance=5cm,
+%   anchor=center] (EPC) 
+%  {%
+%  \begin{tabular}{l}
+%   Antwort: \textbf{EPC}\\
+%   \parbox{4cm}{Mit nächstem \mbox{\textbf{QueryRep}} als "`inventoried"' markieren.}
+%  \end{tabular}
+%  };
+
+ % draw the paths and and print some Text below/above the graph
+ \path 
+ (ASSERT) 	edge[bend left=20]  node[anchor=south,above]{(1)}  (SAT)
+ (ASSERT)   edge[bend right=20] node[anchor=south,above]{(7)} (UNSAT)
+ (ASSERT)  	edge[loop below]    node[anchor=north,below]{(6)} (ASSERT)
+ 
+ (SAT)   	edge[bend left=20]  node[anchor=south,above]{(2)}  (ASSERT)
+ (SAT)  	edge[loop above]    node[anchor=sourth,above]{(3)} (SAT)
+
+ (UNSAT)   	edge[bend right=20]  node[anchor=north,below]{(5)}  (ASSERT)
+ (UNSAT)  	edge[loop below]    node[anchor=north,below]{(4)} (UNSAT)
+ ;
+
+\end{tikzpicture}
+
+
+
+\end{document}

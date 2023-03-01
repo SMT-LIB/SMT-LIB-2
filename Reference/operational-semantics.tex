@@ -1,0 +1,1756 @@
+% commands.tex
+
+%!TEX root = main.tex
+
+
+%=================================================================================
+\chapter{Operational Semantics of SMT-LIB} \label{chap:operational-semantics}
+%=================================================================================
+\thispagestyle{empty}
+
+
+This chapter specifies how a human user or a software client can interact with 
+an SMT-LIB-compliant solver. 
+We do that by providing, as precisely as possible, an operational semantics 
+of SMT-LIB scripts, together with additional requirements on the input/output 
+behavior of the solver.
+
+The expected interaction mode with a compliant solver is 
+that of a read-eval-print loop: 
+the user or client application issues a command in the format 
+of the Command Language to the SMT solver via the solver's 
+standard textual input channel;
+the solver then responds over two textual output channels, 
+one for regular output and one for diagnostic output,
+and waits for another command.
+A non-interactive mode is also allowed where the solver reads commands 
+from a script stored in a file.
+However, the solver's output behavior should be exactly the same as 
+if the commands in the script had been sent to it one at a time.
+ 
+Note that the primary goal of the SMT-LIB standard is, first and foremost,
+to support convenient interaction with other programs, not human interaction.  
+This has some influence on the design of the command language.  
+
+There are other commands one might wish for an SMT solver to support
+beyond those adopted here.  
+In general, it is expected that time and more experience with the needs 
+of applications will drive the addition of further commands in later versions.
+
+
+%-------------------------------------------------------------------------------
+\section{General Requirements} \label{sec:requirements}
+%-------------------------------------------------------------------------------
+
+The command language contains commands for managing a stack 
+of \define{assertion levels} and for making queries about them.
+It includes commands to:
+%
+\begin{itemize}
+\item
+declare and define new sort and function symbols
+(\define{declare} and \define{define} commands),
+\item
+add formulas to the current assertion level,
+\item
+reset the assertion stack or the whole solver,
+\item
+push and pop assertion levels,
+\item
+check the joint satisfiability of all formulas in the assertion stack, 
+possibly under additional assumptions (\define{check commands}),
+\item
+obtain further information following a check command 
+(e.g., model information),
+\item
+set values for standard and solver-specific options, 
+\item
+get standard and solver-specific information from the solver.
+\end{itemize}
+
+This section provides some background and general requirements on how 
+these functionalities are to be supported.
+The next section, Section~\ref{sec:commands} provides more details
+on how each compliant solver is to execute each command.
+
+%-------------------------------------------------------------------------------
+\subsection{Execution Modes} \label{sec:modes}
+%-------------------------------------------------------------------------------
+
+\begin{figure} %[t]
+\begin{center}
+\begin{tikzpicture}[->,>=stealth']
+ \node[state,    	% layout (defined above)
+  text width=2.5cm, 	% distance to ASSERT
+  yshift=2cm, 		% move 2cm in y
+  anchor=center] (START) 
+ {\textbf{Start mode}};
+  
+ \node[state,    	% layout (defined above)
+  text width=3cm,
+%  yshift=2cm, 		% move 2cm in y
+  right of=START, 	% Position is to the right of ASSERT
+  node distance=4.5cm, 	% distance to ASSERT
+  anchor=center] (ASSERT) 
+ {\textbf{Assert mode}};
+  
+ % State: SAT with different content
+ \node[state,    	% layout (defined above)
+  text width=2cm, 	% max text width
+  yshift=2cm, 		% move 2cm in y
+  right of=ASSERT, 	% Position is to the right of ASSERT
+  node distance=6.5cm, 	% distance to ASSERT
+  anchor=center] (SAT) 	% posistion relative to the center of the 'box'
+ {\textbf{Sat mode}};
+ 
+ % STATE UNSAT
+ \node[state,
+  below of=SAT,
+  yshift=-3cm,
+  anchor=center,
+  text width=2.5cm] (UNSAT) 
+ {\textbf{Unsat mode}};
+
+ % draw the paths and and print some Text below/above the graph
+ \path 
+ (START)	edge[loop above]	node[anchor=north,above]{\sf e, gsio, r, ra} (START)
+ (START)	edge[bend left=10]	node[anchor=north,above]{\sf sl} (ASSERT)
+
+ (ASSERT)	edge[loop above]	node[anchor=north,above]{\sf \begin{tabular}{c} ad, e, g, \\ gsio, p, ra\end{tabular}} (ASSERT)
+ (ASSERT)	edge[bend right=16]	node[anchor=south,above]{\sf c} (SAT)
+ (ASSERT)	edge[bend left=16]	node[anchor=north,above]{\sf c} (UNSAT)
+ (ASSERT)	edge[bend left=10]	node[anchor=south,below]{\sf r} (START)
+
+ (SAT)		edge[loop above]	node[anchor=south,above]{\sf c, e, g, gamv, gsio} (SAT)
+ (SAT)		edge[bend right=24]	node[anchor=south,above]{\sf r} (START)
+ (SAT)		edge[bend right=20]	node[anchor=south,above]{\sf ad, p, ra} (ASSERT)
+ (SAT)		edge[bend left=16]	node[anchor=south,right]{\sf c} (UNSAT)
+
+ (UNSAT)	edge[loop below]	node[anchor=north,below]{\sf c, e, g, gsio, gpu} (UNSAT)
+ (UNSAT)	edge[bend left=24]	node[anchor=south,above]{\sf r} (START)
+ (UNSAT)	edge[bend left=20]	node[anchor=south,above]{\sf ad, p, ra} (ASSERT)
+ (UNSAT)	edge[bend left=16]	node[anchor=south,left]{\sf c} (SAT)
+ ;
+\end{tikzpicture}
+\end{center}
+%
+Command name abbreviations:
+{\scriptsize
+\medskip
+
+\begin{multicols}{2}
+\begin{tabular}{r@{\ \ }c@{\ \ }l}
+{\sf ad} & = & \ter{assert}, \ter{declare-}{*}, \ter{define-}{*}
+\\ 
+{\sf c} & = & \ter{check-sat}{*} 
+\\ 
+{\sf e} & = & \ter{echo} \\ 
+{\sf g} & = & \ter{get-assertions} \\ 
+{\sf gamv} & = & \ter{get-assignment}, \ter{get-model}, \ter{get-value} \\
+{\sf gsio} & = & \ter{get-info}, \ter{get-option}, \ter{set-info}, \ter{set-option} \\  
+\end{tabular}
+
+\begin{tabular}{r@{\ \ }c@{\ \ }l}
+{\sf gpu} & = & \ter{get-proof}, \ter{get-unsat-}{*} \\ 
+{\sf p} & = & \ter{pop}, \ter{push} \\ 
+{\sf r} & = & \ter{reset} \\ 
+{\sf ra} & = & \ter{reset-assertions} \\ 
+{\sf sl} & = & \ter{set-logic}
+\end{tabular}
+\end{multicols}
+}
+\caption{Abstract view of transitions between solver execution modes.
+The symbol * here stands for the matching wildcard.
+}
+
+\label{fig:modes}
+\end{figure}
+
+
+At a high-level, a compliant solver can be understood as being at all times 
+in one of four \define{execution modes}:
+a \mode{start} mode, an \mode{assert} mode and two \define{query} modes, 
+\mode{sat} and \mode{unsat}.
+The solver starts in \mode{start} mode, moves to \mode{assert mode} 
+once a logic is set, and then moves to one of the two query modes 
+after executing a check command.
+Any command other than \ter{reset} that modifies the assertion stack brings 
+the solver back from a query mode to the \mode{assert} mode.
+The \ter{reset} command takes the solver back to \mode{start} mode.
+
+The transition system in Figure~\ref{fig:modes} illustrates 
+in some detail which commands can trigger which mode transitions.
+The set of labels for each transition describes the commands that may cause it.
+With the exception of \ter{exit}, 
+if a command does not appear on any transitions originating from a mode,
+it is not permitted in that mode.
+The \ter{exit} command, which causes the solver to quit, can be issued in any mode.
+
+The solver must respond with an error when given a command not permitted 
+in the current mode.
+Because of its level of abstraction, the transition system diagram 
+in Figure~\ref{fig:modes} does not specify the conditions under which 
+a specific command causes a transition to one mode as opposed to another;
+see Section~\ref{sec:commands} for details on that.
+Similarly, the diagram does not account for the fact that some specific options
+can be set only in certain modes. 
+Such restrictions are described in Section~\ref{sec:options}. 
+
+%-------------------------------------------------------------------------------
+\subsection{Solver responses} \label{sec:response}
+%-------------------------------------------------------------------------------
+
+Regular output, including responses \emph{and errors}, produced 
+by compliant solvers should be written to the \define{regular} output channel.
+Diagnostic output, including warnings, debugging, tracing, 
+or progress information, should be written to the \define{diagnostic} output channel.
+These channels may be set with the \nter{set-option} command 
+(see Section~\ref{sec:options} below).  
+By default they are the standard output and standard error channels, 
+respectively.
+
+Generally, once a solver completes its processing in response to a command, 
+it should print to its regular output channel a \nter{general\_response}:
+
+\begin{center}
+ \begin{tabular}{lll}
+  \cGeneralResponse
+ \end{tabular}
+\end{center}
+
+\noindent 
+The value \ter{success} is the default response for a successful execution
+of a supported command.  
+A number of commands have a more detailed response in place of \ter{success}, 
+discussed in Section~\ref{sec:commands} for each of them.
+The value \ter{unsupported} should be returned if the command 
+or some specific input to it is not supported by the solver.
+An expression of the form \expr{(error $e$)} should be returned for any 
+kind of error situation (wrong command syntax, incorrect parameters, 
+erroneous execution, and so on).
+The value of $e$ is a solver-specific string containing 
+a message that describes the problem encountered.\footnote{%
+Returning the empty string is allowed but discouraged 
+because of its uninformative content.
+}
+
+Any response which is not double-quoted and not parenthesized must be followed 
+by at least one whitespace character (for example, a new line character).\endnote{
+This enables applications reading a compliant solver's response to know 
+when an identifier (like \ter{success}) has been completely printed and,
+in general, when the solver has completed processing a command. 
+For example, this is needed if one wants to use an off-the-shelf 
+S-expression parser (e.g., \texttt{read} in Common Lisp) to read responses.
+}
+
+Several options described in Section~\ref{sec:options} below affect the printing 
+of responses, in particular by suppressing the printing of \ter{success}, 
+or by redirecting the regular or diagnostic output channels.
+
+\paragraph{Errors and solver state.} 
+Solvers have two options when encountering errors.  
+For both options, they first print an error message 
+in the \nter{general\_response} format.  
+Then, they may either immediately exit with a non-zero exit status, 
+or continue accepting commands.  
+In the second case, 
+the solver's state remains unmodified by the error-generating command, 
+except possibly for timing and diagnostic information.  
+In particular, the assertion stack, discussed in Section~\ref{sec:assert-stack}, 
+is unchanged.\endnote{
+The motivation for allowing these two behaviors is that
+the first one (exiting immediately when an error occurs) may be simpler to implement,
+while the latter may be more useful for applications, though it might be 
+more burdensome to support the semantics of leaving the state unmodified 
+by the erroneous command.
+}
+
+The predefined \attr{error-behavior} attribute can be used 
+with the $\ter{get-info}$ command to check which error behavior 
+the tool supports (see Section~\ref{sec:get-info} below).
+
+%-------------------------------------------------------------------------------
+\subsection{Printing of terms and defined symbols} 
+%-------------------------------------------------------------------------------
+Several commands request the solver to print sets of terms.  
+While some commands, naturally, place additional semantic requirements on these sets, 
+the general syntactic requirement is that output terms must be well-sorted 
+with respect to the current signature (as defined below in Section~\ref{sec:assert-stack}).
+%
+%ct remove this because get-rank is out for the time being
+%If the signature is expanded, due to
+%the introduction of new symbols during solving, then the ranks of
+%those new symbols can be obtained with $\akey{get-rank}$.
+
+All output from a compliant solver should print any symbols
+defined with \ter{define-sort} and \ter{define-fun} just as they are, 
+without replacing them by the expression they are defined to be equal to.  
+This approach generally keeps the output from solvers much more compact than 
+it would be if definitions were expanded.
+
+%ct removed for now, we need to agree on the format for this
+%
+%\paragraph{Getting a symbol's rank.} The $\akey{get-rank}$ command allows
+%the calling environment to request the sort of a symbol.  In case the
+%symbol is overloaded, all ranks should be returned.  This command is
+%likely to be particularly useful to determine the sort of
+%solver-introduced symbols.
+
+
+
+%-------------------------------------------------------------------------------
+\subsection{The assertion stack} \label{sec:assert-stack}
+%-------------------------------------------------------------------------------
+
+A compliant solver maintains a stack of sets, 
+each of which consists of \define{assertions}.
+Assertions are formulas, declarations, and definitions.
+We will use the following terminology with regards to this data structure:
+\begin{itemize}
+\item 
+\define{assertion stack:} the single stack of sets of assertions;
+\item 
+\define{assertion level:} an element of the assertion stack 
+(i.e., a set of assertions);
+\item 
+\define{context:} the union of all the assertion levels on the assertion stack
+together with any global declarations (see Section~\ref{sec:decl-defn});
+\item 
+\define{current assertion level:} the assertion level at the top of the stack 
+(i.e., the most recent);
+\item \define{first assertion level:} the first assertion level in the stack
+(i.e., the least recent);
+\item \define{current signature:} the signature determined by the logic
+  specified with the most recent \ter{set-logic} command and
+by the set of sort symbols and rank associations (for function symbols) 
+in the current context.  
+\end{itemize}
+
+Initially, when the solver starts, the assertion stack consists 
+of a single element, the first assertion level, which is empty.
+While new assertions can be added to this set, the set itself cannot be removed 
+from the stack with a pop operation.
+The following commands modify the current context:
+\begin{quote}
+\ter{assert},
+\ter{declare-sort}, \ter{declare-fun},
+\ter{declare-const},
+\ter{define-sort}, \ter{define-fun}, 
+\ter{define-fun-rec}, \ter{define-funs-rec},
+\ter{pop}, \ter{push},
+\ter{reset}, and \ter{reset-assertions}.
+\end{quote}
+%\footnote{%
+%A \ter{check-sat-assuming} command modifies the context by temporarily asserting
+%some formulas as \define{assumptions} (see Section~\ref{sec:checking-for-sat}).
+%}
+
+%-------------------------------------------------------------------------------
+\subsection{Symbol declarations and definitions}\label{sec:decl-defn}
+%-------------------------------------------------------------------------------
+
+A number of commands allow the declaration or definition of a function 
+or sort symbol.  
+By default, these declarations and definitions are added to the current
+assertion level when the corresponding command is executed.
+Popping that assertion level removes them.\endnote{
+It is desirable to have the ability to remove declarations and definitions, 
+for example if they are no longer needed at some point during an interaction 
+with a solver (so that the memory required for them can be reclaimed), or 
+if a defined symbol needs to be redefined.  
+The current approach of allowing declarations and definitions to be 
+locally scoped supports removal by popping the containing assertion level.
+Other approaches, such as the ability to add shadowing declarations or
+definitions of symbols, or to ``undefine'' or ``undeclare'' them, 
+present some issues: for example, how to print symbols that have been shadowed, 
+undefined or undeclared.
+As a consequence, they are not supported in the language.
+}
+As an alternative, declarations and definitions can all be made \define{global} 
+by running the solver with the option \attr{global-declarations} set to \ter{true}.
+When running with this option set, all declarations and definitions become permanent.
+That is, they survive any pop operations on the assertion stack as well as invocations
+of \ter{reset-assertions} and can only be removed by a global reset, 
+achieved with the \ter{reset} command.\endnote{
+Setting \attr{global-declarations} to \ter{true} can be understood as stating 
+that declarations and definitions are not part of the assertion stack, 
+and so resetting the stack has no impact on them. 
+This option is convenient in applications that benefit from using push and pop
+for assertions but need to continue using symbols declared after a push 
+even after the corresponding pop.
+}
+
+Well-sortedness checks, required for commands that use sorts or terms, 
+are always done with respect to the current signature.
+It is an error to declare or define a symbol
+that is already in the current signature.
+This implies in particular that, contrary to theory function symbols,
+user-defined function symbols cannot be overloaded.\endnote{
+The motivation for not overloading user-defined symbols is to simplify 
+their processing by a solver.
+This restriction is significant only for users 
+who want to extend the signature of the theory used by a script 
+with a new polymorphic function symbol---i.e., one whose rank would contain
+parametric sorts if it was a theory symbol.
+For instance, users who want to declare a ``reverse'' function 
+on arbitrary lists, must define a different reverse function symbol 
+for each (concrete) list sort used in the script.
+This restriction might be removed in future versions.
+}
+
+
+%-------------------------------------------------------------------------------
+\subsection{In-line definitions}
+%-------------------------------------------------------------------------------
+
+Any closed subterm $t$ occurring in the argument(s) of a command $c$
+can be optionally annotated with a \attr{named} attribute; that is, it
+can appear as \expr{(!~$t$ \attr{named} $f$)} where $f$ is a fresh function symbol
+from \nter{symbol}.
+For such a command $c$, let
+\begin{center}
+\expr{(!~$t_1$ \attr{named} $f_1$)}, \ldots, \expr{(!~$t_n$ \attr{named} $f_n$)}
+\end{center}
+%
+be the enumeration of all the named subterms of $c$ obtained by the (depth-first) left-to-right post-order traversal of $c$.
+The semantics of the command $c$ is the same as the sequence of commands
+\begin{center}
+\begin{tabular}{l}
+ \expr{(define-fun $f_1$ () $\sigma_1$ $t_1'$)} \\
+ \vdots \\
+ \expr{(define-fun $f_n$ () $\sigma_n$ $t_n'$)} \\
+ $c'$
+\end{tabular}
+\end{center}
+%
+where, for each $i=1,\ldots,n$, 
+$(i)$ $\sigma_i$ is the sort of $t_i$ with respect to the current signature 
+up to the declaration of $f_i$,
+$(ii)$ $t_i'$ is the term obtained from $t_i$ by removing 
+all its \attr{named} annotations, and 
+$(iii)$ $c'$ is similarly obtained from $c$ by removing 
+all its \attr{named} annotations.
+
+By these semantics, each \define{label} $f_i$ can occur, as a constant symbol, 
+in any subexpression of $c$ that comes after \expr{(!~$t_i$ \attr{named} $f_i$)} 
+in the left-to-right post-order traversal of $c$, as well as after the command $c$ itself.
+The labels $f_1, \ldots, f_n$ can be used like any other user-defined nullary
+function symbols, with the same visibility and scoping restrictions 
+they would have if they had been defined with the sequence of commands above. 
+However, contrary to function symbols introduced by \attr{define-fun},
+labels have an additional, dedicated use in the commands 
+\attr{get-assignment} and \attr{get-unsat-core}
+(see Section~\ref{sec:commands}).
+
+
+%------------------------------------------------------------------------
+\subsection{Solver options} \label{sec:options}
+%------------------------------------------------------------------------
+
+Solver options may be set using the \ter{set-option} command, and
+their current values can be obtained using the \ter{get-option} command.  
+If a solver does not support the setting of a particular option,
+for either command it should output \ter{unsupported}.  
+
+Solver-specific option names are allowed and indeed expected.  
+A set of standard options is presented in this subsection;
+refer to Figure~\ref{fig:command-options} for their format. 
+%This version of the language requires solvers to recognize and reply 
+%in a standard way only to a few of them, the rest are optional.
+We discuss each option below, specifying also their default values and 
+whether or not compliant solvers are required to support them. 
+It is understood that if a solver does not support one of the optional 
+standard options below, it behaves as if that option was permanently
+set to its default value. 
+
+Some options can be set only when the solver is in \mode{start} mode.
+We list the mode when that is the case.
+Attempting to set an option when the solver is not in a permitted mode 
+should trigger an error response.
+Each option starting with the \ter{produce-} prefix is a Boolean option
+that enables a specific command.
+When such an option is set to \ter{false}, calling the corresponding
+command should trigger an error response.
+
+The set of standard options is likely to be expanded or otherwise revised 
+as further desirable common options and kinds of information across tools
+are identified.  
+
+\begin{description}
+
+\item[\attr{diagnostic-output-channel}] 
+\quad default: \ter{"stderr"}
+\quad support: required
+\\
+The argument is a string consisting of the name of a file to be used subsequently 
+as the diagnostic output channel.
+The input value \ter{"stderr"} is interpreted specially to mean 
+the solver's standard error channel.  
+With other filenames, subsequent solver output is to be appended to the named file 
+(and the file should be first created if it does not  already exist).
+
+\item[\attr{global-declarations}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If the solver supports this option, setting it to \ter{true} causes all
+declarations and definitions to be global (permanent) as opposed to being added
+to the current assertion level.
+
+\item[\attr{interactive-mode}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+The old name for \ter{produce-assertions}. 
+Deprecated.
+
+\item[\attr{print-success}] 
+\quad default: \ter{true}
+\quad support: required
+\\
+Setting this option to \ter{false} causes the solver to suppress the printing 
+of \ter{success} in all responses to commands.  
+Other output remains unchanged.
+
+\item[\attr{produce-assertions}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If the solver supports this option, setting it to \ter{true} enables 
+the \ter{get-assertions} command.
+This option was called \ter{interactive-mode} in previous versions.
+
+\item[\attr{produce-assignments}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If supported, this enables the command \ter{get-assignment}.  
+
+\item[\attr{produce-models}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If supported, this enables the commands \ter{get-value} and \ter{get-model}.  
+
+\item[\attr{produce-proofs}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If supported, this enables the command \ter{get-proof}.  
+
+\item[\attr{produce-unsat-assumptions}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If supported, this enables the command \ter{get-unsat-assumptions}.  
+
+\item[\attr{produce-unsat-cores}] 
+\quad default: \ter{false}
+\quad support: optional
+\quad mode: \mode{start}
+\\
+If supported, this enables the command \ter{get-unsat-core}.  
+
+\item[\attr{random-seed}] 
+\quad default: $0$
+\quad support: optional
+\quad mode: \mode{start}
+\\
+The argument is a numeral for the solver to use as a random seed,
+in case the solver uses (pseudo-)randomization.
+The default value of $0$ means that the solver can use any random seed---possibly 
+even a different one for each run of the same script.
+The intended use of the option is to force the solver to produce identical results 
+whenever given identical input (including identical non-zero seeds) on repeated runs of the solver.
+
+\item[\attr{regular-output-channel}] 
+\quad default: \ter{"stdout"}
+\quad support: required
+\\
+The argument should be a filename to use subsequently for
+the regular output channel.  The input value \ter{"stdout"} is interpreted
+specially to mean the solver's standard output channel.
+With other filenames, subsequent solver output is to be appended to the named file 
+(and the file should be first created if it does not  already exist).
+
+\item[\attr{reproducible-resource-limit}] 
+\quad default: $0$
+\quad support: optional
+\\
+If the solver supports this option, setting it to $0$ disables it.
+Setting it a non-zero numeral $n$ will cause each subsequent check command 
+to terminate within a bounded amount of time dependent on $n$.
+The internal implementation of this option and its relation to run time or 
+other concrete resources can be solver-specific.
+However, it is required that the invocation of a check command return 
+\ter{unknown} whenever the solver is unable to determine the satisfiability 
+of the formulas in the current context within the current resource limit. 
+Setting a higher value of $n$ should allow more resources to be used, 
+which may cause the command to return \ter{sat} or \ter{unsat} instead 
+of \ter{unknown}. 
+Furthermore, the returned result should depend deterministically on $n$;
+specifically, it should be the same every time the solver is run 
+with the same sequence of previous commands on the same machine 
+(and with an arbitrarily long external time out). 
+If the solver makes use of randomization, it may require 
+the \attr{random-seed} option to be set to a value other than $0$ 
+before \attr{reproducible-resource-limit} can be set to a positive value.\endnote{
+Note that this option is not intended to be used for comparisons
+between different solvers since they can implement it differently.
+Its purpose is simply to guarantee the reproducibility 
+of an individual solver's results under the same external conditions.
+}
+
+\item[\attr{verbosity}] 
+\quad default: $0$
+\quad support: optional
+\\
+The argument is a numeral controlling the level of diagnostic output produced
+by the solver.  
+All such output should be written to the diagnostic output channel\endnote{
+This is to avoid confusion with the responses to commands,
+which are written to the regular output channel.  
+}
+which can be set and later changed via the \ter{diagnostic-output-channel} option.  
+An argument of $0$ requests that no such output be produced.  
+Higher values correspond to more verbose output.
+\end{description}
+
+%---------------------------------------------------------------------------
+\subsection{Solver information}   \label{sec:get-info}
+%---------------------------------------------------------------------------
+
+The format for responses to \ter{get-info} commands,
+both for standard and solver-specific information flags,
+is defined by the \nter{get\_info\_response} category 
+in Figure~\ref{fig:command-responses}.
+The standard \ter{get-info} flags and specific formats 
+for their corresponding responses are given next.  
+
+\begin{description}
+
+\item[\attr{all-statistics}] 
+\quad support: optional
+\quad mode: \mode{sat}, \mode{unsat}
+\\
+Solvers reply with a parenthesis-delimited sequence of \nter{info\_response} 
+values (see Figure~\ref{fig:command-responses}) providing various statistics 
+on the execution of the most recent check command.
+No standard statistics are defined for the time being,\endnote{
+Some commonly used statistics 
+(e.g., number of restarts of a solver's propositional reasoning engine)
+are difficult to define precisely and generally, 
+while the exact semantics of others, such as time and memory usage,
+have not being agreed upon yet by the SMT community.
+}
+so they are all solver-specific.
+%ct reworded
+%Any call to \ter{get-info} with \attr{all-statistics} must follow 
+%a check command and precede any commands that modify the assertion stack.  
+Executions of \ter{get-info} with \attr{all-statistics} are allowed only
+when the solver is in \mode{sat} or \mode{unsat} mode.
+
+\item[\attr{assertion-stack-levels}]
+\quad support: optional
+\\
+The response is a pair of the form
+\expr{(\attr{assertion-stack-levels} $n$)}
+where $n$ is a numeral indicating the current number of levels 
+in the assertion stack besides the first assertion level.\endnote{
+This command is useful for interactive use,
+to keep track of the current number of nested \ter{push} commands.
+}
+
+\item[\attr{authors}] 
+\quad support: required
+\\
+The response is a pair of the form
+\expr{(\attr{authors} $s$)}
+where $s$ is a string literal listing the names of the solver's authors.
+
+\item[\attr{error-behavior}]
+\quad support: required
+\\  
+The response is a pair of the form
+\expr{(\attr{error-behavior} $r$)}
+where $r$ is either \ter{immediate-exit} or \ter{continued-execution}.
+A response of \ter{immediate-exit} indicates that the solver
+will exit immediately when an error is encountered.  
+A response of \ter{continued-execution} indicates that when an error is
+encountered, the solver
+will return to the state it was in immediately before the command triggering
+the error, and continue 
+accepting and executing new commands.  
+See Section~\ref{sec:response} for more information.
+
+\item[\attr{name}]
+\quad support: required
+\\
+The response is a pair of the form
+\expr{(\attr{name} $s$)}
+where $s$ is a string literal with the name of the solver.
+
+\item[\attr{reason-unknown}]
+\quad support: optional
+\quad mode: \mode{sat}
+\\
+%ct reworded
+%Any call to \ter{get-info} with \attr{reason-unknown} must follow a check command
+%whose response was \ter{unknown}.  In addition, there must be no intervening commands 
+%that modify the assertion stack.
+Executions of \ter{get-info} with \attr{reason-unknown} are allowed only
+when the solver is in \mode{sat} mode following a check command
+whose response was \ter{unknown}.
+%
+The response is a pair of the form
+\expr{(\attr{reason-unknown} $r$)}
+where $r$ is an element of \nter{reason\_unknown} giving a short reason 
+why the solver could not successfully check satisfiability.
+In general, this reason can be provided by a solver-defined s-expression.
+Two predefined s-expressions are
+\ter{memout}, for out of memory, and \ter{incomplete}, which indicates 
+that the solver knows it is incomplete for the class of formulas containing 
+the most recent check query.
+
+\item[\attr{version}]
+\quad support: required
+\\ 
+The response is a string literal with the version number of the solver 
+(e.g., \texttt{"1.2"}).
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\section{Commands} \label{sec:commands}
+%-------------------------------------------------------------------------------
+
+The full set of commands and their expected behavior are described 
+in this section.
+Commands may impose restrictions on their arguments as well as restrictions 
+on when they can be issued.
+Unless otherwise specified, the solver is required to produce an error 
+when any of these restrictions is violated.
+Figure~\ref{fig:modes} describes the commands permitted in each execution mode 
+and the mode transitions each command may trigger.
+We specify below the conditions under which a command triggers one mode transition 
+versus another only for commands that may trigger more than one transition. 
+
+%-------------------------------------------------------------------------------
+\subsection{(Re)starting and terminating} \label{sec:restarting}
+%-------------------------------------------------------------------------------
+
+\begin{description}
+
+%%% reset %%%
+%
+\item[\expr{(reset)}]
+resets the solver completely to the state it had after it was started
+and before it started reading commands.\endnote{
+This allows the user to reset the state of the solver 
+without paying the cost of restarting it.
+}
+\smallskip
+
+%%% set-logic %%%
+%
+\item[\expr{(set-logic $l$)}]
+tells the solver what logic, in the sense of Section~\ref{sec:logics},
+is being used.
+The argument $l$ can be the name of a logic in the SMT-LIB catalog or 
+of some other solver-specific logic.
+The effect of the command is to add globally (and permanently)
+a declaration of each sort and function symbol in the logic.
+
+The argument $l$ can also be the predefined symbol \ter{ALL}.
+With this argument, the solver sets the logic to the most general logic 
+it supports.\endnote{
+Having \ter{ALL} is convenient for client applications that generate 
+problems on the fly in a variety of logics supported by some specific solver
+without knowing in advance the specific logic for each problem.
+SMT-LIB scripts meant for the SMT-LIB library should not use \ter{ALL} 
+in set-logic but should instead use a specific logic name.
+}
+Note that while the reaction to \expr{(set-logic ALL)} is the same 
+for every compliant solver, the chosen logic is solver-specific.
+
+We refer to the logic set by the most recent \ter{set-logic} command as 
+the \define{current logic}.
+\smallskip
+
+%%% set-option %%%
+%
+\item[\expr{(set-option $o$ $v$)}]
+sets a solver's option $o$ to a specific value $v$.
+More details on predefined options and required behavior are provided 
+in Section~\ref{sec:options}.  
+In general, if a solver does not support the setting of a particular option,
+its response to this command should be \ter{unsupported}.
+If the option is one of the predefined ones it should also leave it unchanged 
+from its default value.  
+The effect of setting a supported option is immediate.
+In particular, for options that affect the solver's output, such as 
+\attr{diagnostic-output-channel}, \attr{regular-output-channel} and 
+\attr{print-success}, 
+the effect applies already to the output of the very command 
+that is setting the option.
+
+Note that some of the options defined in Section~\ref{sec:options} 
+may only be set in \mode{start} mode.\endnote{
+The rationale is that a solver may need to make substantial changes 
+to its internal configuration to provide the functionality requested 
+by these options, and so it needs to be notified before it starts 
+processing assertions.
+}
+\smallskip
+
+%%% exit %%%
+%
+\item[\expr{(exit)}]
+instructs the solver to exit.
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Modifying the assertion stack}
+%-------------------------------------------------------------------------------
+
+\begin{description}
+%%% push %%%
+%
+\item[\expr{(push $n$)}] 
+pushes $n$ empty assertion levels onto the assertion stack.\footnote{%
+Typically, $n=1$.
+}
+If $n$ is $0$, no assertion levels are pushed.
+\smallskip
+
+%%% pop %%%
+%
+\item[\expr{(pop $n$)}] where $n$ is smaller than the number of assertion levels
+in the stack, pops the $n$ most-recent assertion levels from the stack.\footnote{%
+When $n$ is $0$, no assertion levels are popped.
+}
+Note that the first assertion level, 
+which is not created by a \ter{push} command, 
+cannot be popped.
+\smallskip
+
+%%% reset-assertions %%%
+%
+\item[\expr{(reset-assertions)}] removes from the assertion stack 
+all assertion levels beyond the first one.
+In addition, it removes all assertions from the first assertion level.
+Declarations and definitions resulting from the \ter{set-logic} command 
+are unaffected (because they are global).
+Similarly, if the option \attr{global-declarations} has value \ter{true}
+at the time the command is executed, then \emph{all} declarations and definitions
+remain unaffected.
+Note that any information set with \ter{set-option} commands is preserved 
+in any case.
+
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Introducing new symbols} \label{sec:new-symbols}
+%-------------------------------------------------------------------------------
+
+The next seven commands allow one to introduce new sort or function symbols
+by providing them with a rank declaration 
+(\ter{declare-sort}, \ter{declare-fun} and \ter{declare-const})
+or also with a definition 
+(\ter{define-sort}, \ter{define-fun}, \ter{define-fun-rec} and 
+\ter{define-funs-rec}).
+We refer to the former as \define{user-declared} symbols and 
+the latter as \define{user-defined} symbols.
+Declarations and definitions are made global (permanent) or are added 
+to the current assertion level depending on 
+whether the \attr{global-declarations} option is set to \ter{true} or not.
+
+\begin{description}
+
+%%% declare-sort %%%
+%
+\item[\expr{(declare-sort $s$ $n$)}]
+adds sort symbol $s$ with associated arity $n$.
+It is an error if $s$ is a sort symbol present in the current signature.
+\smallskip
+
+%%% define-sort %%%
+%
+\item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
+adds sort symbol $s$ with associated arity $n$.
+Subsequent well-sortedness checks must treat a sort term like
+\expr{($s$ $\sigma_1$ $\cdots$ $\sigma_n$)} 
+as an abbreviation for the term obtained by simultaneously substituting
+$\sigma_i$ for $u_i$, for $i\in\{1,\ldots,n\}$, in $\tau$.\endnote{
+Strictly speaking, only sort symbols introduced with \ter{declare-sort}
+expand the initial signature of theory sort symbols.
+Sort symbols introduced with \ter{define-sort} do not.
+They do not construct \emph{real} sorts,
+but \emph{aliases} of sorts built with
+theory sort symbols and previously declared sort symbols.
+}
+
+The command reports an error
+if $s$ is a sort symbol already present in the current signature or
+if $\tau$ is not a well-defined parametric sort 
+with respect to the current signature.
+This restriction prohibits (meaningless) circular definitions
+where $\tau$ contains $s$.
+\smallskip
+
+%%% declare-fun %%%
+%
+\item[\expr{(declare-fun $f$ ($\sigma_1$ $\cdots$ $\sigma_n$) $\sigma$)}]
+with $n \geq 0$ adds a new symbol $f$ 
+with associated rank $\sigma_1\cdots\sigma_n\sigma$.
+The command reports an error if a function symbol with name $f$ 
+is already present in the current signature.
+\smallskip
+
+%%% declare-const %%%
+%
+\item[\expr{(declare-const $f$ $\sigma$)}]
+abbreviates the command \expr{(declare-fun $f$ () $\sigma$)}.
+\smallskip
+
+%%% declare-datatypes %%%
+%
+\item[%
+\expr{(declare-datatypes (($\delta_1$ $k_1$) $\cdots$ ($\delta_n$ $k_n$))
+                         ($d_1$ $\cdots$ $d_n$))}]
+with $n > 0$ introduces $n$ algebraic datatypes $\delta_1,\dots,\delta_n$
+with respective arities $k_1,\dots,k_n$ and declarations $d_1,\dots,d_n$. 
+Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
+If $k >0$ then $d$ is an expression of the form 
+\expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
+where $u_1, \ldots, u_k$ are sort parameters;
+otherwise, it is just $l$. 
+In either case, $l$ is a (parenthesis-delimited) list of \emph{one or more} 
+expressions of the form
+%
+\begin{center}
+ \expr{($c$ ($s_1$ $\tau_1$) $\cdots$ ($s_m$ $\tau_m$))}
+\end{center}
+where 
+$(i)$ $m \geq 0$, 
+$(ii)$ $c$ is a symbol, a \define{constructor for $\delta$}, and 
+$(iii)$ for each $j=1,\ldots,m$, $s_j$ is a symbol, a \define{selector for $c$}, and 
+$(iv)$ $\tau_j$ is a sort term
+that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbol.
+In the parametric case,
+the terms $\tau_i$ can contain the sort parameters $u_1, \ldots, u_k$.
+The datatype $\delta$ must be \define{well founded} in the following inductive sense:
+it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
+such that $\tau_1\cdots\tau_m$ does not contain any of the datatypes 
+from $\{\delta_1, \ldots, \delta_n\}$ or, if it does contain some, they are well founded.
+
+A compliant solver must return an error in response to invocations of this command 
+that do not satisfy all of the restrictions above.  
+
+In the parametric case, 
+the command has the effect of declaring each $\delta$ as a sort symbol of arity $k$;
+each constructor $c$ as a function symbol of parametric rank $\tau_1\cdots\tau_m\delta$;
+and each $s_i$ as a function symbol of parametric rank $\delta\tau_i$.
+The non-parametric case is analogous.
+
+Note that the sort terms $\tau_1, \ldots,\tau_m$ can contain any previously defined 
+sort symbol as well as any of the datatypes $\delta_1, \ldots, \delta_n$,
+as long as those datatypes are well founded.\endnote{
+The input of this command is split in two arguments precisely to facilitate
+the type-checking of the sort terms $\tau_1, \ldots,\tau_m$.
+The first argument makes sure that when it is time to parse these terms
+each symbol $\delta_i$ is known to be a sort symbol of arity $k_i$.
+}
+This allows the declaration of recursive and mutually recursive datatypes.\endnote{
+The various restrictions on the definition of a datatype $\delta$ are crucial 
+since they allow the existence of standard interpretations for $\delta$.
+See Chapter~\ref{chap:logical-semantics} for more details.
+}
+
+On successfully executing this command, 
+for each constructor $c$ in a declared datatype $\delta$, 
+the solver will also automatically declare a \define{tester}
+with rank $\delta\,\ter{Bool}$.
+The tester's name is an indexed identifier (see Section~\ref{sec:identifiers}) 
+of the form \expr{(\_ is $c$)}.
+\medskip
+
+\begin{lstlisting}[linewidth=37em]
+; an enumeration datatype
+(declare-datatypes ( (Color 0) ) (
+  ( (red) (green) (blue) ))
+)
+; testers: (_ is red), (_ is green)
+
+; integer lists with "empty" and "insert" constructors
+(declare-datatypes ( (IntList 0) ) (
+  ( (empty) (insert (head Int) (tail IntList) )))
+)
+; testers: (_ is empty), (_ is insert)
+
+; parametric lists with "nil" and "cons" constructors
+(declare-datatypes ( (List 1) ) (
+  (par (T) ( (nil) (cons (car T) (cdr (List T)) )))))
+
+; option datatype
+(declare-datatypes ( (Option 1) ) (
+  (par (X) ( (none) (some (val X)) ))))
+
+; parametric pairs
+(declare-datatypes ( (Pair 2) ) (
+  (par (X Y) ( (pair (first X) (second Y)) ))))
+  
+; two mutually recursive datatypes
+(declare-datatypes ( (Tree 1) (TreeList 1) ) (
+  ; Tree
+  (par (X) ( (node (value X) (children (TreeList X)) )))
+  ; TreeList
+  (par (Y) ( (empty) 
+    (insert (head (Tree Y)) (tail (TreeList Y))) ))))
+    
+\end{lstlisting}
+
+Since $\delta_1, \ldots, \delta_n$ are sort symbols, 
+none of them can be a previously declared sort symbol.
+Similarly, constructors and selectors are function symbols,
+so none of them can be a previous declared/defined function symbol.
+This has the effect of also prohibiting, for instance, the use 
+of the same constructor in different datatypes or the use 
+of repeated instances of the same selector in the same datatype.\endnote{
+The rationale for this restriction is the same as for function symbols
+introduced with \ter{declare-fun} and \ter{define-fun}, i.e., 
+keep parsing and type checking simple. 
+}
+\smallskip
+
+%%% declare-datatype %%%
+%
+\item[\expr{ 
+(declare-datatype $\delta$ $d$)}] is an abbreviation of 
+\begin{center}
+\expr{(declare-datatypes (($\delta$ $0$)) ($d$))} 
+\end{center}
+if $\delta$ is not parametric, and an abbreviation of 
+\begin{center}
+\expr{(declare-datatypes (($\delta$ $k$)) ($d$))} 
+\end{center}
+if $d$ has the form \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}.
+This command provides a simpler syntax for defining a single datatype.
+
+\begin{lstlisting}[linewidth=37em]
+; an enumeration datatype
+(declare-datatype Color ( (red) (green) (blue) ))
+
+(declare-datatype IntList 
+  ( (empty) 
+    (insert (head Int) (tail IntList) )))
+
+(declare-datatype List (par (E)
+  ( (nil) 
+    (cons (car E) (cdr (List E)) ))))
+
+(declare-datatype Option (par (X) 
+  ( (none) 
+    (some (val X) ))))
+
+(declare-datatype Pair (par (X Y)
+ ( (pair (first X) (second Y)) ))))
+\end{lstlisting}
+\smallskip
+
+%%% define-fun %%%
+%
+\item[\expr{(define-fun $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
+with $n \geq 0$ and $t$ not containing $f$ is 
+semantically equivalent to the command sequence
+
+\begin{tabular}{l}
+\expr{(declare-fun $f$ ($\sigma_1$ $\cdots$ $\sigma_n$) $\sigma$)} \\
+\expr{(assert (forall (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) 
+       (= ($f$ $x_1$ $\cdots$ $x_n$) $t$))}.
+\end{tabular}
+
+%but differs in that $f$ is considered a definition and will be expanded in
+%solver output if the \attr{expand-definitions} option is set to \ter{true}.
+Note that the restriction on $t$ prohibits recursive or mutually recursive 
+definitions, 
+which are instead provided by \ter{define-fun-rec} and \ter{define-funs-rec}.
+The command reports an error if a function symbol with name $f$ is already 
+present in the current signature or if the argument $t$ is not a well-sorted term 
+of sort $\sigma$ with respect to the current signature extended 
+with the sort associations $(x_1:\sigma_1),\; \ldots,\; (x_n:\sigma_n)$.
+\smallskip
+
+%%% define-funs-rec %%%
+%
+\item[\expr{(define-funs-rec ($d_1$ $\cdots$ $d_m$) ($t_1$ $\cdots$ $t_m$))},]
+where $m > 0$ and for $i=1,\ldots,m$,
+$d_i$ has the form
+\begin{center}
+\expr{($f_i$ (($x_{i,1}$ $\sigma_{i,1}$) $\cdots$ ($x_{i,n_i}$ $\sigma_{i,n_i}$)) $\sigma_i$)}
+\end{center}
+with 
+$n_i \geq 0$ and $f_1, \ldots, f_m$ pairwise distinct,
+is semantically equivalent to the command sequence 
+\smallskip
+
+{\small
+\begin{tabular}{l}
+\expr{(declare-fun $f_1$ ($\sigma_{1,1}$ $\cdots$ $\sigma_{1,n_1}$) $\sigma_1$)} 
+\\
+\hspace{10em} \vdots 
+\\
+\expr{(declare-fun $f_m$ ($\sigma_{m,1}$ $\cdots$ $\sigma_{m,n_m}$) $\sigma_m$)} 
+\\
+\expr{(assert (forall (($x_{1,1}$ $\sigma_{1,1}$) $\cdots$ ($x_{1,n_1}$ $\sigma_{1,n_1}$)) 
+       (= ($f_1$ $x_{1,1}$ $\cdots$ $x_{1,n_1}$) $t_1$))}
+\\
+\hspace{16em} \vdots 
+\\
+\expr{(assert (forall (($x_{m,1}$ $\sigma_{m,1}$) $\cdots$ ($x_{m,n_m}$ $\sigma_{m,n_m}$)) 
+       (= ($f_m$ $x_{m,1}$ $\cdots$ $x_{m,n_m}$) $t_m$))} .
+\end{tabular}
+}
+\smallskip
+
+This command can be used to define multiple functions recursively,
+in particular, mutually recursively.\endnote{
+Similar to \ter{define-fun}, while strictly not needed, 
+\ter{define-funs-rec} provides a more structured way to define functions axiomatically,
+as opposed to introducing a new function with \ter{declare-fun} and then 
+providing its definition with \ter{assert} and a quantified formula.
+This gives an SMT solver the opportunity to easily recognize 
+function definitions and possibly process them specially.
+}
+Mutual recursion is possible since each term $t_i$ can contain any applications 
+of $f_1, \ldots, f_m$.  
+
+Note that, according to the semantics above, \ter{define-funs-rec} imposes 
+no requirements that each $f_i$ be terminating
+(a meaningless notion in our context) or even well-defined.\footnote{%
+In fact, it is even possible, although certainly not desirable, 
+to have a definition like
+\expr{(define-funs-rec ((f ((x Bool)) Bool)) ((not (f x))) )},
+which makes the set of formulas in the context unsatisfiable.
+}
+The only requirement is on the well-sortedness of the definitions.
+
+The command reports an error if for any $i \in \{1,\ldots,m\}$ 
+a function symbol with name $f_i$ is already present in the current signature 
+or if $t_i$ is not a well-sorted term of sort $\sigma_i$ with respect 
+to the current signature extended with the sort associations 
+$(f_1:\sigma_{1,1}\; \cdots\; \sigma_{1,n_1}\sigma_1)$, \ldots,
+$(f_m:\sigma_{m,1}\; \cdots\; \sigma_{m,n_m}\sigma_m)$
+and
+$(x_{i,1}:\sigma_{i,1}),\; \ldots,\; (x_{i,n_i}:\sigma_{i,n_i})$.
+\smallskip
+
+%%% define-fun-rec %%%
+%
+\item[\expr{(define-fun-rec $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
+is an abbreviation of
+\begin{center}
+\expr{(define-funs-rec (($f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$)) ($t$))}
+\end{center}
+It provides a simpler syntax to define individual recursive functions.
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Asserting and inspecting formulas}
+%-------------------------------------------------------------------------------
+
+\begin{description}
+%%% assert %%%
+%
+\item[\expr{(assert $t$)}]
+where $t$ is a well-sorted formula (i.e., a well-sorted term of sort \ter{Bool}),
+adds $t$ to the current assertion level.
+The well-sortedness requirement is with respect to the current signature.
+
+Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
+where the asserted formula $t$ is given a label $f$, 
+have the additional effect of adding $t$ to the formulas tracked 
+by the commands \ter{get-assignment} and \ter{get-unsat-core}, as explained later.
+\smallskip
+
+%%% get-assertions %%%
+%
+\item[\expr{(get-assertions)}]
+causes the solver to print the current set of all asserted formulas
+as a sequence of the form \expr{($f_1$ $\cdots$ $f_n$)}.
+Each $f_i$ is a formula syntactically identical, modulo whitespace, 
+to one of the formulas entered with an \ter{assert} command and 
+currently in the context.
+Solvers are not allowed to print formulas equivalent to or derived from 
+the asserted formulas.\endnote{
+The motivation is to enable interactive users to see easily (exactly)
+which assertions they have asserted, without having to keep track 
+of that information themselves.
+}
+
+The command can be issued only if the \attr{produce-assertions} option,
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).
+
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Checking for satisfiability} \label{sec:checking-for-sat}
+%-------------------------------------------------------------------------------
+
+\begin{description}
+
+%%% check-sat %%%
+%
+\item[\expr{(check-sat)}] is an abbreviation of \expr{(check-sat-assuming ())}.
+\smallskip
+
+%%% check-sat-assuming %%%
+%
+\item[\expr{(check-sat-assuming ($a_1$ $\cdots$ $a_n$))}] where $n \geq 0$
+and $a_1, \cdots, a_n$ are terms of sort \ter{Bool},
+%
+instructs the solver to check whether the conjunction of all the formulas 
+in the current context \emph{and} the \define{assumptions} $a_1, \cdots, a_n$
+is satisfiable in the extension of the current logic with all the current 
+user-declared and user-defined symbols.
+The assumptions $a_1, \ldots, a_n$ can only have the form $p$ or \expr{(not $p$)} 
+where $p$ is a user-declared/defined Boolean constant, i.e., 
+a nullary function symbol of sort \ter{Bool}.\endnote{
+The motivation for having this command is that it corresponds to 
+a common usage pattern with SMT solvers which can be implemented 
+considerably more efficiently than the general stack-based mechanism needed 
+to support \ter{push} and \ter{pop} commands.
+The restriction of assumptions to Boolean constants or negated constants only 
+is also motivated by efficiency concerns since user-defined constants are 
+associated with formulas that have already been internally simplified 
+at definition time. 
+}
+
+Conceptually, this command asks the solver to search for a model of the logic 
+that satisfies all the currently asserted formulas as well as 
+the current assumptions.
+When it has finished attempting to do this, the solver should reply 
+on its regular output channel (see Section~\ref{sec:response}) using 
+the response format defined by \nter{check\_sat\_response} 
+in Figure~\ref{fig:command-responses}.
+A \ter{sat} response indicates that the solver has found a model,
+an \ter{unsat} response that the solver has established there is no model, and 
+an \ter{unknown} response that the search was inconclusive---because of 
+resource limits, solver incompleteness, or other reasons.
+%
+On reporting \ter{sat} or \ter{unknown} the solver should move 
+to \mode{sat} mode---and then respond to \ter{get-assignment}, \ter{get-model}, and
+\ter{get-value} commands provided that the corresponding enabling option is set 
+to \ter{true}.
+On reporting \ter{unsat}, it should move to \mode{unsat} mode---and then respond
+to \ter{get-proof}, \ter{get-unsat-assumptions}, and 
+\ter{get-unsat-core} commands
+provided that the corresponding enabling option is set to \ter{true}.
+
+Regardless of how it is implemented internally, 
+a \ter{check-sat-assuming} command should preserve the current context 
+in the sense that at the end of the command's execution the context should be 
+the same as it was right before the execution.
+
+Note that a \ter{check-sat-assuming} command can be issued also 
+when the solver is already in \mode{sat} or \mode{unsat} mode
+(in this case, the context is necessarily the same as for the previous check command).
+However, it is possible for the solver to switch from \mode{sat} 
+to \mode{unsat} mode or vice versa if the latest command has 
+a different set of assumptions from the previous one.
+
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Inspecting models} 
+%-------------------------------------------------------------------------------
+
+The next three commands can be issued only when the solver is 
+in \mode{sat} mode, and provide information related 
+to the most recent check command.
+In that case, the solver will have identified a model $\str A$ 
+(as defined in Section~\ref{sec:models}) of the current logic,
+and produces responses with respect to that same model until 
+it receives the next check command or it exits the \mode{sat} mode,
+whichever comes first.
+The model $\str A$ is required to satisfy all currently asserted formulas 
+and current assumptions only if the most recent check command
+reported \ter{sat}.\endnote{
+SMT solvers are incomplete for certain logics, typically those that include
+quantified formulas.  
+However, even when they are unable to determine whether the set $\Gamma$ 
+of all assertions and assumptions is satisfiable or not, 
+SMT solvers can typically compute a model 
+for a set $\Gamma'$ of formulas that is entailed by $\Gamma$ in the logic.
+Interpretations in this model are often useful to client applications 
+even if they are not guaranteed to come from a model of $\Gamma$.
+}
+
+The internal representation of the model $\str A$ is not exposed by the solver.
+Similarly to an abstract data type, the model can be inspected only 
+through the three commands below.
+As a consequence, it can even be partial internally and extended as needed 
+in response to successive invocations of some of these commands.\footnote{%
+In that case, of course, the solver has to be sure 
+that its partial model can be indeed extended as needed.
+}
+
+\begin{description}
+
+%%% get-value %%%
+%
+\item[\expr{(get-value ($t_1$ $\cdots$ $t_n$))}]
+where $n > 0$ and each $t_i$ is a well-sorted closed quantifier-free
+term, returns for each $t_i$ a value term $v_i$\footnote{%
+Recall that value terms are particular ground terms defined in a logic 
+for each sort (see Subsection~\ref{sec:logic-decl}).  
+} 
+that is equivalent to $t_i$ in the current model $\str A$ (see above).
+Specifically, $v_i$ has the same sort as $t_i$, and 
+$t_i$ is interpreted the same way as $v_i$ in $\str A$.
+The values are returned as a sequence of pairs of the form 
+\expr{(($t_1$ $v_1$) $\cdots$ ($t_n$ $v_n$))}.
+The terms $v_1,\ldots,v_n$  are allowed to contain symbols
+not in the current signature only if they are abstract values, 
+i.e., constant symbols starting with the special character \ter{@}.\endnote{
+Abstract values are useful for reporting model values in logics containing  
+for example the theory of arrays (see Figure~\ref{fig:ArraysEx}). 
+For instance, a solver may specify the content of an array \ter{a} of sort
+\ter{(Array Int Int)} at positions 0--2 by returning the expression
+\begin{center}
+\expr{(define-fun a () 
+(store (store (store (as @array1 (Array Int Int)) 0 0) 1 2) 2 4))} .
+\end{center}
+The elements of \ter{a} with index outside the 0--2 range are left unspecified 
+because the array \ter{@array1} itself is left unspecified.
+}
+Since these are solver-defined, their sort is not known to the user.
+Therefore, additionally, each occurrence of an abstract value 
+$a$ of sort $\sigma$ in $v_1,\ldots,v_n$ has to be contained in a term 
+of the form \expr{(as $a$ $\sigma$)} which makes the sort explicit.
+
+Note that the returned abstract values are used only to express 
+information about the current model $\str A$.
+They cannot be used in later \ter{assert} commands 
+since they are neither theory symbols nor user-defined ones.
+However, they can be used in later \ter{get-value} commands 
+on the same model.
+
+There is no requirement that different permutations 
+of the same set of \ter{get-value} calls produce the same value 
+for the input terms.
+The only requirement is that syntactically different values 
+of the same sort returned by the solver have different meaning 
+in the model.\footnote{%
+So, for instance, in a logic of rational numbers and values of the form
+\expr{(/ $m$ $n$)} and \expr{(/ (- $m$) $n$)} with $m,n$ numerals, 
+the solver cannot use both the terms \expr{(/ 1 3)} and \expr{(/ 2 6)}
+as output values for \ter{get-value}.
+}
+
+The command can be issued only if the \attr{produce-models} option,
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).
+\smallskip
+
+%%% get-assignment %%%
+%
+\item[\expr{(get-assignment)}]
+can be seen as a light-weight and restricted version of \ter{get-value} 
+that asks for a truth assignment for a selected set 
+of previously entered formulas.\endnote{
+Since it focuses only on preselected, Boolean terms, 
+\ter{get-assignment} can be implemented much more efficiently than 
+the more general \ter{get-value}.
+}
+
+The command returns a sequence of the form 
+\expr{(($f_1$ $b_1$) $\cdots$ ($f_n$ $b_n$))} with $n \geq 0$.
+A pair \expr{($f_i$ $b_i$)} is in the returned sequence if and only if
+$f_i$ is the label of a (sub)term of the form 
+\expr{(!~$t_i$ \attr{named} $f_i$)} in the context, 
+with $t_i$ a closed term of sort \ter{Bool},
+and 
+$b_i$ is the value (\ter{true} or \ter{false}) 
+that $t_i$ has in the current model $\str A$.
+
+The command can be issued only if the \attr{produce-assignments} option, 
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).  
+\smallskip
+
+%%% get-model %%%
+%
+\item[\expr{(get-model)}]
+returns a list \expr{($d_1$ $\cdots$ $d_k$)} of definitions specifying \emph{all} and only the current user-declared 
+function symbols $\{g_1, \ldots, g_m\}$ in the current model $\str A$.
+The interpretation of each symbol is provided in exactly one of the definition 
+$d_1$,\dots $d_k$.  The define commands $d_1$,\dots $d_k$ have one of the following forms:\endnote{
+The rationale for providing the interpretation of a function symbol
+as a define command is that 
+$(i)$ the syntax of such commands is general enough to be able to express
+a large class of functions symbolically in the language of the current logic
+(possibly augmented with abstract values), and
+$(ii)$ in principle the user could use the provided definition as is in later
+interactions with the solver---as long as the original symbol's declaration 
+is no longer in the current context as a consequence of a system restart, 
+or a reset or a pop operation.
+}
+%
+\begin{itemize}
+\item
+\expr{(define-fun $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}
+
+where
+$n \geq 0$, $f$ has rank $\sigma_1 \cdots \sigma_n \sigma$,
+$t$ is a term not containing $f$, and the formula
+\smallskip
+
+\expr{
+\begin{tabular}{l}
+(forall (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) 
+       (= ($f$ $x_1$ $\cdots$ $x_n$) $t$))
+\end{tabular}
+}
+\smallskip
+
+is well-sorted and satisfied by $\str A$.
+The term $t$ is expected, although not required, to be a value 
+when $f$ is a constant (i.e., when $n = 0$).
+\smallskip
+
+\item
+\expr{(define-funs-rec  
+  (($f_1$ (($x_{1,1}$ $\sigma_{1,1}$) $\cdots$ ($x_{1,n_1}$ $\sigma_{1,n_1}$)) $\sigma_1$) $\cdots$
+\\
+\phantom{(define-funs-rec (}($f_p$ (($x_{p,1}$ $\sigma_{p,1}$) $\cdots$ ($x_{p,n_p}$ $\sigma_{p,n_p}$)) $\sigma_p$))
+ ($t_1$ $\cdots$ $t_p$))} 
+
+where $n_i > 0$ for $i=1,\ldots,p$, and the formula
+\smallskip
+
+\expr{
+\begin{tabular}{l@{\ }l}
+(and & (forall (($x_{1,1}$ $\sigma_{1,1}$) $\cdots$ ($x_{1,n}$ $\sigma_{1,n_1}$)) 
+       (= ($f_1$ $x_{1,1}$ $\cdots$ $x_{1,n_1}$) $t_1$))
+\\
+& \ \vdots
+\\
+& (forall (($x_{p,1}$ $\sigma_{p,1}$) $\cdots$ ($x_{p,n_p}$ $\sigma_{p,n_p}$)) 
+          (= ($f_p$ $x_{p,1}$ $\cdots$ $x_{p,n_p}$) $t_p$)))
+\end{tabular}
+}
+\smallskip
+
+is well-sorted and satisfied by $\str A$.
+\smallskip
+
+\item
+\expr{(define-fun-rec $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)} 
+where $n > 0$ and the formula 
+\smallskip
+
+\expr{
+\begin{tabular}{l}
+(forall (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) 
+          (= ($f$ $x_1$ $\cdots$ $x_n$) $t$))
+\end{tabular}
+}
+\smallskip
+
+is well-sorted and satisfied by $\str A$.
+
+\end{itemize}
+
+Similarly to the response of \ter{get-value}, 
+the terms $t,t_1,\ldots,t_m$ above are allowed to contain symbols
+not in the current signature only if they are abstract values.
+Morevever, each occurrence of an abstract value  $a$ of sort $\sigma$ 
+in $t,t_1,\ldots,t_m$ has to be contained in a term of the form 
+\expr{(as $a$ $\sigma$)}.
+
+Later versions of the standard may impose stronger requirements 
+on the returned definitions.
+For now there is only an expectation that, when possible, the solver will provide 
+definitions that have a unique interpretation over the current signature.\endnote{
+The current requirements on the returned definitions are rather weak.
+For instance, they allow a solver to return something like
+\begin{center}
+\expr{(define-fun-rec f (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ 
+   (f $x_1$ $\cdots$ $x_n$))} 
+\end{center}
+for a given $f$ of rank $\sigma_1\cdots\sigma_n\sigma$.
+Similarly, for constant symbols $c$ of a sort $\sigma$ that admits 
+abstract values, they allow a solver to return
+\expr{(define-fun c () @a)} with \ter{@a} abstract.
+
+The reason for such weak requirements is that stronger ones are 
+currently difficult to achieve in general because of limitations 
+in the expressive power of some SMT-LIB theories/logics or 
+in the computational abilities of present SMT solvers.
+For instance, the current theory of arrays (see Figure~\ref{fig:ArraysEx}) 
+does not have enough \emph{constructor} symbols
+to allow one to represent an array uniquely as a value term.
+As shown in a previous note, one can use terms like 
+\begin{center}
+\expr{(store (store (store (as @array1 (Array Int Int)) 0 0) 1 2) 2 4))}
+\end{center}
+which fixes only a portion of the array.
+This term has infinitely many interpretations that differ on the elements
+at indices outside the 0--2 range.
+Similarly, because of the progress in automated synthesis, it is conceivable 
+that future solvers will be able to construct a model
+where a user-declared function symbol $f$ denotes the factorial function 
+over the non-negative integers.
+In that case, a definition like
+\begin{center}
+\expr{(define-fun-rec f ((x Int)) Int (ite (= x 0) 1 (* x (f (- x 1)))))}
+\end{center}
+would not have a unique interpretation because it does not uniquely determine
+the behavior of $f$ over the negative integers.
+In contrast, the definition
+\begin{center}
+\expr{(define-fun-rec f ((x Int)) Int (ite (<= x 1) 1 (* x (f (- x 1)))))}
+\end{center}
+say, would determine a unique function over the whole set of integers.
+%Synthesizing such definitions from a set of input constraints is 
+%by and large beyond the abilities of current SMT solvers.
+}
+
+The command can be issued only if the \attr{produce-models} option,
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).
+
+\end{description}
+
+%-------------------------------------------------------------------------------
+\subsection{Inspecting proofs} 
+%-------------------------------------------------------------------------------
+
+The next three commands can be issued only when the solver is 
+in \mode{unsat} mode, and provide information related to the most recent 
+check command (which produced an \ter{unsat} response).
+%The command \ter{get-unsat-assumptions} below can be issued only following 
+%an invocation of \\
+%\ter{check-sat-assuming} that reports \ter{unsat},
+%without any intervening commands other than other instances of 
+%\ter{get-unsat-assumptions}.
+%The other two commands can be issued only following a \ter{check-sat} command  
+%that reports \ter{unsat}, without intervening commands that modify the context.
+
+\begin{description}
+%%% get-unsat-assumptions %%%
+%
+\item[\expr{(get-unsat-assumptions)}]
+returns a subset $a_1, \ldots,a_n$ of the assumptions in the most recent \\
+\ter{check-sat-assuming} command.
+These assumptions are such that issuing the command \\
+\expr{(check-sat-assuming ($a_1$ $\cdots$ $a_n$))}
+instead would have still produced an \ter{unsat} response.
+The returned sequence is not required to be minimal.\endnote{
+The lax requirement is justified by the fact that 
+the minimization problem alone is NP-hard in general.
+On the other hand, it allows a solver to be compliant by just returning
+the same sequence given to (the most recent) \ter{check-sat-assuming}.
+}
+
+The command can be issued only if the \attr{produce-unsat-assumptions} option,
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).
+\smallskip
+
+%%% get-proof %%%
+%
+\item[\expr{(get-proof)}]
+asks the solver for a proof of unsatisfiability for the set of all formulas
+in the current context.  
+The command can be issued only if the most recent check command had an empty set 
+of assumptions.
+The solver responds by printing a refutation proof 
+on its regular output channel.
+The format of the proof is solver-specific.\endnote{
+There is, as yet, no standard SMT-LIB proof format.
+}
+The only requirement is that, like all responses, it be a member 
+of \nter{s\_expr}.
+
+The command can be issued only if the \attr{produce-proofs} option,
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).
+\smallskip
+
+%%% get-unsat-core %%%
+%
+\item[\expr{(get-unsat-core)}]
+asks the solver to identify an \define{unsatisfiable core}, a subset of all 
+the formulas in the current context that is unsatisfiable by itself.
+The command can be issued only if the most recent check command had an empty set 
+of assumptions.
+The solver selects from the unsatisfiable core only those formulas
+that have been asserted with a command of the form
+\expr{(\ter{assert} (!~$t$ \attr{named} $f$))}, and returns a sequence
+\expr{($f_1$ $\cdots$ $f_n$)} of those labels.
+Unlabeled formulas in the unsatisfiable core are simply not reported.\endnote{
+Unsatisfiable cores are useful for applications because they circumscribe
+the source of unsatisfiability in the asserted set.  
+The labeling mechanism allows users to track only selected asserted formulas 
+when they already know that the rest of the asserted formulas are jointly
+satisfiable.  
+}
+
+The semantics of this command's output is that the reported assertions
+\emph{together with all} the unlabeled ones in the set of all
+assertions are jointly unsatisfiable.  In practice then, not labeling
+assertions is useful for unsat core detection purposes only when the
+user is sure that the set of all unlabeled assertions is satisfiable.
+
+The command can be issued only if the \attr{produce-unsat-cores} option,
+which is set to \ter{false} by default, is set to \ter{true} 
+(see Section~\ref{sec:options}).
+
+\end{description}
+
+
+%-------------------------------------------------------------------------------
+\subsection{Inspecting settings}
+%-------------------------------------------------------------------------------
+
+\begin{description}
+
+%%% get-info %%%
+%
+\item[\expr{(get-info $f$)}] where $f$ is an element of \nter{info\_flag}
+outputs solver information as specified in Section~\ref{sec:get-info}.
+If a solver does not support a (standard or non-standard) flag $f$,
+it just outputs \ter{unsupported}. 
+\smallskip
+
+%%% get-option %%%
+%
+\item[\expr{(get-option $o$)}] 
+outputs the current value of a solver's option $o$
+as an element of \nter{attribute\_value}.
+The form of that value depends on the specific option.
+More details on standard options and required behavior are provided 
+in Section~\ref{sec:options}.  
+If a solver does not support the setting of a standard option $o$,
+the command outputs the option's default value.
+For an unsupported non-predefined option the command outputs \ter{unsupported}.  
+\end{description}
+
+
+%------------------------------------------------------------------------
+\subsection{Script information} \label{sec:script-info}
+%------------------------------------------------------------------------
+
+\begin{description}
+
+%%% echo %%%
+%
+\item[\expr{(echo $s$)}] 
+where $s$ is a string literal, simply prints back $s$ as is---including 
+the surrounding double-quotes.\endnote{
+Interjecting \ter{echo} commands in a script can help a software client know 
+where the solver is in the execution of the script's commands. 
+}
+\smallskip
+
+%%% set-info %%%
+%
+\item[\expr{(set-info $a$)}] where $a$ is an element of \nter{attribute}
+has no effect on the assertion stack.
+Its only purpose is to allow the insertion of structured meta information 
+in a script.\endnote{
+This is particularly useful for scripts that are used as benchmarks,
+as \ter{set-info} can be used to store such information 
+as authors, date, expected response for a check command,
+difficulty level, and so on.
+}
+Typically then, a solver will just parse the command and do nothing with it, 
+except for printing a response (\ter{success} or an error, for instance,
+if the argument is not an element of \nter{attribute}).
+
+There is only a small number of predefined \ter{set-info} attributes,
+which are described below together with their possible values.
+These attributes are used in particular in the official SMT-LIB benchmarks
+at \href{http://www.smt-lib.org/benchmarks.shtml}{www.smt-lib.org}.
+
+\begin{description}
+\item[\attr{smt-lib-version}] \ 
+possible values: a decimal.
+\\
+The value of this attribute is the version of SMT-LIB used by the benchmark (e.g., \ter{2.6}).
+For benchmarks in the official repository a call to \ter{set-info} with this attribute can occur only as the first command of a script.
+
+\item[\attr{source}] \ 
+possible values: a string or a quoted symbol.
+\\
+The value of this attribute is a textual description of the benchmark's source,
+containing, as appropriate, such information as
+the name of person(s) who generated the benchmark;
+the generation date; % with format YYYY-MM-DD;
+the tool that generated it;
+the intended application;
+the solvers that were initially used or targeted to check the benchmarks;
+references to related publications; 
+any other information the benchmark author deems useful.
+
+\item[\attr{category}] \ 
+possible values: \ter{"crafted"}, \ter{"random"}, and \ter{"industrial"}.
+\\
+The value \ter{"crafted"} indicates that the benchmark was hand-crafted
+while \ter{"random"} indicates that it was generated by a random process;
+\ter{"industrial"} is reserved for everything else.\endnote{
+Note that the three possible values are strings and so need to be in quotes.
+The reasons for the values to be strings as opposed to symbols is historical.
+} 
+
+\item[\attr{license}] \ 
+possible values: a string.
+\\
+This is a description of the license under which the benchmark is distributed.
+It can be the actual text of the license, or the URL of a web site containing the description. 
+
+\item[\attr{status}] \ 
+possible values: \ter{sat}, \ter{unsat}, and \ter{unknown}.
+\\
+Each occurrence of the command \expr{(set-info :status sat)}
+(respectively, \expr{(set-info :status unsat)})
+indicates that the next check command in the script 
+is expected to return \ter{sat} (respectively, \ter{unsat}).
+More precisely, the expected value of a check command in a script is 
+the one indicated by the most recent command of the form 
+\expr{(set-info :status $v$)} in the script.
+The value \ter{unknown} is used when the expected value is not known.\endnote{
+Having an explicit \ter{unknown} value is useful for comparative evaluation 
+of solvers, for example in the SMT-COMP competition.
+}
+\end{description}
+\end{description}
+
+\begin{remark}[\ter{set-info} and \ter{get-info} are unrelated]
+Contrary to what their names might suggest,
+\ter{set-info} and \ter{get-info} are not related.
+The first command is used to store information about a script, 
+the second to obtain solver-specific information.\endnote{
+The reason for this unfortunate choice of names is historical.
+It is being kept only for backward compatibility with previous versions. 
+}
+\end{remark}
+
+
+
+

@@ -1,0 +1,238 @@
+%\documentclass{article}
+%\usepackage{hyperref}
+%\usepackage{endnotes}
+\makeatletter
+\newif\ifenotelinks
+\newcounter{Hendnote}
+% Redefining portions of endnotes-package:
+\let\savedhref\href
+\let\savedurl\url
+\def\endnotemark{%
+\@ifnextchar[\@xendnotemark{%
+\stepcounter{endnote}%
+\protected@xdef\@theenmark{\theendnote}%
+\protected@xdef\@theenvalue{\number\c@endnote}%
+\@endnotemark
+}%
+}%
+\def\@xendnotemark[#1]{%
+\begingroup\c@endnote#1\relax
+\unrestored@protected@xdef\@theenmark{\theendnote}%
+\unrestored@protected@xdef\@theenvalue{\number\c@endnote}%
+\endgroup
+\@endnotemark
+}%
+\def\endnotetext{%
+\@ifnextchar[\@xendnotenext{%
+\protected@xdef\@theenmark{\theendnote}%
+\protected@xdef\@theenvalue{\number\c@endnote}%
+\@endnotetext
+}%
+}%
+\def\@xendnotenext[#1]{%
+\begingroup
+\c@endnote=#1\relax
+\unrestored@protected@xdef\@theenmark{\theendnote}%
+\unrestored@protected@xdef\@theenvalue{\number\c@endnote}%
+\endgroup
+\@endnotetext
+}%
+\def\endnote{%
+\@ifnextchar[\@xendnote{%
+\stepcounter{endnote}%
+\protected@xdef\@theenmark{\theendnote}%
+\protected@xdef\@theenvalue{\number\c@endnote}%
+%ct \@endnotemark\@endnotetext
+$^($\@endnotemark$^)$\@endnotetext
+}%
+}%
+\def\@xendnote[#1]{%
+\begingroup
+\c@endnote=#1\relax
+\unrestored@protected@xdef\@theenmark{\theendnote}%
+\unrestored@protected@xdef\@theenvalue{\number\c@endnote}%
+\show\@theenvalue
+\endgroup
+\@endnotemark\@endnotetext
+}%
+\def\@endnotemark{%
+\leavevmode
+\ifhmode
+\edef\@x@sf{\the\spacefactor}\nobreak
+\fi
+\ifenotelinks
+\expandafter\@firstofone
+\else
+\expandafter\@gobble
+\fi
+{%
+\Hy@raisedlink{%
+\hyper@@anchor{Hendnotepage.\@theenvalue}{\empty}%
+}%
+}%
+\hyper@linkstart{link}{Hendnote.\@theenvalue}%
+\makeenmark
+\hyper@linkend
+\ifhmode
+\spacefactor\@x@sf
+\fi
+\relax
+}%
+\long\def\@endnotetext#1{%
+\if@enotesopen
+\else
+\@openenotes
+\fi
+\immediate\write\@enotes{%
+\@doanenote{\@theenmark}{\@theenvalue}%
+}%
+\begingroup
+\def\next{#1}%
+\newlinechar='40
+\immediate\write\@enotes{\meaning\next}%
+\endgroup
+\immediate\write\@enotes{%
+\@endanenote
+}%
+}%
+\def\theendnotes{%
+\immediate\closeout\@enotes
+\global\@enotesopenfalse
+\begingroup
+\makeatletter
+\edef\@tempa{`\string>}%
+\ifnum\catcode\@tempa=12
+\let\@ResetGT\relax
+\else
+\edef\@ResetGT{\noexpand\catcode\@tempa=\the\catcode\@tempa}%
+\@makeother\>%
+\fi
+\def\@doanenote##1##2##3>{%
+\def\@theenmark{##1}%
+\def\@theenvalue{##2}%
+\par
+\smallskip %<-small vertical gap between endnotes
+\begingroup
+\def\href{\expandafter\savedhref}%
+\def\url{\expandafter\savedurl}%
+\@ResetGT
+\edef\@currentlabel{\csname p@endnote\endcsname\@theenmark}%
+\enoteformat
+}%
+\def\@endanenote{%
+\par\endgroup
+}%
+% Redefine, how numbers are formatted in the endnotes-section:
+\renewcommand*\@makeenmark{%
+\hbox{\normalfont\@theenmark~}%
+}%
+% header of endnotes-section
+%ct \enoteheading
+% font-size of endnotes
+\enotesize
+\input{\jobname.ent}%
+\endgroup
+}%
+\def\enoteformat{%
+\rightskip\z@
+\leftskip1.8em
+\parindent\z@
+\leavevmode\llap{%
+\setcounter{Hendnote}{\@theenvalue}%
+\addtocounter{Hendnote}{-1}%
+\refstepcounter{Hendnote}%
+\ifenotelinks
+\expandafter\@secondoftwo
+\else
+\expandafter\@firstoftwo
+\fi
+{\@firstofone}%
+{\hyperlink{Hendnotepage.\@theenvalue}}%
+{\makeenmark}%
+}%
+}%
+% stop redefining portions of endnotes-package:
+\makeatother
+%
+%% Toggle switch in order to turn on/off back-links in the
+%% endnote-section:
+%\enotelinkstrue
+%%\enotelinksfalse
+%\begin{document}
+%\addtocounter{section}{9}
+%\section{test}
+
+%A footnote works fine.%
+%\footnote{Use \href{http://docs.python.org}{Python}.}
+
+%A broken footnote also works fine.\footnotemark[4]%
+%\footnotetext[4]{%
+%Where is \href{http://docs.python.org}{Python}?
+%Here: \url{http://docs.python.org}
+%}
+
+%An endnote does work now.%
+%\endnote{%
+%\label{enoteA}%
+%Why not using \href{http://docs.python.org}{Python}?
+%Here you find it: \url{http://docs.python.org}
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%}
+
+%You can also break it up.\endnotemark[4]\label{enoteB}%
+%\endnotetext[4]{%
+%\label{enoteC}%
+%Where is \href{http://docs.python.org}{Python}?
+%Here: \url{http://docs.python.org}
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%}
+
+%You can also break it up.\endnotemark[10]\label{enoteD}%
+%\endnotetext[10]{%
+%\label{enoteE}%
+%Where is \href{http://docs.python.org}{Python}?
+%Here: \url{http://docs.python.org}
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%}
+
+%You can also break it up.\endnotemark[100]\label{enoteF}%
+%\endnotetext[100]{%
+%\label{enoteG}%
+%Where is \href{http://docs.python.org}{Python}?
+%Here: \url{http://docs.python.org}
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%multi line text multi line text multi line text
+%}
+
+%Continue in text\label{enoteH}.
+
+%Reference in endnote: \ref{enoteA}.
+
+%Reference in text after endnote-mark: \ref{enoteB}.
+
+%Reference in endnote-text: \ref{enoteC}.
+
+%Reference in text after endnote-text: \ref{enoteD}.
+
+%Reference in endnote-text: \ref{enoteE}.
+
+%Reference in text after endnote-text: \ref{enoteF}.
+
+%Reference in endnote-text: \ref{enoteG}.
+
+%Reference in Text: \ref{enoteH}
+%\newpage
+%\theendnotes
+
+%\end{document}
