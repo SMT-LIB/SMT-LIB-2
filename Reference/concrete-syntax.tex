@@ -485,8 +485,6 @@ A sort parameter can be any \nter{symbol}
 (which in turn, is an \nter{identifier}).
 \bigskip
 
-\pfrem{TODO: introduce arrow sort constructor.}
-
 \cSorts
 \medskip
 
@@ -496,6 +494,8 @@ Int                         Bool
 (_ BitVec 3)                (List (Array Int Real))
 
 ((_ FixedSizeList 4) Real)  (Set (_ Bitvec 3))       
+
+(-> Int Real)               (-> Int (-> Int Real))
 \end{lstlisting}
 
 A \define{(non-)parametric} sort is a sort containing (no) parameters.
@@ -1354,19 +1354,21 @@ such a theory would not be not very interesting).
 \begin{verbatim}
 (theory Core
 
- :sorts ( (Bool 0) )
+ :sorts ( (Bool 0) (-> 2 :right-assoc) )
 
  :funs ( (true Bool)  (false Bool)  (not Bool Bool)
          (=> Bool Bool Bool :right-assoc)  (and Bool Bool Bool :left-assoc)
          (or Bool Bool Bool :left-assoc)  (xor Bool Bool Bool :left-assoc)
          (par (A) (= A A Bool :chainable))
          (par (A) (distinct A A Bool :pairwise))
-         (par (A) (ite Bool A A A)) )
+         (par (A) (ite Bool A A A)) 
+         (par (A B) (_ (-> A B :left-assoc) A B)) )
 
  :definition
  "For every expanded signature Sigma, the instance of Core with that signature
   is the theory consisting of all Sigma-models in which: 
   - the sort Bool denotes the set {true, false} of Boolean values;
+  - the sort constructor -> denotes the function space constructor;
   - for all sorts s in Sigma, 
     - (= s s Bool) denotes the function that
       returns true iff its two arguments are identical;
@@ -1382,10 +1384,9 @@ such a theory would not be not very interesting).
 )
 \end{verbatim}
 }%
-\caption{The \ter{Core} theory declaration.}
+\caption{The \ter{Core} theory declaration. \ctrem{To revise}}
 \label{fig:Core}
 \end{figure}
-
 
 \begin{figure}[t]
 \small
@@ -1888,38 +1889,51 @@ both of which abbreviate the expression \expr{(- (* $n$ $t$))}.
 
 
 %-------------------------------------------------------------------------------
-\subsubsection*{Higher-order logic}
+\section{Higher-order logic}
 %-------------------------------------------------------------------------------
 %
-The full language of the theory \ter{SetsRelations} 
-from Figure~\ref{fig:SetsRelations} has the same expressive power as
-higher-order logic or, more precisely, higher-order simple predicate logic
-with primitive types.\footnote{%
-This is a relational version of higher-order logic, as opposed 
-to the functional versions that are more popular in computer science. 
-}
-Higher-order quantification is realized by first-order quantification 
-over sorts of the form \expr{(Set $\sigma$)}.
-Similarly, higher-order predicate symbols can be encoded 
-as unary first-order predicate symbols over sets.
-In fact, because of the presence of the predicate symbol \ter{in}, 
-no additional predicate symbols at all are needed:
-every atomic formula of the form \expr{($p$ $t$)} 
-can be replaced by the formula \expr{(in $t$ $p'$)}
-where $p'$ is a constant symbol of sort 
-\expr{(Set (Prod $\sigma_1$ $\cdots$ $\sigma_n$))}
-if $p$ has rank \expr{((Prod $\sigma_1$ $\cdots$ $\sigma_n$) Bool)}, 
-and of sort \expr{(Set $\sigma$)}
-if $p$ has rank \expr{($\sigma$ Bool)}.
+% The full language of the theory \ter{SetsRelations} 
+% from Figure~\ref{fig:SetsRelations} has the same expressive power as
+% higher-order logic or, more precisely, higher-order simple predicate logic
+% with primitive types.\footnote{%
+% This is a relational version of higher-order logic, as opposed 
+% to the functional versions that are more popular in computer science. 
+% }
+% Higher-order quantification is realized by first-order quantification 
+% over sorts of the form \expr{(Set $\sigma$)}.
+% Similarly, higher-order predicate symbols can be encoded 
+% as unary first-order predicate symbols over sets.
+% In fact, because of the presence of the predicate symbol \ter{in}, 
+% no additional predicate symbols at all are needed:
+% every atomic formula of the form \expr{($p$ $t$)} 
+% can be replaced by the formula \expr{(in $t$ $p'$)}
+% where $p'$ is a constant symbol of sort 
+% \expr{(Set (Prod $\sigma_1$ $\cdots$ $\sigma_n$))}
+% if $p$ has rank \expr{((Prod $\sigma_1$ $\cdots$ $\sigma_n$) Bool)}, 
+% and of sort \expr{(Set $\sigma$)}
+% if $p$ has rank \expr{($\sigma$ Bool)}.
 
-%-------------------------------------------------------------------------------
-\subsubsection*{Monadic second-order logic}
-%-------------------------------------------------------------------------------
-This logic can be obtained by imposing restrictions on the language
-of the \ter{SetsRelations} theory mentioned above, specifically, 
-by disallowing the use of terms of \ter{Prod} sorts (monadic restriction) or
-nested \ter{Set} sorts (second-order restriction) 
-while, however, allowing additional function and predicate symbols.
+% %-------------------------------------------------------------------------------
+% \subsubsection*{Monadic second-order logic}
+% %-------------------------------------------------------------------------------
+% This logic can be obtained by imposing restrictions on the language
+% of the \ter{SetsRelations} theory mentioned above, specifically, 
+% by disallowing the use of terms of \ter{Prod} sorts (monadic restriction) or
+% nested \ter{Set} sorts (second-order restriction) 
+% while, however, allowing additional function and predicate symbols.
+
+
+We already have HOL
+
+the core theory contains an arrow sort constructor
+
+symbols of arrow sort can be applied (with the applied function "\_" )to the approriate number of arguments of appropriate sort
+
+there is syntactic sugar, where you can leave out the underscore
+
+\pfrem{We need to fix this section.}
+
+
 
 
 
