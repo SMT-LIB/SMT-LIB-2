@@ -1354,15 +1354,14 @@ such a theory would not be not very interesting).
 \begin{verbatim}
 (theory Core
 
- :sorts ( (Bool 0) (-> 2 :right-assoc) )
+ :sorts ( (Bool 0) ... )
 
- :funs ( (true Bool)  (false Bool)  (not Bool Bool)
-         (=> Bool Bool Bool :right-assoc)  (and Bool Bool Bool :left-assoc)
-         (or Bool Bool Bool :left-assoc)  (xor Bool Bool Bool :left-assoc)
+ :funs ( (true Bool)  (false Bool)  
+         (not Bool Bool) (=> Bool Bool Bool :right-assoc)
          (par (A) (= A A Bool :chainable))
          (par (A) (distinct A A Bool :pairwise))
-         (par (A) (ite Bool A A A)) 
-         (par (A B) (_ (-> A B :left-assoc) A B)) )
+         (par (A) (ite Bool A A A))
+         ... )
 
  :definition
  "For every expanded signature Sigma, the instance of Core with that signature
@@ -1377,47 +1376,15 @@ such a theory would not be not very interesting).
     - (ite Bool s s) denotes the function that
       returns its second argument or its third depending on whether 
       its first argument is true or not;
-  - the other function symbols of Core denote the standard Boolean operators
-    as expected."
+   ..."
   
   :values "The set of values for the sort Bool is {true, false}." 
 )
 \end{verbatim}
 }%
-\caption{The \ter{Core} theory declaration. \ctrem{To revise}}
-\label{fig:Core}
+\caption{An exerpt of the \ter{Core} theory declaration. \ctrem{To revise}}
+\label{fig:CoreExerpt}
 \end{figure}
-
-\begin{figure}[t]
-\small
-{\color{NavyBlue}
-\begin{verbatim}
-(theory Ints
- :sorts ( (Int 0) )
- :funs ( (NUMERAL Int) 
-         (- Int Int)                 ; negation
-         (- Int Int Int :left-assoc) ; subtraction
-         (+ Int Int Int :left-assoc) 
-         (* Int Int Int :left-assoc)
-         (<= Int Int Bool :chainable)
-         (<  Int Int Bool :chainable)
-         (>= Int Int Bool :chainable)
-         (>  Int Int Bool :chainable) )
- :definition 
- "For every expanded signature Sigma, the instance of Ints with that
-  signature is the theory consisting of all Sigma-models that interpret 
-  - the sort Int as the set of all integers,
-  - the function symbols of Ints as expected. "
- :values 
- "The Int values are all the numerals and all the terms of the form (- n)
-  where n is a non-zero numeral." 
-)
-\end{verbatim}
-}
-\caption{A possible theory declaration for the integer numbers.}
-\label{fig:Integers}
-\end{figure}
-
 
 To provide the usual set of Boolean connectives for building formulas,
 in addition to the predefined logical symbol \ter{distinct},
@@ -1426,76 +1393,48 @@ a basic core theory is implicitly included in every other SMT-LIB theory.
 %The theory declaration \ter{Empty} in Version 1.2 of SMT-LIB is 
 %superseded by the \ter{Core} theory declaration schema.
 %}
-Concretely, every theory declaration is assumed to contain implicitly
-the \attr{sorts} and \attr{funs} attributes of the \ter{Core} theory declaration
-shown in Figure~\ref{fig:Core},
-and to define the symbols in those attributes in the same way as in \ter{Core}.
-
-Note the absence of a symbol for double implication.
-Such a connective is superfluous 
-because the equality symbol \ter{=} can be used in its place. 
-Note how the attributes specified in the declarations of the various symbols
-of this theory allow one, for instance, to write expressions like 
-
-\begin{itemize} \setlength\itemsep{0ex}
-\item[] \expr{(=> x y z)}
-\item[] \expr{(and x y z)}
-\item[] \expr{(= x y z)}
-\item[] \expr{(distinct x y z)}
-\end{itemize}
-
-\noindent respectively as abbreviations for the terms
-
-\begin{itemize} \setlength\itemsep{0ex}
-\item[] \expr{(=> x (=> y z))}
-\item[] \expr{(and (and x y) z)}
-\item[] \expr{(and (= x y) (= y z))}
-\item[] \expr{(and (distinct x y) (distinct x z) (distinct y z))} .
-\end{itemize}
-
-The simplest instance of \ter{Core} is the theory with no additional sort
-and function symbols.
-In that theory, there is only one sort, \ter{Bool},
-and \ter{ite} has only one rank, \expr{(ite Bool Bool Bool Bool)}.
-%\footnote{%
-%That \ter{ite} operator plays the role of the \ter{if\_then\_else} connective in Version 1.2.
-%}
-In other words, this is just the theory of the Booleans with the standard Boolean operators
-plus \ter{ite} and \ter{distinct}.
-The set of values for the \ter{Bool} sort is, predictably, $\{\ter{true},\ter{false}\}$.
-
-Another instance has a single additional sort symbol \ter{U}, say, 
-of arity 0, and a (possibly infinite) set number of function symbols 
-with rank in \ter{U}$\!^+$.
-This theory corresponds to \emph{EUF}, 
-the (one-sorted) theory of equality and \emph{uninterpreted functions}
-(over those function symbols).
-In this theory, \ter{ite} has two ranks:
-\expr{(ite Bool Bool Bool Bool)} and \expr{(ite Bool U U U)}.
-A many-sorted version of EUF is obtained by instantiating \ter{Core}
-with more than one nullary sort symbol---and possibly additional
-function symbols over the resulting sort set. 
-
-Yet another instance is the theory with an additional unary sort symbol \ter{List}
-and an additional number of function symbols.
-This theory has infinitely many sorts:
-\ter{Bool}, \ter{(List Bool)},  \ter{(List (List Bool))}, etc.
-However, by the definition of \ter{Core},
-all those sorts and function symbols are still ``uninterpreted'' in the theory.
-In essence, 
-this theory is the same as a many-sorted version of EUF with infinitely many sorts.
-While not very interesting in isolation,
-the theory is useful in combination with a theory of lists that,
-for each sort $\sigma$, 
-interprets \expr{(List $\sigma$)} as the set of all lists over $\sigma$.
-The combined theory in that case is a theory of lists with uninterpreted
-functions.
+Concretely, every theory declaration is assumed 
+to contain implicitly the \attr{sorts} and \attr{funs} attributes 
+of the \ter{Core} theory declaration and 
+to define the symbols in those attributes in the same way as in \ter{Core}.
+An exerpt of the Core theory is shown in Figure~\ref{fig:CoreExerpt}.
+A more detailed description of this theory is provided in Section~\ref{sec:core}.
 
 
 %-------------------------------------------------------------------------------
 \subsubsection*{Integers}
 %-------------------------------------------------------------------------------
 
+\begin{figure}[t]
+  \small
+  {\color{NavyBlue}
+  \begin{verbatim}
+  (theory Ints
+   :sorts ( (Int 0) )
+   :funs ( (NUMERAL Int) 
+           (- Int Int)                 ; negation
+           (- Int Int Int :left-assoc) ; subtraction
+           (+ Int Int Int :left-assoc) 
+           (* Int Int Int :left-assoc)
+           (<= Int Int Bool :chainable)
+           (<  Int Int Bool :chainable)
+           (>= Int Int Bool :chainable)
+           (>  Int Int Bool :chainable) )
+   :definition 
+   "For every expanded signature Sigma, the instance of Ints with that
+    signature is the theory consisting of all Sigma-models that interpret 
+    - the sort Int as the set of all integers,
+    - the function symbols of Ints as expected. "
+   :values 
+   "The Int values are all the numerals and all the terms of the form (- n)
+    where n is a non-zero numeral." 
+  )
+  \end{verbatim}
+  }
+  \caption{A possible theory declaration for the integer numbers.}
+  \label{fig:Integers}
+\end{figure}
+  
 The theory declaration of Figure~\ref{fig:Integers} defines all theories
 that extend the standard theory of the (mathematical) integers with additional 
 \emph{uninterpreted} sort and function symbols.\footnote{%
@@ -1706,6 +1645,115 @@ And the language of a logic can be always restricted to contain only
 a selected subset of the sorts in the logic's theory.
 \end{remark}
 
+
+
+\section{Core Theory}
+\label{sec:core}
+
+
+\begin{figure}[t]
+\small
+{\color{NavyBlue}
+\begin{verbatim}
+(theory Core
+
+ :sorts ( (Bool 0) (-> 2 :right-assoc) )
+
+ :funs ( (true Bool)  (false Bool)  (not Bool Bool)
+         (=> Bool Bool Bool :right-assoc)  (and Bool Bool Bool :left-assoc)
+         (or Bool Bool Bool :left-assoc)  (xor Bool Bool Bool :left-assoc)
+         (par (A) (= A A Bool :chainable))
+         (par (A) (distinct A A Bool :pairwise))
+         (par (A) (ite Bool A A A)) 
+         (par (A B) (_ (-> A B :left-assoc) A B)) )
+
+ :definition
+ "For every expanded signature Sigma, the instance of Core with that signature
+  is the theory consisting of all Sigma-models in which: 
+  - the sort Bool denotes the set {true, false} of Boolean values;
+  - the sort constructor -> denotes the function space constructor;
+  - for all sorts s in Sigma, 
+    - (= s s Bool) denotes the function that
+      returns true iff its two arguments are identical;
+    - (distinct s s Bool) denotes the function that
+      returns true iff its two arguments are not identical;
+    - (ite Bool s s) denotes the function that
+      returns its second argument or its third depending on whether 
+      its first argument is true or not;
+  - the other function symbols of Core denote the standard Boolean operators
+    as expected."
+  
+  :values "The set of values for the sort Bool is {true, false}." 
+)
+\end{verbatim}
+}%
+\caption{The \ter{Core} theory declaration. \ctrem{To revise}}
+\label{fig:Core}
+\end{figure}
+
+\ctrem{add intro} 
+
+Note the absence of a symbol for double implication.
+Such a connective is superfluous 
+because the equality symbol \ter{=} can be used in its place. 
+Note how the attributes specified in the declarations of the various symbols
+of this theory allow one, for instance, to write expressions like 
+
+\begin{itemize} \setlength\itemsep{0ex}
+\item[] \expr{(=> x y z)}
+\item[] \expr{(and x y z)}
+\item[] \expr{(= x y z)}
+\item[] \expr{(distinct x y z)}
+\end{itemize}
+
+\noindent respectively as abbreviations for the terms
+
+\begin{itemize} \setlength\itemsep{0ex}
+\item[] \expr{(=> x (=> y z))}
+\item[] \expr{(and (and x y) z)}
+\item[] \expr{(and (= x y) (= y z))}
+\item[] \expr{(and (distinct x y) (distinct x z) (distinct y z))} .
+\end{itemize}
+
+
+
+The simplest instance of \ter{Core} is the theory with no additional sort
+and function symbols.
+In that theory, there is only one sort, \ter{Bool},
+and \ter{ite} has only one rank, \expr{(ite Bool Bool Bool Bool)}.
+%\footnote{%
+%That \ter{ite} operator plays the role of the \ter{if\_then\_else} connective in Version 1.2.
+%}
+In other words, this is just the theory of the Booleans with the standard Boolean operators
+plus \ter{ite} and \ter{distinct}.
+The set of values for the \ter{Bool} sort is, predictably, $\{\ter{true},\ter{false}\}$.
+
+Another instance has a single additional sort symbol \ter{U}, say, 
+of arity 0, and a (possibly infinite) set number of function symbols 
+with rank in \ter{U}$\!^+$.
+This theory corresponds to \emph{EUF}, 
+the (one-sorted) theory of equality and \emph{uninterpreted functions}
+(over those function symbols).
+In this theory, \ter{ite} has two ranks:
+\expr{(ite Bool Bool Bool Bool)} and \expr{(ite Bool U U U)}.
+A many-sorted version of EUF is obtained by instantiating \ter{Core}
+with more than one nullary sort symbol---and possibly additional
+function symbols over the resulting sort set. 
+
+Yet another instance is the theory with an additional unary sort symbol \ter{List}
+and an additional number of function symbols.
+This theory has infinitely many sorts:
+\ter{Bool}, \ter{(List Bool)},  \ter{(List (List Bool))}, etc.
+However, by the definition of \ter{Core},
+all those sorts and function symbols are still ``uninterpreted'' in the theory.
+In essence, 
+this theory is the same as a many-sorted version of EUF with infinitely many sorts.
+While not very interesting in isolation,
+the theory is useful in combination with a theory of lists that,
+for each sort $\sigma$, 
+interprets \expr{(List $\sigma$)} as the set of all lists over $\sigma$.
+The combined theory in that case is a theory of lists with uninterpreted
+functions.
 
 
 %-------------------------------------------------------------------------------
