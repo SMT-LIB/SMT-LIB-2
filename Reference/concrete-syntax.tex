@@ -531,7 +531,7 @@ constant symbols in the \nter{spec\_constant} category
 \define{variables}, 
 \define{function symbols}, 
 four kinds of \define{binders} 
-(introduced by the reserved words \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
+(introduced by the reserved words \ter{lambda}, \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
 and an annotation operator (the reserved word \ter{!}).
 In its simplest form, a term is 
 a special constant symbol,
@@ -562,7 +562,8 @@ of the form \expr{(as $f$ $\sigma$)}.
 
 SMT-LIB scripts can contain only \define{well-sorted} terms
 (see Section~\ref{well-sortedness}).
-Formulas in SMT-LIB are just well-sorted terms of sort \ter{Bool}.
+Formulas in SMT-LIB are just well-sorted terms of sort \ter{Bool}
+ (see Section~\ref{sec:core}).
 As a consequence, there is no syntactic distinction 
 between function and predicate symbols;
 the latter are simply function symbols whose result sort is \ter{Bool}.
@@ -583,9 +584,35 @@ Another consequence is that function symbols can take formulas
 \subsection{Variable Binders}  \label{sec:binders}
 %-------------------------------------------------------------------------------
 
-Variables are introduced by means of one of the four binders.
+Variables are introduced by means of one of the five binders.
 Each binder allows the introduction of one or more variables 
 or parameters with local scope.
+
+\paragraph{Lambda.}
+
+
+This binder corresponds to the abstraction binder of higher-order logic.
+It takes a non-empty list of variables, 
+which abbreviates a sequential nesting of lambda abstractions.
+Specifically, a term of the form
+
+\begin{equation} \label{eq:lambda}
+  \expr{
+  (lambda (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) 
+    $t$)
+  }
+\end{equation}
+has the same semantics as the term
+%
+  \begin{equation} \label{eq:nested-lambda}
+  \expr{
+   (lambda (($x_1$ $\sigma_1$)) 
+   (lambda (($x_2$ $\sigma_2$)) ($\cdots$ 
+   (lambda (($x_n$ $\sigma_n$)) $t$) $\cdots$)
+  }
+  \end{equation}
+  %
+  See Section~\ref{sec:core} for more details on the use of this binder.
 
 \paragraph{Exists and forall quantifiers.}
 These binders correspond 
@@ -777,8 +804,9 @@ or the \ter{let} subexpression, if $i=m$, is replaced by \expr{(let (($x$ $t$)) 
 %-------------------------------------------------------------------------------
 
 SMT-LIB allows the declaration of parametric function symbols 
-in theory declarations (see Section~\ref{sec:theory-declarations}) 
+in theory declarations (see Section~\ref{sec:theory-declarations})
 and of parametric datatypes in user scripts (see Section~\ref{sec:new-symbols}).
+It also allows parametric assertions in user scripts (see Section~\ref{sec:xxxx})
 Sort parameters are introduced with expressions of the form
 \begin{center}
  \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
@@ -806,9 +834,9 @@ if $e_1$ is \ter{par} or not a binder, and
 $x$ occurs free in some $e_i$ ($1\le i\le n$); 
 \item
 occurs free in an expression 
-\expr{(forall ($s_1$ $\cdots$ $s_n$) $t$)} or
-\expr{(exists ($s_1$ $\cdots$ $s_n$) $t$)} 
-if it does not occur in $s_1, \ldots, s_n$ and occurs free in $t$;
+\expr{($Q$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)}
+where $Q$ is \ter{lambda}, \ter{forall}, or \ter{exists}
+if it does not occur in $\{x_1, \ldots, x_n\}$ and occurs free in $t$;
 \item
 occurs free in an expression 
 \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)} if 
@@ -842,8 +870,8 @@ has a \define{scope} defined as follows.
 \begin{itemize}
 \item
 In an expression 
-\expr{($q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
-where $q$ is either \ter{forall} or \ter{exists}, 
+\expr{($Q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
+where $Q$ is either \ter{lambda}, \ter{forall}, or \ter{exists}, 
 or in an expression \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)},
 the scope of each variable in $\{x_1, \ldots, x_n\}$ is the term $t$.
 \item
@@ -1348,56 +1376,14 @@ such a theory would not be not very interesting).
 
 \subsubsection*{Core theory}
 
-\begin{figure}[t]
-\small
-{\color{NavyBlue}
-\begin{verbatim}
-(theory Core
-
- :sorts ( (Bool 0) ... )
-
- :funs ( (true Bool)  (false Bool)  
-         (not Bool Bool) (=> Bool Bool Bool :right-assoc)
-         (par (A) (= A A Bool :chainable))
-         (par (A) (distinct A A Bool :pairwise))
-         (par (A) (ite Bool A A A))
-         ... )
-
- :definition
- "For every expanded signature Sigma, the instance of Core with that signature
-  is the theory consisting of all Sigma-models in which: 
-  - the sort Bool denotes the set {true, false} of Boolean values;
-  - the sort constructor -> denotes the function space constructor;
-  - for all sorts s in Sigma, 
-    - (= s s Bool) denotes the function that
-      returns true iff its two arguments are identical;
-    - (distinct s s Bool) denotes the function that
-      returns true iff its two arguments are not identical;
-    - (ite Bool s s) denotes the function that
-      returns its second argument or its third depending on whether 
-      its first argument is true or not;
-   ..."
-  
-  :values "The set of values for the sort Bool is {true, false}." 
-)
-\end{verbatim}
-}%
-\caption{An exerpt of the \ter{Core} theory declaration. \ctrem{To revise}}
-\label{fig:CoreExerpt}
-\end{figure}
-
 To provide the usual set of Boolean connectives for building formulas,
 in addition to the predefined logical symbol \ter{distinct},
 a basic core theory is implicitly included in every other SMT-LIB theory.
-%\endnote{
-%The theory declaration \ter{Empty} in Version 1.2 of SMT-LIB is 
-%superseded by the \ter{Core} theory declaration schema.
-%}
 Concretely, every theory declaration is assumed 
 to contain implicitly the \attr{sorts} and \attr{funs} attributes 
 of the \ter{Core} theory declaration and 
 to define the symbols in those attributes in the same way as in \ter{Core}.
-An exerpt of the Core theory is shown in Figure~\ref{fig:CoreExerpt}.
+The full Core theory definition is shown in Figure~\ref{fig:Core}.
 A more detailed description of this theory is provided in Section~\ref{sec:core}.
 
 
@@ -1691,7 +1677,24 @@ a selected subset of the sorts in the logic's theory.
 \label{fig:Core}
 \end{figure}
 
-\ctrem{add intro} 
+\ctrem{Maybe we should not have \ter{->} and \ter{\_} here and move them to an HO-Core theory.} 
+
+
+The core theory is a subtheory of all SMT-LIB theories.
+It introduces the basis sort and function symbols of the underlying logic,
+which are then automatically available in all theories.
+It provides the standard \ter{Bool} sort for Boolean values and 
+a sort constructor \ter{->} for sorts denoting function spaces.
+The theory also provides the usual set of Boolean connectives for building formulas,
+as well parametric function symbols for equality (\ter{=}), disequality (\ter{distinct}),
+if-then-else (\ter{ite}) and function application (\ter{\_}).
+Every theory declaration is assumed 
+to contain implicitly the \attr{sorts} and \attr{funs} attributes 
+of the \ter{Core} theory declaration and 
+to define the symbols in those attributes in the same way as in \ter{Core}.
+
+
+
 
 Note the absence of a symbol for double implication.
 Such a connective is superfluous 
@@ -1699,22 +1702,21 @@ because the equality symbol \ter{=} can be used in its place.
 Note how the attributes specified in the declarations of the various symbols
 of this theory allow one, for instance, to write expressions like 
 
-\begin{itemize} \setlength\itemsep{0ex}
-\item[] \expr{(=> x y z)}
-\item[] \expr{(and x y z)}
-\item[] \expr{(= x y z)}
-\item[] \expr{(distinct x y z)}
-\end{itemize}
+\begin{center}
+\expr{(=> x y z)}
+\qquad \expr{(and x y z)}
+\qquad \expr{(= x y z)} \\
+\expr{(distinct x y z)}
+\end{center}
 
 \noindent respectively as abbreviations for the terms
 
-\begin{itemize} \setlength\itemsep{0ex}
-\item[] \expr{(=> x (=> y z))}
-\item[] \expr{(and (and x y) z)}
-\item[] \expr{(and (= x y) (= y z))}
-\item[] \expr{(and (distinct x y) (distinct x z) (distinct y z))} .
-\end{itemize}
-
+\begin{center}
+\expr{(=> x (=> y z))}
+\qquad \expr{(and (and x y) z)}
+\qquad \expr{(and (= x y) (= y z))} \\
+\qquad \expr{(and (distinct x y) (distinct x z) (distinct y z))} .
+\end{center}
 
 
 The simplest instance of \ter{Core} is the theory with no additional sort
