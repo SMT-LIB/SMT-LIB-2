@@ -1632,7 +1632,6 @@ a selected subset of the sorts in the logic's theory.
 \end{remark}
 
 
-
 \section{Core Theory}
 \label{sec:core}
 
@@ -1643,15 +1642,14 @@ a selected subset of the sorts in the logic's theory.
 \begin{verbatim}
 (theory Core
 
- :sorts ( (Bool 0) (-> 2 :right-assoc) )
+ :sorts ( (Bool 0) )
 
  :funs ( (true Bool)  (false Bool)  (not Bool Bool)
          (=> Bool Bool Bool :right-assoc)  (and Bool Bool Bool :left-assoc)
          (or Bool Bool Bool :left-assoc)  (xor Bool Bool Bool :left-assoc)
          (par (A) (= A A Bool :chainable))
          (par (A) (distinct A A Bool :pairwise))
-         (par (A) (ite Bool A A A)) 
-         (par (A B) (_ (-> A B :left-assoc) A B)) )
+         (par (A) (ite Bool A A A)) )
 
  :definition
  "For every expanded signature Sigma, the instance of Core with that signature
@@ -1677,17 +1675,13 @@ a selected subset of the sorts in the logic's theory.
 \label{fig:Core}
 \end{figure}
 
-\ctrem{Maybe we should not have \ter{->} and \ter{\_} here and move them to an HO-Core theory.} 
-
-
 The core theory is a subtheory of all SMT-LIB theories.
 It introduces the basis sort and function symbols of the underlying logic,
 which are then automatically available in all theories.
-It provides the standard \ter{Bool} sort for Boolean values and 
-a sort constructor \ter{->} for sorts denoting function spaces.
+It provides the standard \ter{Bool} sort for Boolean values.
 The theory also provides the usual set of Boolean connectives for building formulas,
-as well parametric function symbols for equality (\ter{=}), disequality (\ter{distinct}),
-if-then-else (\ter{ite}) and function application (\ter{\_}).
+as well parametric function symbols for equality (\ter{=}), disequality (\ter{distinct}), and
+if-then-else (\ter{ite}).
 Every theory declaration is assumed 
 to contain implicitly the \attr{sorts} and \attr{funs} attributes 
 of the \ter{Core} theory declaration and 
@@ -1756,6 +1750,115 @@ for each sort $\sigma$,
 interprets \expr{(List $\sigma$)} as the set of all lists over $\sigma$.
 The combined theory in that case is a theory of lists with uninterpreted
 functions.
+
+\begin{newver} 
+
+%-------------------------------------------------------------------------------
+\section{Higher-order Core Theory}
+%-------------------------------------------------------------------------------
+
+\begin{figure}[t]
+  \small
+  {\color{NavyBlue}
+  \begin{verbatim}
+  (theory HO-Core
+  
+   :sorts ( (-> 2 :right-assoc) )
+  
+   :funs ( (par (A B) (_ (-> A B : left-assoc) A B) ) )
+  
+   :definition
+   "For every expanded signature Sigma, the instance of HO-Core with that signature
+    is the theory consisting of all Sigma-models in which: 
+    - the sort constructor -> denotes the function space constructor;
+    - for all sorts s1, s2 in Sigma, 
+      - (_ (-> s1 s2) s1 s2) denotes the function that
+        returns the result of applying the its first to its second argument."
+    
+    :values 
+    "For all sorts s1, s2, the set of values for the sort (-> s1 s2) consists of
+     - an abstract value for each function (from a countable subset of the functions)
+       of type s1 -> s2;
+     - terms of the form (lambda ((x s1)) t) where t has sort s2 when every
+       free occurrence of x in t has sort s1.
+    " 
+  )
+  \end{verbatim}
+  }%
+  \caption{The \ter{HO-Core} theory declaration. \ctrem{To revise}}
+  \label{fig:HO-Core}
+  \end{figure}
+  
+
+%
+% The full language of the theory \ter{SetsRelations} 
+% from Figure~\ref{fig:SetsRelations} has the same expressive power as
+% higher-order logic or, more precisely, higher-order simple predicate logic
+% with primitive types.\footnote{%
+% This is a relational version of higher-order logic, as opposed 
+% to the functional versions that are more popular in computer science. 
+% }
+% Higher-order quantification is realized by first-order quantification 
+% over sorts of the form \expr{(Set $\sigma$)}.
+% Similarly, higher-order predicate symbols can be encoded 
+% as unary first-order predicate symbols over sets.
+% In fact, because of the presence of the predicate symbol \ter{in}, 
+% no additional predicate symbols at all are needed:
+% every atomic formula of the form \expr{($p$ $t$)} 
+% can be replaced by the formula \expr{(in $t$ $p'$)}
+% where $p'$ is a constant symbol of sort 
+% \expr{(Set (Prod $\sigma_1$ $\cdots$ $\sigma_n$))}
+% if $p$ has rank \expr{((Prod $\sigma_1$ $\cdots$ $\sigma_n$) Bool)}, 
+% and of sort \expr{(Set $\sigma$)}
+% if $p$ has rank \expr{($\sigma$ Bool)}.
+
+% %-------------------------------------------------------------------------------
+% \subsubsection*{Monadic second-order logic}
+% %-------------------------------------------------------------------------------
+% This logic can be obtained by imposing restrictions on the language
+% of the \ter{SetsRelations} theory mentioned above, specifically, 
+% by disallowing the use of terms of \ter{Prod} sorts (monadic restriction) or
+% nested \ter{Set} sorts (second-order restriction) 
+% while, however, allowing additional function and predicate symbols.
+
+This version of SMT-LIB supports for higher-order logic through the addition
+of a new theory, HO-Core, as shown in Figure~\ref{fig:HO-Core}.
+The theory includes a binary sort constructor \ter{->} for sorts 
+that denote function spaces 
+(for example \expr{(-> Int Real)} for the sort of functions from \ter{Int} to \ter{Real})
+and an explicit function application operator \ter{\_}.
+Note that, with this addition, the language distinguishes 
+between functions of rank \expr{($\sigma_1$, $\sigma_2$)}
+and constants or variables of sort \expr{(-> $\sigma_1$ $\sigma_2$)}.
+For instance, the latter can be passed as an argument to other functions 
+as any other datatype but the former cannot.\endnote{%
+This difference will disappear in the planned Version 3 of the standard
+whose underlying logic will change from many-sorted logic 
+to a version of higher-order logic with dependent types.
+}
+This is no real limitation because it is possible to convert from one to the other
+thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
+For instance, if \ter{f} is a function symbol of rank \expr{($\sigma_1$, $\sigma_2$)},
+one can create the corresponding higher-order constant as
+\expr{(lambda ((x $\sigma_1$)) (f x))}.
+Conversely, if \ter{g} is a constant of sort \expr{(-> $\sigma_1$ $\sigma_2$)}
+the corresponding function can be defined by the command (see~\ref{sec:new-symbols})
+\expr{(define-fun f ((x $\sigma_1$)) $\sigma_2$ (\_ g x))}.
+
+The \ter{->} constructor is defined as right-associative, allowing for instance the syntax
+\expr{(-> $\sigma_1$ $\sigma_2$ $\sigma_3$)} to be used in place of the syntax
+\expr{(-> $\sigma_1$ (-> $\sigma_2$ $\sigma_3$))}.
+Correspondingly, the application operator \ter{\_} is defined as left-associative, allowing the syntax
+\expr{(\_ $t_1$ $t_2$ $t_3$)} to be used in place of the syntax
+\expr{(\_ (\_ $t_1$ $t_2$) $t_3$)}.
+Note that this allows \emph{partial} applications \expr{(\_ g t)} of a constant \ter{g} 
+of sort \expr{(-> $\sigma_1$ $\sigma_2$ $\sigma_3$)},
+which is a term of sort \expr{(-> $\sigma_2$ $\sigma_3$)}.
+
+As an additional simplification, which does not introduce ambiguities,  
+it is possible to omit the \ter{\_} symbol altogether in applications and write
+\expr{(g t)} instead of \expr{(\_ g t)}.
+\end{newver} 
 
 
 %-------------------------------------------------------------------------------
@@ -1936,54 +2039,6 @@ Also included are terms with negative integer coefficients, that is,
 expressions of the form \expr{(* (- $n$) $t$)} or \expr{(* $t$ (- $n$))} 
 for some numeral $n$,
 both of which abbreviate the expression \expr{(- (* $n$ $t$))}.
-
-
-%-------------------------------------------------------------------------------
-\section{Higher-order logic}
-%-------------------------------------------------------------------------------
-%
-% The full language of the theory \ter{SetsRelations} 
-% from Figure~\ref{fig:SetsRelations} has the same expressive power as
-% higher-order logic or, more precisely, higher-order simple predicate logic
-% with primitive types.\footnote{%
-% This is a relational version of higher-order logic, as opposed 
-% to the functional versions that are more popular in computer science. 
-% }
-% Higher-order quantification is realized by first-order quantification 
-% over sorts of the form \expr{(Set $\sigma$)}.
-% Similarly, higher-order predicate symbols can be encoded 
-% as unary first-order predicate symbols over sets.
-% In fact, because of the presence of the predicate symbol \ter{in}, 
-% no additional predicate symbols at all are needed:
-% every atomic formula of the form \expr{($p$ $t$)} 
-% can be replaced by the formula \expr{(in $t$ $p'$)}
-% where $p'$ is a constant symbol of sort 
-% \expr{(Set (Prod $\sigma_1$ $\cdots$ $\sigma_n$))}
-% if $p$ has rank \expr{((Prod $\sigma_1$ $\cdots$ $\sigma_n$) Bool)}, 
-% and of sort \expr{(Set $\sigma$)}
-% if $p$ has rank \expr{($\sigma$ Bool)}.
-
-% %-------------------------------------------------------------------------------
-% \subsubsection*{Monadic second-order logic}
-% %-------------------------------------------------------------------------------
-% This logic can be obtained by imposing restrictions on the language
-% of the \ter{SetsRelations} theory mentioned above, specifically, 
-% by disallowing the use of terms of \ter{Prod} sorts (monadic restriction) or
-% nested \ter{Set} sorts (second-order restriction) 
-% while, however, allowing additional function and predicate symbols.
-
-
-We already have HOL
-
-the core theory contains an arrow sort constructor
-
-symbols of arrow sort can be applied (with the applied function "\_" )to the approriate number of arguments of appropriate sort
-
-there is syntactic sugar, where you can leave out the underscore
-
-\pfrem{We need to fix this section.}
-
-
 
 
 
