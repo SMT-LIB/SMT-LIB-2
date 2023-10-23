@@ -135,7 +135,7 @@
  \nter{match\_case} & ::= & \ter{(} \nter{pattern} \nter{term} \ter{)}
  \\[1ex]
  \nter{term} & ::= & \nter{spec\_constant} \\
-             &\alt&  \nter{qual\_identifier} \\ 
+             &\alt &  \nter{qual\_identifier} \\ 
              &\alt & \ter{(} \nter{qual\_identifier} \nter[+]{term} \ter{)} \\
              &\alt & \ter{(} \ter{let} 
                              \ter{(} \nter[+]{var\_binding} \ter{)} \nter{term}
@@ -153,6 +153,10 @@
                              \ter{(} \nter[+]{match\_case} \ter{)}
                      \ter{)} \\
              &\alt & \ter{(} \ter{!} \nter{term} \nter[+]{attribute} \ter{)}
+\\[1ex]
+\nter{pterm} & ::= & \nter{term} \\
+             &\alt &  \ter{(} \ter{par} \ter{(} \nter[+]{symbol} \ter{)} \nter{term} \ter{)} \\ 
+             &\alt &  \ter{(} \ter{!} \ter{(} \ter{par} \ter{(} \nter[+]{symbol} \ter{)} \nter{term} \ter{)} \nter[+]{attribute} \ter{)}
 \end{tabular}
 }
 
@@ -267,7 +271,7 @@
  \nter{prop\_literal} & ::= & \nter{symbol} \alt\ \ter{(} \ter{not} \nter{symbol} \ter{)}
  \\[1ex]
  \nter{command}
-  & ::=  & \ter{(} \ter{assert} \nter{term} \ter{)}\\
+  & ::=  & \ter{(} \ter{assert} \nter{pterm} \ter{)}\\
   & \alt & \ter{(} \ter{check-sat} \ter{)} \\
   & \alt & \ter{(} \ter{check-sat-assuming} \ter{(} \nter[*]{prop\_literal} \ter{)} \ter{)}
             \\

@@ -1166,16 +1166,18 @@ It provides a simpler syntax to define individual recursive functions.
 
 
 %-------------------------------------------------------------------------------
-\subsection{Asserting and inspecting formulas}
+\subsection{Asserting and inspecting formulas} \label{sec:assert}
 %-------------------------------------------------------------------------------
 
 \begin{description}
 %%% assert %%%
 %
 \item[\expr{(assert $t$)}]
-where $t$ is a well-sorted formula (i.e., a well-sorted term of sort \ter{Bool}),
+where $t$ is a well-sorted, \new{possibly parametric}, formula 
+(i.e., a well-sorted element of \nter{pterm} of sort \ter{Bool}),
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
+
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 

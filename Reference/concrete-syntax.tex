@@ -803,17 +803,25 @@ or the \ter{let} subexpression, if $i=m$, is replaced by \expr{(let (($x$ $t$)) 
 \subsection{Parameter Binders}
 %-------------------------------------------------------------------------------
 
-SMT-LIB allows the declaration of parametric function symbols 
-in theory declarations (see Section~\ref{sec:theory-declarations})
-and of parametric datatypes in user scripts (see Section~\ref{sec:new-symbols}).
-It also allows parametric assertions in user scripts (see Section~\ref{sec:xxxx})
+SMT-LIB allows the declaration of polymorphic function symbols 
+in theory declarations (see Section~\ref{sec:theory-declarations}) and 
+of polymorphic datatypes in user scripts (see Section~\ref{sec:new-symbols}).
+\new{It also enables the assertion of polymorphic formulas in user scripts (see Section~\ref{sec:assert}).}
 Sort parameters are introduced with expressions of the form
 \begin{center}
  \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
 \end{center}
 where $u_1, \ldots, u_k$ are $k>0$ pairwise distinct sort parameters and
 $e$ is an expression containing occurrences of $u_1, \ldots, u_k$.
+\new{
+When $e$ is a term of sort \ter{Bool} the expression above is a formula
+with polymorphic types over the parameters, i.e., sort variables, $u_1, \ldots, u_k$.
+Note that, the way \nter{pterm} is defined (see Section~\ref{sec:concrete-terms}),
+only \emph{prenex} (or \emph{rank-1}) polymorphism is allowed in formulas.\endnote{%
+This restriction is intentional, to simplify reasoning.
+}}
 
+\pfrem{Look for parametric vs polymorphic}
 
 %-------------------------------------------------------------------------------
 \subsection{Scoping of variables and parameters} \label{sec:free}
@@ -1063,7 +1071,7 @@ From Version 2.0 on,
 theory declarations may also declare entire families 
 of overloaded function symbols by using ranks that contain 
 \emph{sort parameters}, locally scoped sort symbols of arity 0. 
-This kind of parametricity entails that a theory declaration generally defines 
+This kind of polymorphism entails that a theory declaration generally defines 
 a whole \emph{class} of similar theories.
 
 The syntax of theory declarations, specified in Figure~\ref{fig:theory-decls},
@@ -1129,8 +1137,8 @@ each in the form of an \nter{attribute}.
 In this version, there are no predefined annotations for sort declarations.
 
 The value of a \attr{funs} attribute is a non-empty sequence
-of possibly parametric function symbol declarations \nter{par\_fun\_symbol\_decl}.
-A (non-parametric) function symbol declaration \nter{fun\_symbol\_decl}
+of possibly polymorphic function symbol declarations \nter{par\_fun\_symbol\_decl}.
+A (monomorphic) function symbol declaration \nter{fun\_symbol\_decl}
 of the form \expr{($c$ $\sigma$)},
 where $c$ is an element of \nter{spec\_constant},
 declares $c$ to have sort $\sigma$.
@@ -1142,13 +1150,13 @@ This is done for instance in the theory declaration in Figure~\ref{fig:Integers}
 The same can be done for the set of \nter{decimal} and \nter{string} constants
 by using \ter{DECIMAL} and \ter{STRING}, respectively. 
  
-A (non-parametric) function symbol declaration of the form
+A (monomorphic) function symbol declaration of the form
 \begin{center}
 \expr{($f$ $\sigma_1\ \cdots\ \sigma_n$ $\sigma$)}
 \end{center}
 with $n \geq 0$ declares a function symbol $f$ with rank $\sigma_1\cdots\sigma_n\sigma$.
 
-A parametric function symbol declaration, which has the form,
+A polymorphic function symbol declaration, which has the form,
 \begin{center}
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))}
 \end{center}
