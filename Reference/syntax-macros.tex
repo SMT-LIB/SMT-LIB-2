@@ -418,11 +418,11 @@
 \newcommand{\sortterms}{
 \(
 \begin{array}{llcl}
- \text{(Sorts)} & 
+ \text{(Monomorphic Sorts)} & 
  \sigma
  & ::= & s\: \sigma^*
  \\[2ex]
- \text{(Parametric Sorts)} &
+ \text{(Polymorphic Sorts)} &
  \tau & ::= & u \alt s\: \tau^*
 \end{array}
 \)
@@ -446,16 +446,18 @@ u \in \mathcal{U}, & \text{the set of sort parameters}
  \\[2.2ex]
  \text{(Patterns)} &
   p & ::= & x \alt f\: x^*
- \\[2.2ex]
+  \\[2.2ex]
   \text{(Terms)} &
   \mathit{t} & ::= & x % \alt c
-      \alt f\: t^* \alt f^\sigma\: t^* \\ %\alt t \eqs t \\
-  & & \alt & \exists\, (x{:}\sigma)^+\ t \alt
-              \forall\, (x{:}\sigma)^+\ t \alt
+      \alt f\: t^* \alt f^\tau\: t^* \\ %\alt t \eqs t \\
+  & & \alt & \exists\, (x{:}\tau)^+\ t \alt
+              \forall\, (x{:}\tau)^+\ t \alt
   %& & \alt & 
   \akey{let}\ (x = t)^+\ \akey{in}\ t
       \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+ \\
-  & & \alt & \mathit{t} \ \alpha^+ \\
+  & & \alt & \mathit{t} \ \alpha^+\\[2.2ex]
+  \text{(PTerms)} &
+  \mathit{t'} & ::= & \forall\, u^+\ t \alt \\
  \end{array}
 \)
 }

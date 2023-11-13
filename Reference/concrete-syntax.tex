@@ -1663,7 +1663,6 @@ a selected subset of the sorts in the logic's theory.
  "For every expanded signature Sigma, the instance of Core with that signature
   is the theory consisting of all Sigma-models in which: 
   - the sort Bool denotes the set {true, false} of Boolean values;
-  - the sort constructor -> denotes the function space constructor;
   - for all sorts s in Sigma, 
     - (= s s Bool) denotes the function that
       returns true iff its two arguments are identical;
@@ -1679,7 +1678,7 @@ a selected subset of the sorts in the logic's theory.
 )
 \end{verbatim}
 }%
-\caption{The \ter{Core} theory declaration. \ctrem{To revise}}
+\caption{The \ter{Core} theory declaration.}
 \label{fig:Core}
 \end{figure}
 
@@ -1763,6 +1762,7 @@ functions.
 
 %-------------------------------------------------------------------------------
 \section{Higher-order Core Theory}
+\label{sec:ho-core}
 %-------------------------------------------------------------------------------
 
 \begin{figure}[t]
@@ -1773,7 +1773,7 @@ functions.
   
    :sorts ( (-> 2 :right-assoc) )
   
-   :funs ( (par (A B) (_ (-> A B : left-assoc) A B) ) )
+   :funs ( (par (A B) (_ (-> A B :left-assoc) A B) ) )
   
    :definition
    "For every expanded signature Sigma, the instance of HO-Core with that signature
@@ -1781,19 +1781,19 @@ functions.
     - the sort constructor -> denotes the function space constructor;
     - for all sorts s1, s2 in Sigma, 
       - (_ (-> s1 s2) s1 s2) denotes the function that
-        returns the result of applying the its first to its second argument."
+        returns the result of applying its first argument to its second."
     
-    :values 
-    "For all sorts s1, s2, the set of values for the sort (-> s1 s2) consists of
-     - an abstract value for each function (from a countable subset of the functions)
-       of type s1 -> s2;
-     - terms of the form (lambda ((x s1)) t) where t has sort s2 when every
-       free occurrence of x in t has sort s1.
-    " 
+   :values 
+   "For all sorts s1, s2, the set of values for the sort (-> s1 s2) consists of
+    - an abstract value for each function (from a countable subset of the functions)
+      of type s1 -> s2;
+    - terms of the form (lambda ((x s1)) t) where t has sort s2 when every
+      free occurrence of x in t has sort s1.
+   " 
   )
   \end{verbatim}
   }%
-  \caption{The \ter{HO-Core} theory declaration. \ctrem{To revise}}
+  \caption{The \ter{HO-Core} theory declaration.}
   \label{fig:HO-Core}
   \end{figure}
   
@@ -1836,8 +1836,8 @@ that denote function spaces
 (for example \expr{(-> Int Real)} for the sort of functions from \ter{Int} to \ter{Real})
 and an explicit function application operator \ter{\_}.
 Note that, with this addition, the language distinguishes 
-between functions of rank \expr{($\sigma_1$, $\sigma_2$)}
-and constants or variables of sort \expr{(-> $\sigma_1$ $\sigma_2$)}.
+between \emph{functions} of rank \expr{($\sigma_1$, $\sigma_2$)}
+and \emph{constants} or variables of sort \expr{(-> $\sigma_1$ $\sigma_2$)}.
 For instance, the latter can be passed as an argument to other functions 
 as any other datatype but the former cannot.\endnote{%
 This difference will disappear in the planned Version 3 of the standard
