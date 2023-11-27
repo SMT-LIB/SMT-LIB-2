@@ -154,6 +154,12 @@ if $\ar(s) = n$.
 \qed
 \end{definition}
 
+\pfrem{On Nov 27, we discussed the need for quantifiers over sort parameters.
+  Since only one quantifier is alowed, mandatory on all free parameters, and at
+  the top symbol, we can consider that top-level terms are closed on all parameters (PCTerms).
+  We have to remove universal sort binder from binders, add parameters in signatures.
+  Well-sortedness might not change much.  However we will have to be careful with interpretations.
+  }
 
 As an example of a sort,
 if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0, 
@@ -198,7 +204,7 @@ and we use ``monorphic sort'' for the more restricted case as needed.
 
 \begin{figure}
 \terms
-\caption{Abstract syntax for unsorted terms\\\pfrem{We must extend this with PTerms, as in concrete syntax}}
+\caption{Abstract syntax for unsorted terms}
 \label{fig:abstract-terms}
 \end{figure}
 
@@ -223,10 +229,18 @@ which is taken care of later by the well-sortedness rules.
 \subsubsection{Binders}
 
 For all $n \geq 0$,
-distinct variables $x_1, \ldots, x_n \in \va$, and 
-sorts $\tau_1, \ldots, \tau_n$,
+distinct variables $x_1, \ldots, x_n \in \va$,
+sorts $\tau_1, \ldots, \tau_n$, and
+sort parameters $u_1, \ldots, u_n$,
+
 
 \begin{itemize}
+\item
+the prefix construct
+\ $\lambda\,x_1{:}\tau_1\:\cdots\:x_n{:}\tau_n\ \_$ \ is 
+a \define{function abstraction binder}\index{binder!lambda binder}
+for $x_1, \ldots, x_n$;
+
 \item
 the prefix construct
 \ $\exists\,x_1{:}\tau_1\:\cdots\:x_n{:}\tau_n\ \_$ \ is 
@@ -248,18 +262,23 @@ for $x_1, \ldots, x_n$.
 \item
 the mixfix construct 
 \ $\akey{match}\,\_\,\akey{with}\,p_1 \to \_\:\cdots\:p_n \to \_$ \ is 
-a \define{match binder} for the variables that occur in the pattern $p_i$ for each $i=1,\ldots,n$.
+a \define{match binder} for the variables that occur in the pattern $p_i$ for each $i=1,\ldots,n$;
+
+\item
+the prefix construct
+\ $\forall\,u_1\:\cdots\:u_n\ \_$ \ is 
+a \define{universal sort binder}\index{binder!universal sort binder}
+for $u_1, \ldots, u_n$.
 \end{itemize}
 
-\pfrem{We need to introduce lambdas, and pterms}
-
-Occurrences of variables in terms are defined to be \define{free}\index{free} or
+Occurrences of variables in terms or parameters in types are defined to be \define{free}\index{free} or
 \define{bound}\index{bound} as in the case of the concrete syntax;
-the scope of each bound variable is defined similarly as well
+the scope of each bound variable/parameter is defined similarly as well
 (see Subsection~\ref{sec:free}).
 Terms are \define{closed}\index{closed term} 
 if they contain no free variables, and \define{open}\index{open term} otherwise.
 Terms are \define{ground}\index{ground term} if they are variable-free.
+Similarly, a term 
 % as removed for now:
 %\trem{Add formal definition of bound variables and \define{closed} term}
 \pfrem{Extend concept of closed term to include parameters}
