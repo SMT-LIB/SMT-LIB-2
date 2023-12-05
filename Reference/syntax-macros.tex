@@ -454,10 +454,7 @@ u \in \mathcal{U}, & \text{the set of sort parameters}
               \forall\, (x{:}\tau)^+\ t \alt
   %& & \alt & 
   \akey{let}\ (x = t)^+\ \akey{in}\ t
-      \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+ \\
-  & & \alt & \mathit{t} \ \alpha^+\\[2.2ex]
-  \text{(PCTerms)} &
-  \mathit{t'} & ::= & \bar\forall\, t\\
+      \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+
  \end{array}
 \)
 }
@@ -485,46 +482,56 @@ f \in \mathcal{F}, & \text{the set of function symbols}
 \begin{tabular}{ll}
 \derives
 {}
-{\Sigma \vdash x\ \alpha^*:\sigma}
+{\Sigma \vdash x\ \alpha^*:\tau}
 &
-if $x{:}\sigma \in \Sigma$
+if $x{:}\tau \in \Sigma$
 \end{tabular}
 \bigskip
 
 %% function application
 \begin{tabular}{ll}
-\derives{
-\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
-\Sigma \vdash t_k:\sigma_k
-}
-{\Sigma \vdash (f\; t_1\; \cdots\; t_k)\ \alpha^*: \sigma}
-&
-%\text{if $f:\sigma_1 \cdots \sigma_k\sigma \in \Sigma$ and
-%         $f:\sigma_1 \cdots \sigma_k\sigma' \notin \Sigma$ with 
-%         $\sigma' \neq \sigma$}
-if
-\(
-\begin{cases}
-f{:}\sigma_1 \cdots \sigma_k\sigma \in \Sigma, \\
-f{:}\sigma_1 \cdots \sigma_k\sigma' \notin \Sigma \ \text{ for all } \sigma' \neq \sigma
-\end{cases}
-\)
-\end{tabular}
-\bigskip
-
-%% annotated function application
+  \derives{
+  \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
+  \Sigma \vdash t_k:\tau_k
+  }
+  {\Sigma \vdash (f\; t_1\; \cdots\; t_k)\ \alpha^*: \tau}
+  &
+  %\text{if $f:\tau_1 \cdots \tau_k\tau \in \Sigma$ and
+  %         $f:\tau_1 \cdots \tau_k\tau' \notin \Sigma$ with 
+  %         $\tau' \neq \tau$}
+  if
+  \(
+  \begin{cases}
+  f{:}\tau_1 \cdots \tau_k\tau \in \Sigma, \\
+  f{:}\tau_1 \cdots \tau_k\tau' \notin \Sigma \ \text{ for all } \tau' \neq \tau
+  \end{cases}
+  \)
+  \end{tabular}
+  \bigskip
+  
+  %% lambda
+\begin{tabular}{ll}
+  \derives{
+  \Sigma[x:\tau_1] \vdash t_2:\tau_2
+  }
+  {\Sigma \vdash (\lambda x:\tau_1\; t_2): \tau_1 \to \tau_2}
+  &
+  \end{tabular}
+  \bigskip
+  
+  %% annotated function application
 \begin{tabular}{ll}
 \derives{
-\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
-\Sigma \vdash t_k:\sigma_k
+\Sigma \vdash t_1:\tau_1 \quad \cdots \quad
+\Sigma \vdash t_k:\tau_k
 }
-{\Sigma \vdash (f^\sigma\; t_1\; \cdots\; t_k)\ \alpha^*: \sigma}
+{\Sigma \vdash (f^\tau\; t_1\; \cdots\; t_k)\ \alpha^*: \tau}
 &
 if 
 \(
 \begin{cases}
-f{:}\sigma_1 \cdots \sigma_k\sigma \in \Sigma, \\
-f{:}\sigma_1 \cdots \sigma_k\sigma' \in \Sigma \ \text{ for some } \sigma' \neq \sigma
+f{:}\tau_1 \cdots \tau_k\tau \in \Sigma, \\
+f{:}\tau_1 \cdots \tau_k\tau' \in \Sigma \ \text{ for some } \tau' \neq \tau
 \end{cases}
 \)
 \end{tabular}
@@ -532,8 +539,8 @@ f{:}\sigma_1 \cdots \sigma_k\sigma' \in \Sigma \ \text{ for some } \sigma' \neq 
 
 %% quantifiers
 \begin{tabular}{ll}
-\derives{\Sigma[x_1{:}\sigma_1,\: \ldots,\: x_{k+1}{:}\sigma_{k+1}]\: \vdash t:\bool}
-{\Sigma \vdash (Q x_1{:}\sigma_1\, \cdots\, x_{k+1}{:}\sigma_{k+1}\; t)\ \alpha^* : \bool}
+\derives{\Sigma[x_1{:}\tau_1,\: \ldots,\: x_{k+1}{:}\tau_{k+1}]\: \vdash t:\bool}
+{\Sigma \vdash (Q x_1{:}\tau_1\, \cdots\, x_{k+1}{:}\tau_{k+1}\; t)\ \alpha^* : \bool}
 &
 if $Q\, \in \{\exists, \forall\}$
 \end{tabular}
@@ -542,10 +549,10 @@ if $Q\, \in \{\exists, \forall\}$
 %% let
 \begin{tabular}{ll}
 \derives{
-\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
-\Sigma \vdash t_{k+1}:\sigma_{k+1} \\
-\Sigma[x_1{:}\sigma_1,\: \ldots,\: x_{k+1}{:}\sigma_{k+1}]\: \vdash t:\sigma}
-{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ \alpha^* : \sigma}
+\Sigma \vdash t_1:\tau_1 \quad \cdots \quad
+\Sigma \vdash t_{k+1}:\tau_{k+1} \\
+\Sigma[x_1{:}\tau_1,\: \ldots,\: x_{k+1}{:}\tau_{k+1}]\: \vdash t:\tau}
+{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ \alpha^* : \tau}
 &
 if $x_1, \ldots, x_{k+1}$ are all distinct
 \end{tabular}
@@ -555,9 +562,9 @@ if $x_1, \ldots, x_{k+1}$ are all distinct
 \begin{tabular}{ll}
 \derives{
 \Sigma \vdash t:\delta \\
-\Sigma[\bar x_i{:}\bar\sigma_i]\: \vdash t_i:\sigma \text{ for } i=1,\ldots,k+1
+\Sigma[\bar x_i{:}\bar\tau_i]\: \vdash t_i:\tau \text{ for } i=1,\ldots,k+1
 }
-{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ \alpha^* : \sigma}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ \alpha^* : \tau}
 &
 if 
 \(
@@ -575,10 +582,10 @@ if
 \begin{tabular}{ll}
 \derives{
 \Sigma \vdash t:\delta \\
-\Sigma[\bar x_i{:}\bar\sigma_i]\: \vdash t_i:\sigma \text{ for } i=1,\ldots,k\\
-\Sigma[x_i{:}\delta]\: \vdash t_i:\sigma \text{ for } i=k+1,\ldots,n 
+\Sigma[\bar x_i{:}\bar\tau_i]\: \vdash t_i:\tau \text{ for } i=1,\ldots,k\\
+\Sigma[x_i{:}\delta]\: \vdash t_i:\tau \text{ for } i=k+1,\ldots,n 
 }
-{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ \alpha^* : \sigma}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ \alpha^* : \tau}
 &
 if 
 \(
@@ -588,7 +595,7 @@ if
                       \hspace{6.7em} \{x_{k+1}, \ldots, x_n\}, \\
 \;k < n,\\
 \text{ for all } i=1,\ldots,k \\
-\quad c_i{:}\bar\sigma_i\delta \in \Sigma \text{ and}\\
+\quad c_i{:}\bar\tau_i\delta \in \Sigma \text{ and}\\
 \quad \bar{x}_i \text{ contains no repetitions}
 \end{cases}
 \)

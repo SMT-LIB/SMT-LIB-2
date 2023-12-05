@@ -264,11 +264,6 @@ the mixfix construct
 \ $\akey{match}\,\_\,\akey{with}\,p_1 \to \_\:\cdots\:p_n \to \_$ \ is 
 a \define{match binder} for the variables that occur in the pattern $p_i$ for each $i=1,\ldots,n$;
 
-\item
-the prefix construct
-\ $\forall\,u_1\:\cdots\:u_n\ \_$ \ is 
-a \define{universal sort binder}\index{binder!universal sort binder}
-for $u_1, \ldots, u_n$.
 \end{itemize}
 
 Occurrences of variables in terms or parameters in types are defined to be \define{free}\index{free} or
@@ -324,6 +319,8 @@ a (many-sorted) signature.
 \label{def:signature}
 An \define{SMT-LIB signature}, or simply a \define{signature},
 is a tuple $\Sigma$ consisting of:
+
+\pfrem{We probably need to add sort parameters}
 
 \begin{itemize}
 \item
@@ -543,7 +540,7 @@ for some $i \in \{i,\ldots, n\}$.
 
 
 \subsection{Well-sorted terms}
-
+ 
 \begin{figure}
  \termrules
 \caption{Well-sortedness rules for terms.}
@@ -954,27 +951,41 @@ Let $\Sigma$ be an SMT-LIB signature
 and 
 let $\inter{I}$ be a $\Sigma$-interpretation.
 For every well-sorted term $t$ of sort $\tau$ with respect to $\Sigma$,
-$\mea{\inter I}{t}$ is defined recursively as follows.
+$\mea{\inter I}{t}$ is defined recursively as follows,
+where Rule~\ref{ruleI} applies to polymorphic terms
+and the rest of the rules apply only to monomorphic terms.
 
 \begin{enumerate}
-\item
-$\mea{\inter I}{u\;\alpha_1\;\cdots\;\alpha_n} = \mea{\inter I}{u}$
+\item \label{ruleI}
+$\mea{\inter I}{t} = \true$ 
+iff \ $\mea{\inter I}{\theta(t)} = \true$ 
+for all $\theta$ \ such that \ 
+\(
+\begin{cases}
+ \theta = \{u_1 \mapsto \sigma_1,\;\ldots,\;u_n\mapsto \sigma_n\}, \\
+ \{u_1, \ldots u_n\} = pars(t),\; n > 0\\
+ \sigma_1,\ldots,\sigma_n \in \sortt{\Sigma}
+\end{cases}
+\)
 
 \item
-$\mea{\inter I}{x} = v(x{:}\tau)$ 
+$\mea{\inter I}{t\;\alpha_1\;\cdots\;\alpha_n} = \mea{\inter I}{t}$
+
+\item
+$\mea{\inter I}{x} = v(x{:}\sigma)$ 
 \quad if $\inter I = (\str A, v)$  
 
 \item
 $\mea{\inter I}{\hat{f}\;t_1\;\ldots\;t_n} = 
- (f{:}\tau_1\cdots\tau_n\tau)^{\str A}(a_1,\ldots,a_n)
+ (f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}(a_1,\ldots,a_n)
 $ 
 \quad if \  
 \(
 \begin{cases}
  \inter I = (\str A, v) \text{ with signature } \Sigma,\\
- \hat{f} = f \text{ or } \hat{f} = f^\tau,\\
+ \hat{f} = f \text{ or } \hat{f} = f^\sigma,\\
  \text{for } i=1,\ldots,n \\
- \quad \Sigma \vdash t_i : \tau_i \text{ and } a_i = \mea{\inter I}{t_i}
+ \quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}
 \end{cases}
 \)
 
@@ -987,35 +998,35 @@ $
 \begin{cases}
  \inter{I} \text{ has signature } \Sigma, \\
  \text{for } i=1,\ldots,n \\
- \quad \Sigma \vdash t_i : \tau_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
- \inter{I}' = {\inter I}[x_1{:}\tau_1\mapsto a_1,\;\ldots,\;x_n{:}\tau_n\mapsto a_n]
+ \quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
+ \inter{I}' = {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n]
 \end{cases}
 \)
 
 \item
-$\mea{\inter I}{\exists\, x_1{:}\tau_1\, \cdots\, x_n{:}\tau_n\; t} = \true$ 
+$\mea{\inter I}{\exists\, x_1{:}\sigma_1\, \cdots\, x_n{:}\sigma_n\; t} = \true$ 
 iff \ $\mea{\inter I'}{t} = \true$ 
 for some $\inter I'$
 
 \qquad such that
 \(
 \begin{cases}
- \inter{I}'= {\inter I}[x_1{:}\tau_1\mapsto a_1,\;\ldots,\;x_n{:}\tau_n\mapsto a_n],\\
- (a_1,\ldots,a_n) \in \tau_1^{\str A} \times \cdots \times \tau_n^{\str A},\\
+ \inter{I}'= {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n],\\
+ (a_1,\ldots,a_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A},\\
  \inter I = (\str A, v),\\
 \end{cases}
 \)
 
 \item
-$\mea{\inter I}{\forall\, x_1{:}\tau_1\, \cdots\, x_n{:}\tau_n\; t} = \true$ 
+$\mea{\inter I}{\forall\, x_1{:}\sigma_1\, \cdots\, x_n{:}\sigma_n\; t} = \true$ 
 iff \ $\mea{\inter I'}{t} = \true$ 
 for all $\inter I'$
 
 \qquad such that
 \(
 \begin{cases}
- \inter{I}'= {\inter I}[x_1{:}\tau_1\mapsto a_1,\;\ldots,\;x_n{:}\tau_n\mapsto a_n],\\
- (a_1,\ldots,a_n) \in \tau_1^{\str A} \times \cdots \times \tau_n^{\str A},\\
+ \inter{I}'= {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n],\\
+ (a_1,\ldots,a_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A},\\
  \inter I = (\str A, v),\\
 \end{cases}
 \)
