@@ -121,12 +121,6 @@ an infinite set $\lo$ of \define{logic names} $L$.
 \label{fig:abstract-sorts}
 \end{figure}
 
-\pfrem{I might happen that we never use $\tau$ at all and the
- figure could be simplified to $\tau$ only.  Actually, to avoid
- corrupting the whole chapter, we might just extend the definition
- of $\tau$ and forget about $\tau$.}
-
-
 In many-sorted logics, terms are typed, or \define{sorted}. 
 Each sort, which stands for a non-empty set of elements, is denoted 
 by a sort symbol.
@@ -137,10 +131,12 @@ Formally, we have the following.
 \begin{definition}[Sorts]
 For all non-empty subsets $S$ of $\so$ and 
 all mappings $\ar:S \to \mathbb{N}$,
-the set $\sortt S$ of all \define{sorts}\index{sort} over $S$ 
+the set $\sortt{S, \sop}$ of all \define{sorts}\index{sort} over $S$ and $\sop$ 
 (with respect to $\ar$)
 is defined inductively as follows:
 \begin{enumerate}
+\item 
+every $u \in \sop$ is a sort;
 \item
 every $s \in S$ with $\ar(s) = 0$ is a sort;
 \item
@@ -151,15 +147,10 @@ $s\,\tau_1\,\cdots\,\tau_n\:$ is a sort.
 \end{enumerate}
 We say that $s \in S$ has (or is of) \define{arity} $n$ 
 if $\ar(s) = n$.
+A sort is \emph{polymorphic} 
+if it contains a sort parameter, it is \emph{monomorphic} otherwise.
 \qed
 \end{definition}
-
-\pfrem{On Nov 27, we discussed the need for quantifiers over sort parameters.
-  Since only one quantifier is alowed, mandatory on all free parameters, and at
-  the top symbol, we can consider that top-level terms are closed on all parameters (PCTerms).
-  We have to remove universal sort binder from binders, add parameters in signatures.
-  Well-sortedness might not change much.  However we will have to be careful with interpretations.
-  }
 
 As an example of a sort,
 if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0, 
@@ -171,14 +162,10 @@ then the expression
 \] 
 and all of its subexpressions are sorts.
 
-Function symbol declarations in theory declarations (defined later)
-use also \define{polymorphic sorts}.
-These are defined similarly to sorts in the example above 
-except that they can be built also over 
-a further set $\mathcal{U}$ of \define{sort parameters},
-used like sort symbols of arity 0.
+Note that function symbol declarations in theory declarations (defined later)
+use also polymorphic sorts.
 Similarly to the example above,
-if $u_1, u_2$ are elements of $\mathcal{U}$,
+if $u_1, u_2$ are parameters, that is elements of $\sop$,
 the expression
 \[
   (\akey{->}\ u_1\ u_2\ \akey{List}\ (\akey{Array}\ u_1\ (\akey{List}\ u_2)))
@@ -189,7 +176,7 @@ An abstract syntax for monomorphic sorts $\sigma$ and polymorphic sorts $\tau$,
 which ignores arity constraints for simplicity, 
 is provided in Figure~\ref{fig:abstract-sorts}.
 Note that every monomorphic sort is a polymorphic sort, but not vice versa.
-In the following, we say just use ``sort'' to refer to polymorphic sorts
+In the following, we just use ``sort'' to refer to possibly polymorphic sorts
 and we use ``monorphic sort'' for the more restricted case as needed.
 
 %
@@ -215,7 +202,7 @@ function symbols from $\fu$,
 %a distinguished binary symbol ($\eqs$) for equality,\index{symbol!equality symbol}
 and a set of \emph{binders}.
 %
-The logic considers, in fact, only \emph{well-sorted terms},
+The logic considers, in fact, only \emph{well-sorted (polymorphic) terms},
 a subset of all possible terms determined 
 by a \emph{sorted signature}, as described below.
 
@@ -229,9 +216,8 @@ which is taken care of later by the well-sortedness rules.
 \subsubsection{Binders}
 
 For all $n \geq 0$,
-distinct variables $x_1, \ldots, x_n \in \va$,
-sorts $\tau_1, \ldots, \tau_n$, and
-sort parameters $u_1, \ldots, u_n$,
+distinct variables $x_1, \ldots, x_n \in \va$, and
+sorts $\tau_1, \ldots, \tau_n$,
 
 
 \begin{itemize}
@@ -266,17 +252,13 @@ a \define{match binder} for the variables that occur in the pattern $p_i$ for ea
 
 \end{itemize}
 
-Occurrences of variables in terms or parameters in types are defined to be \define{free}\index{free} or
+Occurrences of variables in terms are defined to be \define{free}\index{free} or
 \define{bound}\index{bound} as in the case of the concrete syntax;
-the scope of each bound variable/parameter is defined similarly as well
+the scope of each bound variable is defined similarly as well
 (see Subsection~\ref{sec:free}).
 Terms are \define{closed}\index{closed term} 
 if they contain no free variables, and \define{open}\index{open term} otherwise.
 Terms are \define{ground}\index{ground term} if they are variable-free.
-Similarly, a term 
-% as removed for now:
-%\trem{Add formal definition of bound variables and \define{closed} term}
-\pfrem{Extend concept of closed term to include parameters}
 
 For simplicity,
 the defined language does not contain any logical symbols
@@ -319,8 +301,6 @@ a (many-sorted) signature.
 \label{def:signature}
 An \define{SMT-LIB signature}, or simply a \define{signature},
 is a tuple $\Sigma$ consisting of:
-
-\pfrem{We probably need to add sort parameters}
 
 \begin{itemize}
 \item
@@ -366,7 +346,7 @@ a bijective mapping $\mathrm{tes}_\Sigma:\cons{\Sigma} \to \tests{\Sigma}$,
 assigning a tester to each constructor;
 
 \item
-a partial mapping from $\va$ to $\sortt{\sorts\Sigma}$,
+a partial mapping from $\va$ to $\sortt{\sorts\Sigma, \sop}$,
 assigning a sort to some of the variables in $\va$;%
 %so that there are infinitely many variables of sort $\tau$ 
 %for each $\tau \in \sortt{\sorts\Sigma}$;
@@ -380,7 +360,7 @@ a left-total \define{ranking} relation\footnote{%
 A binary relation $R \subseteq X \times Y$ is \define{left-total}
 if for each $x \in X$ there is (at least) a $y \in Y$ such that $xRy$.
 }
-$R$ from $\funs{\Sigma}$ to $\sortt{\sorts \Sigma}^+$,
+$R$ from $\funs{\Sigma}$ to $\sortt{\sorts \Sigma, \sop}^+$,
 assigning at least one \define{rank} to each function symbol and
 such that
 \begin{enumerate}
@@ -394,15 +374,15 @@ such that
 \item
 for all constructors $c \in \cons{\Sigma}$, 
 selectors $g_1 \cdots g_n = \mathrm{sel}_\Sigma(c)$, and
-sorts $\tau_1,\ldots,\tau_n,\tau \in \sortt{\sorts \Sigma}$,
+sorts $\tau_1,\ldots,\tau_n,\tau \in \sortt{\sorts \Sigma, \sop}$,
 if $(c, \tau_1\cdots\tau_n\tau) \in R$
-then $(g_i,\tau\tau_i) \in R$ for all $i=1,\ldots,n$;
+then $(g_i,\tau\,\tau_i) \in R$ for all $i=1,\ldots,n$;
 
 \item
 for all constructors $c \in \cons{\Sigma}$ and 
 testers $p = \mathrm{tes}_\Sigma(c)$,
 if $(c, \tau_1\cdots\tau_n\tau) \in R$
-then $(p,\tau\bool) \in R$;
+then $(p,\tau\,\bool) \in R$;
 
 \item
 there is no constructor $c \in \cons{\Sigma}$ such that
@@ -416,7 +396,7 @@ in a \akey{match} expression.
 \end{enumerate}
 \end{itemize}
 
-A sort in $\Sigma$ is an \define{algebraic data type}
+A sort symbol in $\Sigma$ is an \define{algebraic data type}
 if it is assigned a non-empty set of constructors.
 %\ctrem{notes on constructors, selectors and testers}
 \qed
@@ -430,23 +410,26 @@ in the sense of Definition~\ref{def:signature}.
 \end{remark}
 
 
-In the following, we will write $\sortt{\Sigma}$ as an abbreviation 
-of $\sortt{\sorts \Sigma}$.
+In the following, we will write $\sortt{\Sigma, \sop}$ as an abbreviation 
+of $\sortt{\sorts \Sigma, \sop}$, and $\sortt{\Sigma}$ as the subset of all 
+monorphic sorts in $\sortt{\Sigma, \sop}$.
 We will work with \emph{ranked} function symbols and \emph{sorted} variables
 in a signature.
 Formally,
 given a signature $\Sigma$,
 a \define{ranked function symbol} is 
-a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma}^+$,
+a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma, \sop}^+$,
 which we write as $f{:}\tau_1\cdots\tau_n\tau$.
 A \define{sorted variable} is 
-a pair $(x,\tau)$ in $\va \times \sortt{\Sigma}$,
+a pair $(x,\tau)$ in $\va \times \sortt{\Sigma, \sop}$,
 which we write as $x{:}\tau$.
 We write 
 $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$ and
 $x{:}\tau \in \Sigma$
 to denote that $f$ has rank $\tau_1\cdots\tau_n\tau$ in $\Sigma$ and 
 $x$ has sort $\tau$ in $\Sigma$.
+
+\pfrem{We need to start from here on 14 December}
 
 We also consider signatures that differ from a given signature $\Sigma$
 only the sort they assign to variables.
