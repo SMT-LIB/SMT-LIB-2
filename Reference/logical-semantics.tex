@@ -216,28 +216,27 @@ which is taken care of later by the well-sortedness rules.
 \subsubsection{Binders}
 
 For all $n \geq 0$,
-distinct variables $x_1, \ldots, x_n \in \va$, and
-sorts $\tau_1, \ldots, \tau_n$,
+distinct variables $x, x_1, \ldots, x_n \in \va$ and sort $\tau$,
 
 
 \begin{itemize}
 \item
 the prefix construct
-\ $\lambda\,x_1{:}\tau_1\:\cdots\:x_n{:}\tau_n\ \_$ \ is 
+\ $\lambda\,x{:}\tau\ \_$ \ is 
 a \define{function abstraction binder}\index{binder!lambda binder}
-for $x_1, \ldots, x_n$;
+for $x$;
 
 \item
 the prefix construct
-\ $\exists\,x_1{:}\tau_1\:\cdots\:x_n{:}\tau_n\ \_$ \ is 
+\ $\exists\,x{:}\tau\ \_$ \ is 
 a \define{sorted existential binder (or existential quantifier)}\index{binder!existential binder}
-for $x_1, \ldots, x_n$;
+for $x$;
 
 \item
 the prefix construct
-\ $\forall\,x_1{:}\tau_1\:\cdots\:x_n{:}\tau_n\ \_$ \ is 
+\ $\forall\,x{:}\tau\ \_$ \ is 
 a \define{sorted universal binder (or universal quantifier)}\index{binder!universal binder}
-for $x_1, \ldots, x_n$;
+for $x$;
 
 \item
 the mixfix construct
@@ -429,11 +428,9 @@ $x{:}\tau \in \Sigma$
 to denote that $f$ has rank $\tau_1\cdots\tau_n\tau$ in $\Sigma$ and 
 $x$ has sort $\tau$ in $\Sigma$.
 
-\pfrem{We need to start from here on 14 December}
-
-We also consider signatures that differ from a given signature $\Sigma$
-only the sort they assign to variables.
-We will also consider signatures that conservatively expand a given signature $\Sigma$
+We will also consider signatures that differ from a given signature $\Sigma$
+only by the sort they assign to variables,
+as well as signatures that conservatively expand a given signature $\Sigma$
 with additional sort and function symbols or additional ranks 
 for $\Sigma$'s function symbols.
 
@@ -450,9 +447,9 @@ the sort symbols of $\Sigma$ have the same arity in $\Sigma$ and in $\Omega$;
 every sort of $\Sigma$ has the same constructors in $\Omega$ that it has in $\Sigma$;
 every constructor of $\Sigma$ has the same selectors and testers in $\Omega$ 
 that it has in $\Sigma$;
-for all $x \in \va$ and $\tau \in \sortt{\Sigma}$,
+for all $x \in \va$ and $\tau \in \sortt{\Sigma, \sop}$,
 $x{:}\tau \in \Sigma$ iff $x{:}\tau \in \Omega$;
-for all $f \in \fu$ and $\bar{\tau} \in \sortt{\Sigma}^+$,
+for all $f \in \fu$ and $\bar{\tau} \in \sortt{\Sigma, \sop}^+$,
 if $f{:}\bar{\tau} \in \Sigma$ then $f{:}\bar{\tau} \in \Omega$.
 In that case, $\Sigma$ is a \define{subsignature} of $\Omega$.
 \qed
@@ -476,31 +473,31 @@ $\akey{Real}\:\akey{Real}\:\akey{Real}$ (for binary subtraction over the reals),
 and
 $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 
-Together with the mechanisms used 
-to declare theories (described in Section~\ref{sec:theories})
-and algebraic datatypes (described in Section~\ref{sec:new-symbols}),
-overloading also provides an approximate form of \emph{parametric polymorphism}
-by allowing one to declare function symbols with ranks
-all having the \emph{same shape}.
-For instance,
-it is possible to declare an array access symbol with rank
-$(\akey{Array}\:\tau_1\:\tau_2)\:\tau_1\:\tau_2$ 
-for all sorts $\tau_1, \tau_2$ in a theory signature. 
-%
-Strictly speaking, this is still ad-hoc polymorphism
-because SMT-LIB logic itself does not allow parametric sorts.\footnote{%
-Parametric sort terms that occur in theory declarations 
-and algebraic datatype declarations
-are meta-level syntax as far as SMT-LIB logic is concerned.
-They are \emph{schemas} standing for concrete sorts.
-}
-However, it provides most of the convenience of parametric polymorphism 
-while remaining within the confines of the standard semantics
-of many-sorted FOL.
-%\endnote{
-%\label{parametric-polymorphism}
-%\trem{Comment on why we do not have have real parametric polymorphism in SMT-LIB logic.}
-%}
+% Together with the mechanisms used 
+% to declare theories (described in Section~\ref{sec:theories})
+% and algebraic datatypes (described in Section~\ref{sec:new-symbols}),
+% overloading also provides an approximate form of \emph{parametric polymorphism}
+% by allowing one to declare function symbols with ranks
+% all having the \emph{same shape}.
+% For instance,
+% it is possible to declare an array access symbol with rank
+% $(\akey{Array}\:\tau_1\:\tau_2)\:\tau_1\:\tau_2$ 
+% for all sorts $\tau_1, \tau_2$ in a theory signature. 
+% %
+% Strictly speaking, this is still ad-hoc polymorphism
+% because SMT-LIB logic itself does not allow parametric sorts.\footnote{%
+% Parametric sort terms that occur in theory declarations 
+% and algebraic datatype declarations
+% are meta-level syntax as far as SMT-LIB logic is concerned.
+% They are \emph{schemas} standing for concrete sorts.
+% }
+% However, it provides most of the convenience of parametric polymorphism 
+% while remaining within the confines of the standard semantics
+% of many-sorted FOL.
+% %\endnote{
+% %\label{parametric-polymorphism}
+% %\trem{Comment on why we do not have have real parametric polymorphism in SMT-LIB logic.}
+% %}
 
 A function symbol can be \define{ambiguous}\index{ambiguous symbol}
 in an SMT-LIB signature for having distinct ranks of the form
@@ -520,7 +517,8 @@ a unique sort only if $f$ is annotated with one of the result sorts
 $\tau_1, \ldots, \tau_n$,
 that is, only if it is written as $f^{\tau_i}\bar{t}$ 
 for some $i \in \{i,\ldots, n\}$.
-
+As a consequence, from now on we will assume 
+that all ambiguous symbols are annotated as described above.
 
 \subsection{Well-sorted terms}
  
@@ -544,7 +542,7 @@ The format and meaning of the sorting rules in Figure~\ref{fig:well-sorted-terms
 is fairly standard and should be largely self-explanatory 
 to readers familiar with type systems.
 In more detail, the letter $\tau$ (possibly primed or with subscripts) 
-denotes sorts in $\sortt \Sigma$,
+denotes sorts in $\sortt{\Sigma, \sop}$,
 the letter $k$ denotes a natural number.
 %
 %the notation $x : \tau \in \Sigma$ means that 
@@ -567,7 +565,7 @@ a term $t$ generated by the grammar in Figure~\ref{fig:abstract-terms}
 is \define{well-sorted (with respect to $\Sigma$)}
 if $\Sigma \vdash t : \tau$ is derivable 
 by the sorting rules in Figure~\ref{fig:well-sorted-terms}
-for some sort $\tau \in \sortt{\Sigma}$.
+for some sort $\tau \in \sortt{\Sigma,\sop}$.
 In that case, 
 we say that \define{$t$ has, or is of, sort $\tau$}.
 \qed
@@ -650,7 +648,7 @@ every formula $\varphi$ with free variables
 $x_1, \ldots, x_n$ of respective sort $\tau_1, \ldots, \tau_n$,
 can be rewritten as 
 \[
- \exists\: x_1{:}\tau_1 \ldots x_n{:}\tau_n\: \varphi\ .
+ \exists\: x_1{:}\tau_1 ( \ldots (\exists\:x_n{:}\tau_n\: \varphi\ )\ldots).
 \]
 An alternative way to avoid free variables in scripts is 
 to replace them by fresh constant symbols of the same sort.

@@ -449,9 +449,10 @@ u \in \mathcal{U}, & \text{the set of sort parameters}
   \\[2.2ex]
   \text{(Terms)} &
   \mathit{t} & ::= & x % \alt c
-      \alt f\: t^* \alt f^\tau\: t^* \\ %\alt t \eqs t \\
-  & & \alt & \exists\, (x{:}\tau)^+\ t \alt
-              \forall\, (x{:}\tau)^+\ t \alt
+      \alt f\: t^* \alt f^\tau\: t^* \alt \lambda\, (x{:}\tau)\ t \alt
+      \exists\, (x{:}\tau)\ t \alt
+      \forall\, (x{:}\tau)\ t \\ %\alt t \eqs t \\
+  & & \alt & 
   %& & \alt & 
   \akey{let}\ (x = t)^+\ \akey{in}\ t
       \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+
@@ -539,14 +540,15 @@ f{:}\tau_1 \cdots \tau_k\tau' \in \Sigma \ \text{ for some } \tau' \neq \tau
 
 %% quantifiers
 \begin{tabular}{ll}
-\derives{\Sigma[x_1{:}\tau_1,\: \ldots,\: x_{k+1}{:}\tau_{k+1}]\: \vdash t:\bool}
-{\Sigma \vdash (Q x_1{:}\tau_1\, \cdots\, x_{k+1}{:}\tau_{k+1}\; t)\ \alpha^* : \bool}
+\derives{\Sigma[x{:}\tau]\: \vdash t:\bool}
+{\Sigma \vdash (Q x{:}\tau\; t)\ \alpha^* : \bool}
 &
 if $Q\, \in \{\exists, \forall\}$
 \end{tabular}
 \bigskip
 
-%% let
+ 
+  %% let
 \begin{tabular}{ll}
 \derives{
 \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
