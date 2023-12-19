@@ -667,19 +667,33 @@ The semantics of SMT-LIB is essentially the same as that
 of conventional many-sorted logic,
 relying on a similar notion of \emph{$\Sigma$-structure}.
 
+%Given a polymorphic sort $\tau$, that is, a sort containing sort parameters in $\sop$,
+%we consider the set $\sorttt{_\tau}{\Sigma}$ of all instances of this sort in $\sortt{\Sigma}$, that is,
+%the set of all monomorphic sorts obtained by a complete substitution of sort parameters by sorts in 
+%$\sortt{\Sigma}$.
+
+A \define{sort substitution $\theta$ over a set $V$} of sort parameters in $\sop$
+maps each sort parameter $u$ in $V$ to a sort $\theta(u)$ in $\sortt{\Sigma}$.
+A sort instance of a polymorphic sort $\tau$ is a sort $\theta(\tau)$ obtained
+by sort substitution, i.e.,
+substituting every occurrence of all sort parameters $u$ by the associated sort
+$\theta(u)$ in $\sortt{\Sigma}$.
+%Given a polymorphic sort $\tau$, we define the set $\sorttt{_\tau}{\Sigma}$ of all instances of
+%$\tau$ in $\sortt{\Sigma}$.
+%TODO, same thing for functions
 
 \begin{definition}[$\Sigma$-structure]
 %\label{def:structure}
 Let $\Sigma$ be a signature.
 A \define{$\Sigma$-structure} $\str A$ is a pair consisting of 
 a set $A$,  the \define{universe} of $\str A$, and 
-a mapping that interprets 
+a mapping that
 
 \begin{itemize}
-\item
-each $\tau \in \sortt{\Sigma}$ as a \emph{non-empty} subset $\tau^{\str A}$ of $A$,
-which we call the \define{domain} of $\tau$ in $\str A$,
-with $A = \bigcup_{\tau \in \sorts\Sigma} \tau^{\str A}$;\endnote{
+\item interprets
+each $\sigma \in \sortt{\Sigma}$ as a \emph{non-empty} subset $\sigma^{\str A}$ of $A$,
+which we call the \define{domain} of $\sigma$ in $\str A$,
+with $A = \bigcup_{\sigma \in \sortt{\Sigma}} \sigma^{\str A}$;\endnote{
 Distinct sorts can have non-disjoint domain in a structure.
 However, whether they do that or not is irrelevant in SMT-LIB logic.
 The reason is that 
@@ -693,15 +707,17 @@ iff it is satisfiable in a structure
 where the two sorts do have disjoint domains.
 }
 
-\item
+\item associates
+an element $(f{:}\theta(\tau))^{\str A}$ of the set $\theta(\tau)^{\str A}$ to
 each (ranked function symbol) $f{:}\tau \in \Sigma$ 
-as an element $(f{:}\tau)^{\str A}$ of  $\tau^{\str A}$;
+and each sort substitution $\theta$ over the sort parameters of $\tau$;
 
-\item
-each $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$ with $n > 0$ 
-as a total function 
-$(f{:}\tau_1\cdots\tau_n\tau)^{\str A}$ 
-from $\tau_1^{\str A} \times \cdots \times \tau_n^{\str A}$ to $\tau^{\str A}$.
+\item associates
+a total function 
+$(f{:}\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau))^{\str A}$ 
+from $\theta(\tau_1)^{\str A} \times \cdots \times \theta(\tau_n)^{\str A}$ to
+$\theta(\tau)^{\str A}$ to each function symbol $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$ with $n > 0$ 
+and each sort subsitution $\theta$ over the sort parameters of $\tau_1\cdots\tau_n\tau$.
 \end{itemize}
 
 If $\str B$ is an $\Omega$-structure with universe $B$ and 
@@ -726,24 +742,27 @@ for every variant $\Sigma'$ of $\Sigma$.
 Let $\str A$ be a $\Sigma$-structure with universe $A$ and 
 let $G \subseteq A$.
 Let $\Sigma_G$ be the expansion of $\Sigma$ obtained by adding to $\Sigma$
-a constant symbol $a$ of rank $\tau$
-for every $a \in G$ and sort $\tau \in \sorts\Sigma$ 
-such that $a \in \tau^{\str A}$.
+a constant symbol $a$ of sort $\sigma$
+for every $a \in G$ and monomorphic sort $\sigma \in \sorts\Sigma$ 
+such that $a \in \sigma^{\str A}$.
 Then, $\str A$ is an \define{absolutely free structure (with generators $G$)}
 if 
 \begin{itemize}
 \item
-for all $\tau \in \sorts\Sigma$, $\tau^{\str A}$ is the set 
+for all $\sigma \in \sortt{\Sigma}$, $\sigma^{\str A}$ is the set 
 of well-sorted ground terms of signature $\Sigma_G$;
 
 \item
 $\str A$ interprets every function symbol 
-$f{:}\tau_1 \cdots \tau_n \tau \in \Sigma_G$ as the function that maps each tuple 
-$(t_1,\ldots,t_n) \in \tau_1^{\str A} \times \ldots \times \tau_n^{\str A}$ 
+$f{:}\sigma_1 \cdots \sigma_n \sigma \in \Sigma_G$ as the function that maps each tuple 
+$(t_1,\ldots,t_n) \in \sigma_1^{\str A} \times \ldots \times \sigma_n^{\str A}$ 
 to the term $f(t_1,\ldots,t_n)$.
 \qed
 \end{itemize}
 \end{definition}
+
+\pfrem{We might have to be careful in the above item, because functions are 
+actually polymorphic and we might have to consider all instances.}
 
 Intuitively, an absolutely free $\Sigma$-structure with a set $G$ of generators
 interprets every well-sorted ground $\Sigma_G$-term as itself.
