@@ -408,25 +408,41 @@ the signature defined by an SMT-LIB script is in fact a signature
 in the sense of Definition~\ref{def:signature}.
 \end{remark}
 
-
 In the following, we will write $\sortt{\Sigma, \sop}$ as an abbreviation 
 of $\sortt{\sorts \Sigma, \sop}$, and $\sortt{\Sigma}$ as the subset of all 
 monorphic sorts in $\sortt{\Sigma, \sop}$.
+\begin{definition}[Sort substitution and instance]
+A \define{sort substitution} $\theta$
+maps each sort parameter $u$ in $\sop$ to a sort $\theta(u)$ in $\sortt{\Sigma,\sop}$.
+A \define{monomorphic substitution} is a sort substitution that maps every parameter
+to a monomorphic sort.
+A \define{sort instance of a polymorphic sort} $\tau$ is a sort $\theta(\tau)$ obtained
+by sort substitution, i.e.,
+substituting every occurrence of all sort parameters $u$ by the associated sort
+$\theta(u)$ in $\sortt{\Sigma,\sop}$.
+A \define{sort instance of a polymorphic rank} $\tau_1\cdots\tau_n \tau$ is a rank
+$\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau)$ for some sort substitution
+$\theta$.
+\end{definition}
+We will use the syntax $\{u_1 \mapsto \tau_1, \cdots u_n \mapsto \tau_n \}$
+to denote a sort substitution that maps $u_i$ to $\tau_i$ for each $i=1,\dots n$
+and maps every other sort parameter to itself.
+
 We will work with \emph{ranked} function symbols and \emph{sorted} variables
 in a signature.
 Formally,
 given a signature $\Sigma$,
-a \define{ranked function symbol} is 
-a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma, \sop}^+$,
-which we write as $f{:}\tau_1\cdots\tau_n\tau$.
-A \define{sorted variable} is 
+a \define{sorted variable} is 
 a pair $(x,\tau)$ in $\va \times \sortt{\Sigma, \sop}$,
 which we write as $x{:}\tau$.
-We write 
-$f{:}\tau_1\cdots\tau_n\tau \in \Sigma$ and
-$x{:}\tau \in \Sigma$
-to denote that $f$ has rank $\tau_1\cdots\tau_n\tau$ in $\Sigma$ and 
-$x$ has sort $\tau$ in $\Sigma$.
+We write $x{:}\tau \in \Sigma$
+to denote $x$ has sort $\tau$ in $\Sigma$.
+A \define{ranked function symbol} is 
+a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma, \sop}^+$,
+which we write as $f{:}\tau_1\cdots\tau_n\tau$.
+We write  $f{:}\tau'_1\cdots\tau'_n\tau' \in \Sigma$
+if $f$ has rank $\tau_1\cdots\tau_n\tau$ in $\Sigma$, and
+$\tau'_1\cdots\tau'_n\tau'$ is an instance of rank $\tau_1\cdots\tau_n\tau$.
 
 We will also consider signatures that differ from a given signature $\Sigma$
 only by the sort they assign to variables,
@@ -672,12 +688,6 @@ relying on a similar notion of \emph{$\Sigma$-structure}.
 %the set of all monomorphic sorts obtained by a complete substitution of sort parameters by sorts in 
 %$\sortt{\Sigma}$.
 
-A \define{sort substitution $\theta$ over a set $V$} of sort parameters in $\sop$
-maps each sort parameter $u$ in $V$ to a sort $\theta(u)$ in $\sortt{\Sigma}$.
-A sort instance of a polymorphic sort $\tau$ is a sort $\theta(\tau)$ obtained
-by sort substitution, i.e.,
-substituting every occurrence of all sort parameters $u$ by the associated sort
-$\theta(u)$ in $\sortt{\Sigma}$.
 %Given a polymorphic sort $\tau$, we define the set $\sorttt{_\tau}{\Sigma}$ of all instances of
 %$\tau$ in $\sortt{\Sigma}$.
 %TODO, same thing for functions
@@ -698,7 +708,7 @@ Distinct sorts can have non-disjoint domain in a structure.
 However, whether they do that or not is irrelevant in SMT-LIB logic.
 The reason is that 
 the logic has no sort predicates, such as a subsort predicate, and 
-does not allow one to equate terms of different sorts
+does not allow one to equate te rms of different sorts
 (the term $t_1 \eqs t_2$ is ill-sorted unless $t_1$ and $t_2$ have 
 the same sort).
 As a consequence, a formula is satisfiable in a structure 
@@ -710,14 +720,14 @@ where the two sorts do have disjoint domains.
 \item associates
 an element $(f{:}\theta(\tau))^{\str A}$ of the set $\theta(\tau)^{\str A}$ to
 each (ranked function symbol) $f{:}\tau \in \Sigma$ 
-and each sort substitution $\theta$ over the sort parameters of $\tau$;
+and each monomorphic sort substitution $\theta$ over the sort parameters of $\tau$;
 
 \item associates
 a total function 
 $(f{:}\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau))^{\str A}$ 
 from $\theta(\tau_1)^{\str A} \times \cdots \times \theta(\tau_n)^{\str A}$ to
 $\theta(\tau)^{\str A}$ to each function symbol $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$ with $n > 0$ 
-and each sort subsitution $\theta$ over the sort parameters of $\tau_1\cdots\tau_n\tau$.
+and each monomorphic sort substitution $\theta$ over the sort parameters of $\tau_1\cdots\tau_n\tau$.
 \end{itemize}
 
 If $\str B$ is an $\Omega$-structure with universe $B$ and 
@@ -946,7 +956,7 @@ to well-sorted $\Sigma$-terms by means of a uniquely determined
 (total) mapping $\mea{\inter I}{\_}$ of such terms into the universe 
 of its structure.
 
-\begin{definition}
+\begin{definition}[Interpretation of terms]
 Let $\Sigma$ be an SMT-LIB signature
 and 
 let $\inter{I}$ be a $\Sigma$-interpretation.
