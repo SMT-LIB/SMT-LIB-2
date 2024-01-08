@@ -38,6 +38,7 @@ no provisions for parametric or subsort polymorphism.
 The only polymorphism is of the \emph{ad-hoc} variety (a function symbol 
 can be given more than one rank), although there is a syntactical mechanism 
 for approximating parametric polymorphism.
+\pfrem{We need to carefully reread the above.}
 As a consequence, all the classical meta-theoretic results from many-sorted 
 FOL apply to SMT-LIB logic when considered in its full generality, that is,
 with no restrictions on the possible models other than those imposed 
@@ -154,13 +155,13 @@ if it contains a sort parameter, it is \emph{monomorphic} otherwise.
 
 As an example of a sort,
 if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0, 
-$\akey{List}$ is a sort symbols of arity 1, and
+$\akey{List}$ is a sort symbol of arity 1, and
 $\akey{->}$ and $\akey{Array}$ are sort symbols of arity 2,
 then the expression
 \[
   (\akey{->}\ \akey{Int}\ \akey{List}\ (\akey{Array}\ \akey{Int}\ (\akey{List}\ \akey{Real})))
 \] 
-and all of its subexpressions are sorts.
+and all of its subexpressions are monomorphic sorts.
 
 Note that function symbol declarations in theory declarations (defined later)
 use also polymorphic sorts.
@@ -408,9 +409,12 @@ the signature defined by an SMT-LIB script is in fact a signature
 in the sense of Definition~\ref{def:signature}.
 \end{remark}
 
+\begin{notation}
 In the following, we will write $\sortt{\Sigma, \sop}$ as an abbreviation 
 of $\sortt{\sorts \Sigma, \sop}$, and $\sortt{\Sigma}$ as the subset of all 
 monorphic sorts in $\sortt{\Sigma, \sop}$.
+\end{notation}
+
 \begin{definition}[Sort substitution and instance]
 A \define{sort substitution} $\theta$
 maps each sort parameter $u$ in $\sop$ to a sort $\theta(u)$ in $\sortt{\Sigma,\sop}$.
@@ -515,26 +519,36 @@ $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 % %\trem{Comment on why we do not have have real parametric polymorphism in SMT-LIB logic.}
 % %}
 
-A function symbol can be \define{ambiguous}\index{ambiguous symbol}
-in an SMT-LIB signature for having distinct ranks of the form
-$\bar{\tau}\tau_1$ and $\bar{\tau}\tau_2$ 
-where $\bar{\tau}$ is a sequence of sorts and 
-$\tau_1$ and $\tau_2$ are different sorts.
+A function symbol $f$ can be \define{ambiguous}\index{ambiguous symbol}
+in an SMT-LIB signature $\Sigma$.
+That is the case if $f:\bar{\tau}\tau_1 \in \Sigma$ and $f:\bar{\tau}\tau_2 \in \Sigma$ 
+where $\tau_1$ and $\tau_2$ are different sorts.
 Thanks to the requirement in Definition~\ref{def:signature} that
 variables have exactly one sort in a signature,
 in signatures with no ambiguous function symbols
 every term can have at most one sort.
 In contrast,
-with an ambiguous symbol $f$ whose different ranks are
-$\bar{\tau}\tau_1, \ldots, \bar{\tau}\tau_n$,
+with an ambiguous symbol like $f$ above
 a term of the form $f\, \bar{t}$,
 where the terms $\bar t$ have sorts $\bar \tau$, can be given 
-a unique sort only if $f$ is annotated with one of the result sorts
-$\tau_1, \ldots, \tau_n$,
-that is, only if it is written as $f^{\tau_i}\bar{t}$ 
-for some $i \in \{i,\ldots, n\}$.
+a unique sort only if $f$ is annotated with one of the result sorts $\tau_1, \tau_2$,
+that is, only if it is written as $f^{\tau_1}\bar{t}$ or $f^{\tau_2}\bar{t}$. 
 As a consequence, from now on we will assume 
-that all ambiguous symbols are annotated as described above.
+that all ambiguous symbols are annotated as  described above.
+
+\pfrem{Maybe add an end-note on this non-issue: there might be
+two identical instances from two ranks:
+  f: u -> u
+  f: Int -> Int
+Technically, this would not be an ambiguity (it is the same function),
+but the issue does not even happen in 2.7 because there is no
+overloading for users (and we can be confidents theory designer will be
+careful).
+} 
+
+\pfrem{User scripts and parametric sorts for declaring functions.}
+
+
 
 \subsection{Well-sorted terms}
  
@@ -696,19 +710,19 @@ relying on a similar notion of \emph{$\Sigma$-structure}.
 %\label{def:structure}
 Let $\Sigma$ be a signature.
 A \define{$\Sigma$-structure} $\str A$ is a pair consisting of 
-a set $A$,  the \define{universe} of $\str A$, and 
+a sufficently large set $A$,  the \define{universe} of $\str A$, and 
 a mapping that
 
 \begin{itemize}
 \item interprets
-each $\sigma \in \sortt{\Sigma}$ as a \emph{non-empty} subset $\sigma^{\str A}$ of $A$,
+each monomorphic sort $\sigma \in \sortt{\Sigma}$ as a \emph{non-empty} subset $\sigma^{\str A}$ of $A$,
 which we call the \define{domain} of $\sigma$ in $\str A$,
 with $A = \bigcup_{\sigma \in \sortt{\Sigma}} \sigma^{\str A}$;\endnote{
 Distinct sorts can have non-disjoint domain in a structure.
 However, whether they do that or not is irrelevant in SMT-LIB logic.
 The reason is that 
 the logic has no sort predicates, such as a subsort predicate, and 
-does not allow one to equate te rms of different sorts
+does not allow one to equate terms of different sorts
 (the term $t_1 \eqs t_2$ is ill-sorted unless $t_1$ and $t_2$ have 
 the same sort).
 As a consequence, a formula is satisfiable in a structure 
@@ -718,16 +732,16 @@ where the two sorts do have disjoint domains.
 }
 
 \item associates
-an element $(f{:}\theta(\tau))^{\str A}$ of the set $\theta(\tau)^{\str A}$ to
-each (ranked function symbol) $f{:}\tau \in \Sigma$ 
-and each monomorphic sort substitution $\theta$ over the sort parameters of $\tau$;
+an element $(f{:}\sigma)^{\str A}$ of the set $\sigma^{\str A}$ to
+each (ranked function symbol) $f{:}\sigma \in \Sigma$,
+where $\sigma$ is a monomorphic sort;
 
 \item associates
 a total function 
-$(f{:}\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau))^{\str A}$ 
-from $\theta(\tau_1)^{\str A} \times \cdots \times \theta(\tau_n)^{\str A}$ to
-$\theta(\tau)^{\str A}$ to each function symbol $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$ with $n > 0$ 
-and each monomorphic sort substitution $\theta$ over the sort parameters of $\tau_1\cdots\tau_n\tau$.
+$(f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}$ 
+from $\sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A}$ to
+$\sigma^{\str A}$ to each function symbol $f{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n > 0$,
+where $\sigma_1, \ldots, \sigma_n, \sigma$ are monomorphic sorts.
 \end{itemize}
 
 If $\str B$ is an $\Omega$-structure with universe $B$ and 
@@ -764,15 +778,14 @@ of well-sorted ground terms of signature $\Sigma_G$;
 
 \item
 $\str A$ interprets every function symbol 
-$f{:}\sigma_1 \cdots \sigma_n \sigma \in \Sigma_G$ as the function that maps each tuple 
+$f{:}\sigma_1 \cdots \sigma_n \sigma \in \Sigma_G$ 
+where $\sigma_1, \ldots, \sigma_n, \sigma$ are monomorphic,
+as the function that maps each tuple 
 $(t_1,\ldots,t_n) \in \sigma_1^{\str A} \times \ldots \times \sigma_n^{\str A}$ 
 to the term $f(t_1,\ldots,t_n)$.
 \qed
 \end{itemize}
 \end{definition}
-
-\pfrem{We might have to be careful in the above item, because functions are 
-actually polymorphic and we might have to consider all instances.}
 
 Intuitively, an absolutely free $\Sigma$-structure with a set $G$ of generators
 interprets every well-sorted ground $\Sigma_G$-term as itself.
@@ -812,26 +825,28 @@ An SMT-LIB structure is a $\Sigma$-structure $\str A$ such that
 if $\Omega$ is the signature obtained from $\Sigma$ by removing 
 all of its non-constructor function symbols,
 the $\Omega$-reduct of $\str A$ is an absolutely free algebra with 
-generators $\bigcup_{ \tau \in S} \tau^{\str A}$
-where $S$ collects the sorts of $\Sigma$ that are not datatypes;
+generators $\bigcup_{ \sigma \in S} \sigma^{\str A}$
+where $S$ collects the sorts of $\sortt{\Sigma}$ that are not datatypes;
+\pfrem{Actually, datatypes instances.  Datatype is defined with sort
+constructors, here we mean all possible sorts built with these sort constructors.}
 
 \item
-for all constructors $c{:}\tau_1\cdots\tau_n\tau \in \Sigma$ with $n>0$,
-selectors $g_1{:}\tau\tau_1, \ldots, g_n{:}\tau\tau_n$ 
+for all constructors $c{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n>0$,
+selectors $g_1{:}\sigma\sigma_1, \ldots, g_n{:}\sigma\sigma_n$ 
 with $\mathrm{sel}_\Sigma(c) = g_1\cdots g_n$, 
-values $(v_1, \ldots, v_n) \in \tau_1^{\str A} \times \cdots \times \tau_n^{\str A}$,
+values $(v_1, \ldots, v_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A}$,
 and
 $i=1,\ldots,n$,
 \[
- g_i^{\str A}(c^{\str A}(v_1, \ldots, v_n)) = v_i\ ;
+ (g_i{:}\sigma\sigma_i)^{\str A}((c{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}(v_1, \ldots, v_n)) = v_i\ ;
 \]
 
 \item
-for all constructors $c{:}\bar{\tau}\tau \in \Sigma$,
+for all constructors $c{:}\bar{\sigma}\sigma \in \Sigma$,
 testers $q$ with $\mathrm{tes}_\Sigma(c) = q$, and 
-values $v \in \tau^{\str A}$,
 \begin{center}
- $q^{\str A}(v) = \true$ iff $v$ is in the range of $c^{\str A}$.
+  values $v \in \sigma^{\str A}$,
+ $q^{\str A}(v) = \true$ iff $v$ is in the range of $(c{:}\bar{\sigma}\sigma)^{\str A}$.
 \end{center}
 \end{enumerate}
 \end{definition}
@@ -846,6 +861,10 @@ together with the well-foundedness restrictions on those constructs in signature
 guarantee that sorts with constructors indeed denote algebraic datatypes
 as traditionally understood in the literature.
 \end{remark}
+
+\pfrem{Some work is required in the above remark: well-foundedness is not mentioned
+anywhere above, and it is rather the constraints on structure that guarantees that
+the algebraic datatype exist.}
 
 \begin{remark}[Partiality of selectors]
 As in classical first-order logic, all function symbols in a signature $\Sigma$ 
