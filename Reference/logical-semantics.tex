@@ -602,7 +602,7 @@ we say that \define{$t$ has, or is of, sort $\tau$}.
 \end{definition}
 
 With this definition, it is possible to show that every term has at
-most one sort.\endnote{
+most one sort in a given signature $\Sigma$.\endnote{
   It would have been reasonable to adopt an
   alternative version of the rule for well-sortedness of terms
   $(f^\tau\; t_1\; \cdots\; t_k)\ \alpha^*$ with annotated function
@@ -618,6 +618,11 @@ most one sort.\endnote{
   to improve human comprehension of scripts written using overloaded
   function symbols. 
 }
+This means that we can define a total function $\tsort$ that associates 
+to each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
+We can also define a function $\pars$ that associates to each well-sorted term $t$
+the set $\pars(t, \Sigma)$ of all parameters that occur in its sort or in that 
+of one of its subterms.
 
 \begin{remark}[Match rules]
 The two rules for the \akey{match} binder in Figure~\ref{fig:well-sorted-terms} 
@@ -898,20 +903,20 @@ A mapping $h:A \to B$ is a \define{homomorphism} from $\str A$ to $\str B$
 if
 \begin{enumerate}
 \item
-for all $\tau \in \sortt{\Sigma}$ and $a \in \tau^{\str A}$,
+for all monomorphic sorts $\sigma \in \sortt{\Sigma}$ and $a \in \sigma^{\str A}$,
 \[
- h(a) \in  \tau^{\str B}\ ;
+ h(a) \in  \sigma^{\str B}\ ;
 \]
 \item
-for all $f{:}\tau_1\ldots\tau_n\tau \in \Sigma$ with $n > 0$
+for all $f{:}\sigma_1\ldots\sigma_n\sigma \in \Sigma$ with $n > 0$
 and 
 \(
  (a_1, \ldots, a_n) \in 
- \tau_1^{\str A} \times \cdots \times \tau_n^{\str A} ,
+ \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A} ,
 \)
 \[
- h((f{:}\tau_1\ldots\tau_n\tau)^{\str A}(a_1, \ldots, a_n)) = 
- (f{:}\tau_1\ldots\tau_n\tau)^{\str B}(h(a_1), \ldots, h(a_n)) \ . 
+ h((f{:}\sigma_1\ldots\sigma_n\sigma)^{\str A}(a_1, \ldots, a_n)) = 
+ (f{:}\sigma_1\ldots\sigma_n\sigma)^{\str B}(h(a_1), \ldots, h(a_n)) \ . 
 \]
 \end{enumerate}
 %
@@ -933,11 +938,11 @@ because one satisfies a set of $\Sigma$-sentences if and only if the other one d
 A \define{valuation} into a $\Sigma$-structure $\str A$ is 
 a partial mapping $v$ from $\va \times \sortt{\Sigma}$ to the set 
 of all domain elements of $\str A$ such that,
-for all $x \in \va$ and $\tau \in \sortt{\Sigma}$, 
-$v(x{:}\tau) \in \tau^{\str A}$.
+for all $x \in \va$ and $\sigma \in \sortt{\Sigma}$, 
+$v(x{:}\sigma) \in \sigma^{\str A}$.
 %
-We denote by $v[x_1{:}\tau_1 \mapsto a_1,\;\ldots,\;x_n{:}\tau_n \mapsto a_n]$
-the valuation that maps $x_i{:}\tau_i$ to $a_i \in \tau_i^{\str A}$ 
+We denote by $v[x_1{:}\sigma_1 \mapsto a_1,\;\ldots,\;x_n{:}\sigma_n \mapsto a_n]$
+the valuation that maps $x_i{:}\sigma_i$ to $a_i \in \sigma_i^{\str A}$ 
 for $i=1,\ldots,n$ and is otherwise identical to $v$.
 %Note that 
 %$v[x_1 \mapsto a_1, \ldots, x_n \mapsto a_n]$ need not be 
@@ -961,12 +966,12 @@ for $i=1,\ldots,n$ and is otherwise identical to $v$.
 
 If $v$ is a valuation into $\Sigma$-structure $\str A$,
 the pair $\inter{I} = (\str A, v)$ is a \define{$\Sigma$-interpretation}.
-We write $\inter{I}[x_1{:}\tau_1 \mapsto a_1,\;\ldots,\;x_n{:}\tau_n \mapsto a_n]$
+We write $\inter{I}[x_1{:}\sigma_1 \mapsto a_1,\;\ldots,\;x_n{:}\sigma_n \mapsto a_n]$
 as an abbreviation for the $\Sigma'$-interpretation
 \[
- (\str A', v[x_1{:}\tau_1 \mapsto a_1,\;\ldots,\; x_n{:}\tau_n \mapsto a_n])
+ (\str A', v[x_1{:}\sigma_1 \mapsto a_1,\;\ldots,\; x_n{:}\sigma_n \mapsto a_n])
 \]
-where $\Sigma' = \Sigma[x_1{:}\tau_1,\;\ldots,\; x_n{:}\tau_n]$
+where $\Sigma' = \Sigma[x_1{:}\sigma_1,\;\ldots,\; x_n{:}\sigma_n]$
 and
 $\str A'$ is just $\str A$ but seen as a $\Sigma'$-structure.
 
@@ -992,7 +997,7 @@ for all $\theta$ \ such that \
 \(
 \begin{cases}
  \theta = \{u_1 \mapsto \sigma_1,\;\ldots,\;u_n\mapsto \sigma_n\}, \\
- \{u_1, \ldots u_n\} = pars(t),\; n > 0\\
+ \{u_1, \ldots u_n\} = \pars(t, \Sigma),\; n > 0\\
  \sigma_1,\ldots,\sigma_n \in \sortt{\Sigma}
 \end{cases}
 \)
@@ -1061,6 +1066,13 @@ for all $\inter I'$
 \)
 
 \item
+$\mea{\inter I}{\lambda (x {:} \sigma)\; t} =
+ \{ a \mapsto \mea{\inter I[x \mapsto a]}{t} \mid a \in \sigma^{\str A}
+ \}
+$
+where $\inter I = (\str A, v)$
+
+\item
 \(
  \mea{\inter I}{\akey{match}\ t\ \akey{with}\ c \to t_0\ \:p_1 \to t_1 \;\cdots\; p_n \to t_n} = \mea{\inter I}{t_0}
 \)
@@ -1116,6 +1128,8 @@ for all $\inter I'$
 \qed
 \end{enumerate}
 \end{definition}
+
+\pfrem{We need to add rules for lambda applications}
 
 \noindent 
 One can show that $\mea{\inter I}{\_}$ is well-defined, and hence total, over
