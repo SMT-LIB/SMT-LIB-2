@@ -9,6 +9,11 @@
 %===============================================================================
 \thispagestyle{empty}
 
+\pfrem{We should get rid of annotations in this chapter ($\alpha$) but
+ this requires to explain somewhere that annotations do not change
+ types.  Left for later.}
+
+
 The underlying logic of the SMT-LIB language is a variant of many-sorted 
 first-order logic (FOL) with equality~\cite{Man-MSL-93,Gal-86,Hen-01},
 although it incorporates some syntactic \new{and semantic} features 
@@ -304,7 +309,7 @@ is a tuple $\Sigma$ consisting of:
 
 \begin{itemize}
 \item
-a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$;
+a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$ and $\fconstruct$;
 
 \item
 a set $\funs{\Sigma} \subseteq \fu$ of \define{function} symbols;
@@ -334,7 +339,7 @@ assigning a (possibly empty) set of constructors to each sort symbol;
 \item
 a total mapping $\ar:\sorts{\Sigma} \to \mathbb{N}$,
 assigning an arity to each sort symbol,
-with $\ar(\bool) = 0$;
+with $\ar(\bool) = 0$ and $\ar(\fconstruct) = 2$;
 
 \item
 a total mapping $\mathrm{sel}_\Sigma:\cons{\Sigma} \to (\sels \Sigma)^*$,
@@ -799,8 +804,12 @@ For instance, no structure without constant symbols can be absolutely free
 with an empty set of generators.
 \medskip
 
+For interpreting functional sorts, we will use the notion of a \define{map}, i.e., a functional binary relation.
+We will denote a map as a set of pairs of the form $a\mapsto b$.
+
+\medskip
 The SMT-LIB logic considers only structures that interpret in a special way 
-the sort \bool\ and any constructor, selector, and tester symbols in their signature.
+the sort \bool, the sort constructor \fconstruct, and any constructor, selector, and tester symbols in their signature.
 
 \begin{definition}[SMT-LIB $\Sigma$-structure]
 \label{def:structure}
@@ -808,6 +817,10 @@ An SMT-LIB structure is a $\Sigma$-structure $\str A$ such that
 
 \begin{enumerate}
 \item $\bool^{\str A} = \bo = \{ \false, \true \}$ with \false\ and \true\ distinct;
+
+\item for all monomorphic sorts $\sigma_1$ and $\sigma_2$,
+  $(\fconstructa{\sigma_1}{\sigma_2})^{\str A}$ is the set of all total maps from
+  $\sigma_1^{\str A}$ to $\sigma_2^{\str A}$;
 
 %CT unnecessary
 %\item
@@ -1129,7 +1142,8 @@ where $\inter I = (\str A, v)$
 \end{enumerate}
 \end{definition}
 
-\pfrem{We need to add rules for lambda applications}
+\pfrem{Apply is a normal (interpreted) function and is defined in the core theory.
+There is therefore no dedicated rule for it here.}
 
 \noindent 
 One can show that $\mea{\inter I}{\_}$ is well-defined, and hence total, over
