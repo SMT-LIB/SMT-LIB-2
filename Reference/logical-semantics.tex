@@ -1280,9 +1280,11 @@ In SMT-LIB, basic theories are obtained as instances of theory declarations.
 (In contrast, combined theories are defined in logic declarations.)
 An abstract syntax of theory declarations is defined in 
 Figure~\ref{fig:theory-declaration}.
-The symbol $\Pi$ in parametric function symbol declarations 
-is a (universal) binder for the sort parameters---and corresponds 
-to the symbol \ter{par} in the concrete syntax.
+Note that function symbol declarations define polymorphic functions
+when $\tau$ contains sort parameters.\footnote{%
+Recall that sort parameters are introduced
+in the concrete syntax with the binder \ter{par}.
+}
 
 To simplify the meta-notation let $T$ denote 
 a theory declaration with theory name $T$.
@@ -1300,6 +1302,9 @@ must be such that
 every signature like $\Omega$ above uniquely determines 
 a theory $\widehat T = T[\Omega]$ as an instance of $T$
 with signature $\widehat\Omega$ defined as follows:
+\pfrem{Probably we have to introduce something like $Sort(\Omega)$,
+ because it is the set of all monomorphic sort terms we can build with
+ sort constructors.}
 \begin{enumerate}
 \item
 $\sorts{\widehat\Omega} = \sorts{\Omega}$

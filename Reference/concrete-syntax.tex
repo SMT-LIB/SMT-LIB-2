@@ -1161,7 +1161,9 @@ A polymorphic function symbol declaration, which has the form,
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))}
 \end{center}
 with $k > 0$, $n \geq 0$ and $u_1, \ldots, u_k$ all distinct,
-declares a function symbol $f$ with parametric rank $\tau_1\cdots\tau_n\tau$.
+declares a function symbol $f$ with parametric rank $\tau_1\cdots\tau_n\tau$
+provided all symbols in $\tau_1\cdots\tau_n\tau$ are either sort constructors
+or sort parameters in $\{u_1, \ldots, u_k\}$.  
 This effectively declares a whole class of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways each occurrence in $\tau_1\cdots\tau_n\tau$
