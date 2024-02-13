@@ -1302,9 +1302,6 @@ must be such that
 every signature like $\Omega$ above uniquely determines 
 a theory $\widehat T = T[\Omega]$ as an instance of $T$
 with signature $\widehat\Omega$ defined as follows:
-\pfrem{Probably we have to introduce something like $Sort(\Omega)$,
- because it is the set of all monomorphic sort terms we can build with
- sort constructors.}
 \begin{enumerate}
 \item
 $\sorts{\widehat\Omega} = \sorts{\Omega}$
@@ -1321,19 +1318,15 @@ the sorting of variables in a signature is irrelevant.
 
 \item
 for all $f \in \funs{\widehat\Omega}$ and 
-$\bar{\tau} \in (\sorts{\widehat\Omega})^+$, 
-
-$f{:}\bar{\tau} \in \widehat\Omega$ iff
+$\bar{\sigma} \in (\sortt{\widehat\Omega})^+$, 
+$f{:}\bar{\sigma} \in \widehat\Omega$ iff
 \begin{enumerate}
 \item
-$f{:}\bar{\tau} \in \Omega$, or
-
-\item \label{decl-i}
-$T$ contains a declaration of the form $f\;\bar{\tau}\;\bar{\alpha}$, or
+$f{:}\bar{\sigma} \in \Omega$, or
 
 \item \label{decl-ii}
-$T$ contains a declaration of the form $\Pi\;\bar{u}\;(f\;\bar{\tau}\;\bar{\alpha})$ and
-$\bar{\tau}$ is an instance of $\bar \tau$.
+$T$ contains a declaration of the form $f\;\bar{\tau}\;\bar{\alpha}$ and
+$\bar{\sigma}$ is an instance of $\bar \tau$, with $\bar\tau\in (\sortt{\Omega, \sop})^+$.
 \end{enumerate}
 
 \item
@@ -1341,10 +1334,10 @@ A function symbol of $\widehat\Omega$ is a datatype constructor/selector/tester
 in $\widehat\Omega$ iff it is so in $\Omega$.
 \end{enumerate}
 
-We say that a ranked function symbol $f{:}\bar{\tau}$ of $\widehat\Omega$ 
+We say that a ranked function symbol $f{:}\bar{\sigma}$ of $\widehat\Omega$ 
 is \define{declared in $T$} 
-if $f{:}\bar{\tau} \in \widehat\Omega$
-because of Point~\ref{decl-i} or \ref{decl-ii} above.
+if $f{:}\bar{\sigma} \in \widehat\Omega$
+because of Point~\ref{decl-ii} above.
 The \define{free sort symbols} of $\widehat T$ are
 the sort symbols of $\widehat\Omega$ that are not in $S$
 and are not datatypes.
@@ -1459,27 +1452,27 @@ each with the same arity in all of them.
 
 \paragraph{Values.}
 The $\akey{values}$ attribute is expected to designate 
-for each sort $\tau$ of the logic's theory $\T$ 
-a distinguished set $V_\tau$ of ground terms called \define{values}.  
-The definition of $V_\tau$ should be such that 
+for each sort $\sigma$ of the logic's theory $\T$ 
+a distinguished set $V_\sigma$ of ground terms called \define{values}.  
+The definition of $V_\sigma$ should be such that 
 every sentence satisfiable in the logic $L$ is satisfiable
 in a model $\str A$ of $\T$ 
-where each element of $\tau^{\str A}$
-is denoted by some element of $V_\tau$.
+where each element of $\sigma^{\str A}$
+is denoted by some element of $V_\sigma$.
 In other words, if $\Sigma$ is $\T$'s signature,
 $\str A$ is such that,
-for all $\tau \in \sorts{\Sigma}$ and 
-all $a \in \tau^{\str A}$,
-$a = \mea{\inter A}{t}$ for some $t \in V_\tau$.
+for all $\sigma \in \sortt{\Sigma}$ and 
+all $a \in \sigma^{\str A}$,
+$a = \mea{\inter A}{t}$ for some $t \in V_\sigma$.
 For example,
 in a logic of the integers,
 the set of values for the integer sort
 might consist of all the terms of the form $0$ or $[-]n$
 where $n$ is a non-zero numeral.
 
-For flexibility, we do not require that $V_\tau$ be minimal.
-That is, it is possible for two terms of $V_\tau$ to denote 
-the same element of $\tau^{\str A}$.
+For flexibility, we do not require that $V_\sigma$ be minimal.
+That is, it is possible for two terms of $V_\sigma$ to denote 
+the same element of $\sigma^{\str A}$.
 For example,
 in a logic of rational numbers, the set of values for the rational sort
 might consist of all the terms of the form $[-]m/n$
@@ -1488,12 +1481,12 @@ This set covers all the rationals
 but, in contrast with the previous example, is not minimal
 because, for instance, $3/2$ and $9/6$ denote the same rational.
 
-Note that the requirements on $V_\tau$ can be always trivially satisfied 
+Note that the requirements on $V_\sigma$ can be always trivially satisfied 
 by $L$ by making sure that the signature
 $\Omega$ above contains 
 a distinguished set of infinitely many additional free constant symbols of 
-sort $\tau$,
-and defining $V_\tau$ to be that set.
+sort $\sigma$,
+and defining $V_\sigma$ to be that set.
 We call these constant symbols \define{abstract values}.
 Abstract values are useful to denote the elements of uninterpreted  
 sorts or sorts standing for structured data types
