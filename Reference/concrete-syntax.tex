@@ -768,7 +768,7 @@ The scope of those variables is the term $t_i$.
 
 \begin{lstlisting}[linewidth=29em]
 ; Axiom for list append: version 1
-; List is a parametric datatype 
+; List is a polymorphic datatype 
 ; with constructors "nil" and "cons"
 ;
 (forall ((l1 (List Int)) (l2 (List Int)))
@@ -864,8 +864,6 @@ Note that, the way \nter{pterm} is defined (see Section~\ref{sec:concrete-terms}
 only \emph{prenex} (or \emph{rank-1}) polymorphism is allowed in formulas.\endnote{%
 This restriction is intentional, to simplify reasoning.
 }}
-
-\pfrem{Look for parametric vs polymorphic}
 
 %-------------------------------------------------------------------------------
 \subsection{Scoping of variables and parameters} \label{sec:free}
@@ -1195,26 +1193,28 @@ This is done for instance in the theory declaration in Figure~\ref{fig:Integers}
 The same can be done for the set of \nter{decimal} and \nter{string} constants
 by using \ter{DECIMAL} and \ter{STRING}, respectively. 
  
-A (monomorphic) function symbol declaration of the form
+A function symbol declaration of the form
 \begin{center}
 \expr{($f$ $\sigma_1\ \cdots\ \sigma_n$ $\sigma$)}
 \end{center}
-with $n \geq 0$ declares a function symbol $f$ with rank $\sigma_1\cdots\sigma_n\sigma$.
+with $n \geq 0$ declares a \define{monomorphic function symbol} $f$ with rank 
+$\sigma_1\cdots\sigma_n\sigma$
+provided that $\sigma$ and all $\sigma_i$'s are monomorphic sorts.
 
-A polymorphic function symbol declaration, which has the form,
+A function symbol declaration of the form,
 \begin{center}
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))}
 \end{center}
 with $k > 0$, $n \geq 0$ and $u_1, \ldots, u_k$ all distinct,
-declares a function symbol $f$ with parametric rank $\tau_1\cdots\tau_n\tau$
-provided all symbols in $\tau_1\cdots\tau_n\tau$ are either sort constructors
-or sort parameters in $\{u_1, \ldots, u_k\}$.  
-This effectively declares a whole class of function symbols, 
+declares a \define{polymorphic function symbol} $f$ with rank $\tau_1\cdots\tau_n\tau$
+provided that $\tau$ and all $\tau_i$'s are polymorphic sorts over 
+the parameters $u_1, \ldots, u_k$.  
+This effectively declares a \emph{class} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways each occurrence in $\tau_1\cdots\tau_n\tau$
-of the sort parameters $u_1,\ldots,u_k$ with non-parametric sorts.
+of the sort parameters $u_1,\ldots,u_k$ with monomorphic sorts.
 
-As with sorts, each (parametric) function symbol declaration 
+As with sorts, each function symbol declaration 
 may additionally contain zero or more annotations $\alpha_1, \ldots, \alpha_n$,
 each in the form of an \nter{attribute}.
 In this version, there are only 4 predefined function symbol annotations,
@@ -1334,7 +1334,7 @@ seems enough.
 }
 For some theories, 
 a mix of formal notation and natural language might be more appropriate.
-In the presence of parametric function symbol declarations,
+In the presence of polymorphic function symbol declarations,
 the definition must also specify the meaning of each instance of the
 declared symbol.\endnote{
 Version 1.2 allowed one to specify a finitely-axiomatizable theory formally
@@ -1400,7 +1400,7 @@ and any number of occurrences of other attributes.
 \item
 Each sort symbol used in a \attr{funs} attribute is 
 previously declared in some \attr{sorts} attribute.
-In each parametric function symbol declaration
+In each polymorphic function symbol declaration
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))},
 any symbol other than $f$ that is not a previously declared sort symbol
 must be one of the sort parameters $u_1, \ldots, u_k$. 
@@ -1665,7 +1665,7 @@ by the constant \ter{univSet} of (the powerset) sort \expr{(Set $\sigma$)}.
 
 
 \smallskip
-\begin{remark}[Instances of parametric sorts]
+\begin{remark}[Instances of polymorphic sorts]
 For some applications, 
 the instantiation mechanism defined here for theory declarations
 will definitely over-generate.
@@ -1674,8 +1674,9 @@ the \ter{ArraysEx} declaration
 a theory of just the arrays of sort \expr{(Array Int Real)},
 without all the other nested array sorts over $\{\ter{Int},\, \ter{Real}\}$.
 This, however, is a problem neither in theory nor in practice. 
+\ctrem{Revise}
 It is not a problem in practice because,
-since a script can only use formulas with non-parametric sorts,\footnote{%
+since a script can only use formulas with monomorphic sorts,\footnote{%
 Note that sort parameters cannot occur in a formula.
 }
 any sorts that are not used in a script are, for practical purposes,
@@ -1734,7 +1735,7 @@ It introduces the basis sort and function symbols of the underlying logic,
 which are then automatically available in all theories.
 It provides the standard \ter{Bool} sort for Boolean values.
 The theory also provides the usual set of Boolean connectives for building formulas,
-as well parametric function symbols for equality (\ter{=}), disequality (\ter{distinct}), and
+as well polymorphic function symbols for equality (\ter{=}), disequality (\ter{distinct}), and
 if-then-else (\ter{ite}).
 Every theory declaration is assumed 
 to contain implicitly the \attr{sorts} and \attr{funs} attributes 
@@ -1883,7 +1884,7 @@ that denote function spaces
 (for example \expr{(-> Int Real)} for the sort of functions from \ter{Int} to \ter{Real})
 and an explicit function application operator \ter{\_}.
 Note that, with this addition, the language distinguishes 
-between \emph{functions} of rank \expr{($\sigma_1$, $\sigma_2$)}
+between \emph{functions} of rank $\sigma_1\sigma_2$
 and \emph{constants} or variables of sort \expr{(-> $\sigma_1$ $\sigma_2$)}.
 For instance, the latter can be passed as an argument to other functions 
 as any other datatype but the former cannot.\endnote{%
@@ -1893,7 +1894,7 @@ to a version of higher-order logic with dependent types.
 }
 This is no real limitation because it is possible to convert from one to the other
 thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
-For instance, if \ter{f} is a function symbol of rank \expr{($\sigma_1$, $\sigma_2$)},
+For instance, if \ter{f} is a function symbol of rank $\sigma_1\sigma_2$,
 one can create the corresponding higher-order constant as
 \expr{(lambda ((x $\sigma_1$)) (f x))}.
 Conversely, if \ter{g} is a constant of sort \expr{(-> $\sigma_1$ $\sigma_2$)}
