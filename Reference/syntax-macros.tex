@@ -448,10 +448,10 @@ u \in \mathcal{U}, & \text{the set of sort parameters}
 \newcommand{\terms}{
 \(
 \begin{array}{llcl}
- \text{(Attributes)} &
-  \alpha & ::= & a \alt a = v
- \\[2.2ex]
- \text{(Patterns)} &
+%  \text{(Attributes)} &
+%   \alpha & ::= & a \alt a = v
+%  \\[2.2ex]
+  \text{(Patterns)} &
   p & ::= & x \alt f\: x^*
   \\[2.2ex]
   \text{(Terms)} &
@@ -487,10 +487,11 @@ f \in \mathcal{F}, & \text{the set of function symbols}
 
 \newcommand{\termrules}{
 %% variable
+\pfrem{Remove alphas everywhere here.}\\
 \begin{tabular}{ll}
   \derives
   {}
-  {\Sigma \vdash x\ \alpha^*:\tau}
+  {\Sigma \vdash x:\tau}
   &
   if $x{:}\tau \in \Sigma$
   \end{tabular}
@@ -502,7 +503,7 @@ f \in \mathcal{F}, & \text{the set of function symbols}
   \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
   \Sigma \vdash t_k:\tau_k
   }
-  {\Sigma \vdash (f\; t_1\; \cdots\; t_k)\ \alpha^*: \tau}
+  {\Sigma \vdash (f\; t_1\; \cdots\; t_k): \tau}
   &
   %\text{if $f:\tau_1 \cdots \tau_k\tau \in \Sigma$ and
   %         $f:\tau_1 \cdots \tau_k\tau' \notin \Sigma$ with 

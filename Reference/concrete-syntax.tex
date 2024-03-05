@@ -571,10 +571,9 @@ Recall that every function symbol $f$ is separately associated
 with one or more ranks,
 each specifying the sorts of $f$'s arguments and result.
 To simplify sort checking,
-a function symbol in a term can be annotated with one of its result sorts $\sigma$
-\ctrem{$\sigma$ should be $\tau$?}.
+a function symbol in a term can be annotated with one of its result sorts $\tau$.
 Such an annotated function symbol is a \define{qualified identifier}
-of the form \expr{(as $f$ $\sigma$)}.
+of the form \expr{(as $f$ $\tau$)}.
 \bigskip
 
 \cTerms
@@ -625,7 +624,7 @@ Another consequence is that function symbols can take formulas
 
 Variables are introduced by means of one of the five binders.
 Each binder allows the introduction of one or more variables with local scope.
-\ctrem{All the $\sigma$'s below should be $\tau$'s.}
+\ctrem{All the $\sigma$'s below should be $\tau$'s.  PF: yes, to do offline.}
 
 \paragraph{Lambda.}
 
@@ -962,6 +961,8 @@ would be nested, which is not allowed.
 
 \begin{remark}[No shadowing of theory symbols]
 \ctrem{How come we have this exception for function symbols but not for sort symbols?}
+\pfrem{Indeed we should adjust the previous paragraph to disallow shadowing
+ theory sorts (or any sort?) with parameters.}
 One exception is that binders cannot shadow \define{theory function symbols},
 that is, function symbols from the declaration 
 (see Section~\ref{sec:theory-declarations})

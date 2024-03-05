@@ -92,26 +92,30 @@ an infinite set $\va$ of \define{variables}\index{variable} $x$,
 an infinite set $\fu$ of \define{function symbols}\index{symbol!function symbol} $f$
 containing the symbols $\eqs$, $\land$, and $\lnot$,
 
-\item
-an infinite set $\mathcal{A}$ of \define{attribute names}\index{attribute name} $a$, 
+%%PF Attributes do not impact the semantics
+%\item
+%an infinite set $\mathcal{A}$ of \define{attribute names}\index{attribute name} $a$, 
 
-\item
-an infinite set $\val$ of \define{attribute values}\index{attribute values} $v$,
+%\item
+%an infinite set $\val$ of \define{attribute values}\index{attribute values} $v$,
 
-\item
-the set $\st$ of \define{Unicode character strings} $w$,
+%%PF \st \na \te \lo do not seem to be explicitly used below, so we
+%% remove it for now and rephrase sorts-description, ... so that
+%% we are not using these sets implicitly anymore
+%\item
+%the set $\st$ of \define{Unicode character strings} $w$,
 
 \item
 a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$,
 
-\item
-the set $\na$ of \define{natural numbers} $n$,
+%\item
+%the set $\na$ of \define{natural numbers} $n$,
 
-\item
-an infinite set $\te$ of \define{theory names} $T$,
+%\item
+%an infinite set $\te$ of \define{theory names} $T$,
 
-\item
-an infinite set $\lo$ of \define{logic names} $L$.
+%\item
+%an infinite set $\lo$ of \define{logic names} $L$.
 
 
 \end{itemize}
@@ -276,23 +280,25 @@ implicitly included in all SMT-LIB theories
 
 \subsubsection{Annotations}
 
-Terms can be optionally annotated with zero or more \define{attributes}\index{attribute}.
+In the concrete syntax, terms can be optionally annotated with zero or
+more \define{attributes}\index{attribute}.  
 Attributes have no logical meaning, 
 but they are a convenient mechanism for adding meta-logical information,
-as illustrated in Section~\ref{sec:concrete-terms}. 
-Syntactically, 
-an attribute is either an attribute name $a \in \at$ or 
-a pair the form $a = v$ where 
-$a \in \at$ and 
-$v$ is an attribute value in $\val$.\footnote{%
-At this abstract level,
-the syntax of attribute values is intentionally left unspecified.
-}
+as illustrated in Section~\ref{sec:concrete-terms}.
+For this reason annotations do not occur in the abstract syntax.
+
+% Syntactically, 
+% an attribute is either an attribute name $a \in \at$ or 
+% a pair the form $a = v$ where 
+% $a \in \at$ and 
+% $v$ is an attribute value in $\val$.\footnote{%
+% At this abstract level,
+% the syntax of attribute values is intentionally left unspecified.
+% }
 
 Function symbols themselves may be annotated with a sort, as in $f^\tau$.
 Sort annotations simplify the sorting rules of the logic,
 which determine the set of well-sorted terms.
-
 
 \subsection{Signatures} \label{sec:signature}
 
@@ -464,7 +470,7 @@ A signature $\Sigma'$ is a \define{variant} of a signature $\Sigma$
 if it is identical to $\Sigma$ possibly except for its mapping 
 from variables to sorts.
 
-A signature $\Omega$ is a \define{expansion} of a signature $\Sigma$
+A signature $\Omega$ is an \define{expansion} of a signature $\Sigma$
 if all of the following hold:
 $\sorts{\Sigma} \subseteq \sorts{\Omega}$;
 $\funs{\Sigma} \subseteq \funs{\Omega}$;
@@ -590,7 +596,7 @@ Expressions of the form $\Sigma[x_1:\tau_1,\: \ldots,\: x_n:\tau_n]$
 denotes the signature 
 that maps $x_i$ to sort $\tau_i$ for $i=1,\ldots,n$, and 
 coincides otherwise with $\Sigma$.
-Finally, $\alpha^*$ denotes a possibly empty sequence of attributes.
+%%PF Finally, $\alpha^*$ denotes a possibly empty sequence of attributes.
 The rules operate over \define{sorting judgments}
 which are triples of the form $\Sigma \vdash t : \tau$.
 
@@ -610,7 +616,7 @@ With this definition, it is possible to show that every term has at
 most one sort in a given signature $\Sigma$.\endnote{
   It would have been reasonable to adopt an
   alternative version of the rule for well-sortedness of terms
-  $(f^\tau\; t_1\; \cdots\; t_k)\ \alpha^*$ with annotated function
+  $(f^\tau\; t_1\; \cdots\; t_k)$ with annotated function
   symbols $f^\tau$, without the second conjunct of the rule's side
   condition.  This would allow formation of terms with annotated
   function symbols $f^\tau$, even when $f$ lacked two ranks of the
@@ -1325,7 +1331,7 @@ $f{:}\bar{\sigma} \in \widehat\Omega$ iff
 $f{:}\bar{\sigma} \in \Omega$, or
 
 \item \label{decl-ii}
-$T$ contains a declaration of the form $f\;\bar{\tau}\;\bar{\alpha}$ and
+$T$ contains a declaration of the form $f\;\bar{\tau}$ and
 $\bar{\sigma}$ is an instance of $\bar \tau$, with $\bar\tau\in (\sortt{\Omega, \sop})^+$.
 \end{enumerate}
 
