@@ -156,7 +156,11 @@
                              \ter{(} \nter[+]{match\_case} \ter{)}
                      \ter{)} \\
              &\alt & \ter{(} \ter{!} \nter{term} \nter[+]{attribute} \ter{)}
-\\[1ex]
+\end{tabular}
+}
+
+\newcommand{\cPterms}{
+\begin{tabular}{lcl}
 \nter{pterm} & ::= & \nter{term} \\
              &\alt &  \ter{(} \ter{par} \ter{(} \nter[+]{symbol} \ter{)} \nter{term} \ter{)} \\ 
              &\alt &  \ter{(} \ter{!} \ter{(} \ter{par} \ter{(} \nter[+]{symbol} \ter{)} \nter{term} \ter{)} \nter[+]{attribute} \ter{)}

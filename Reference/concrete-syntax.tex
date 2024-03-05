@@ -261,6 +261,7 @@ The basic set of reserved words consists of the following:
  \verb|_| \quad
  \ter{!} \quad
  \ter{as} \quad
+ \ter{lambda} \quad
  \ter{let} \quad
  \ter{exists} \quad
  \ter{forall} \quad
@@ -471,10 +472,10 @@ their values.
 A major subset of the SMT-LIB language is 
 the language of \emph{well-sorted} terms,
 used to represent logical expressions.
-Such terms are typed, or \define{sorted} in logical terminology; 
+Such terms are typed, or \define{sorted} in first-order logic terminology; 
 that is, each is associated with a (unique) \define{sort}.
 The set of sorts consists itself of \define{sort terms}.
-In essence, a sort term is 
+In essence, a sort is 
 a \define{sort symbol},
 a \define{sort parameter}, 
 or a sort symbol applied to a sequence of sort terms.
@@ -498,9 +499,25 @@ Int                         Bool
 (-> Int Real)               (-> Int (-> Int Real))
 \end{lstlisting}
 
-A \define{(non-)parametric} sort is a sort containing (no) parameters.
-We will use $\sigma$ to denote non-parametric sorts and 
-$\tau$ to denote possibly parametric sorts.
+A \define{monomorphic} sort is a sort containing no parameters.
+A \define{polymorphic} sort is a sort containing zero or more parameters.
+For instance, if \ter{X} and \ter{Y} are declared as sort parameters,
+and \ter{Int} and \ter{Array} as sort symbols,
+\ter{(Array Int Int)} is a monomorphic sort 
+while \ter{(Array Int Y)}, \ter{(Array X Int)}, and \ter{(Array X Y)} are
+all polymorphic sorts.
+Note that we treat monomorphic sorts as a special case of polymorphic ones,
+hence \ter{(Array Int Int)} is also a (trivially) polymorphic sort.
+Contextual information is needed in general to know whether a particular symbol
+occurring in a sort is a sort parameter or not.
+This information is provided in an extended syntax for terms, 
+as explained in Section~\ref{sec:concrete-terms}.
+
+We will say just \emph{sort} to mean a polymorphic sort, and 
+say instead \emph{monomorphic sort} when we want to emphasize 
+that the sort has no parameters. 
+We will use $\sigma$ to denote monomorphic sorts and 
+$\tau$ to denote, more generally, polymorphic sorts.
 
 
 \subsection{Ranks}
@@ -508,7 +525,7 @@ $\tau$ to denote possibly parametric sorts.
 Each function symbol in an SMT-LIB script is associated with one or more 
 \define{ranks}, non-empty sequences of sorts.
 Intuitively, a function symbol $f$ with rank $\sigma_1\cdots\sigma_n\sigma$,
-with none of the sorts parametric,
+(with sorts being monomorphic),
 denotes a function that takes as input $n$ values of respective sorts
 $\sigma_1, \ldots, \sigma_n$,
 and returns a value of sort $\sigma$.
@@ -518,7 +535,7 @@ where each sort may contain sort parameters,
 actually stands for a whole \emph{class} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
-of a sort parameter with a non-parametric sort.
+of a sort parameter with a monomorphic sort.
 
 
 %-------------------------------------------------------------------------------
@@ -532,7 +549,7 @@ constant symbols in the \nter{spec\_constant} category
 \define{function symbols}, 
 four kinds of \define{binders} 
 (introduced by the reserved words \ter{lambda}, \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
-and an annotation operator (the reserved word \ter{!}).
+and an annotation operator: the reserved word \ter{!}.
 In its simplest form, a term is 
 a special constant symbol,
 a variable,
@@ -546,19 +563,41 @@ while a function symbol can be any \nter{identifier}
 As a consequence, contextual information is needed during parsing
 to know whether an identifier is to be treated as a variable or 
 a function symbol. 
-For variables, this information is provided by the three binders 
+For variables, this information is provided by the binders 
+\ter{let}, \ter{lambda}, \ter{forall}, \ter{exists}, and \ter{match}, 
 which are the only mechanism to introduce variables.
 Function symbols, in contrast, are predefined, as explained later.
-Recall that every function symbol $f$ is separately associated with one or more ranks,
+Recall that every function symbol $f$ is separately associated 
+with one or more ranks,
 each specifying the sorts of $f$'s arguments and result.
 To simplify sort checking,
-a function symbol in a term can be annotated with one of its result sorts $\sigma$.
+a function symbol in a term can be annotated with one of its result sorts $\sigma$
+\ctrem{$\sigma$ should be $\tau$?}.
 Such an annotated function symbol is a \define{qualified identifier}
 of the form \expr{(as $f$ $\sigma$)}.
 \bigskip
 
 \cTerms
 \bigskip
+
+Terms are members of the syntactic category \nter{term}.
+Note that a term $t$ with binders or qualified identifiers contains 
+sort terms in it.
+Any parameters for these sorts have to be introduced 
+by an outer sort parameter binder \ter{par} for $t$, as specified 
+by the production rules below.
+\bigskip
+
+\cPterms
+\bigskip
+
+We refer informally to members of \nter{pterm} as \define{polymorphic} terms.
+We remark that although members of \nter{term} are also polymorphic terms or 
+can occur as subterms of polymorphic terms, the opposite is not the case.\endnote{
+This restriction is intentional, to enforce \emph{prenex} polymorphism~\ref{} \todo{Add reference},
+a limited form of polymorphism that is general enough for our purposes.
+}
+
 
 SMT-LIB scripts can contain only \define{well-sorted} terms
 (see Section~\ref{well-sortedness}).
@@ -585,8 +624,8 @@ Another consequence is that function symbols can take formulas
 %-------------------------------------------------------------------------------
 
 Variables are introduced by means of one of the five binders.
-Each binder allows the introduction of one or more variables 
-or parameters with local scope.
+Each binder allows the introduction of one or more variables with local scope.
+\ctrem{All the $\sigma$'s below should be $\tau$'s.}
 
 \paragraph{Lambda.}
 
@@ -747,6 +786,11 @@ The scope of those variables is the term $t_i$.
 \end{lstlisting}
 
 \begin{remark}[No nested patterns]
+\ctrem{
+Maybe we should allow nested patterns and a catch-all syntax
+in Version 2.7, since these extensions would appear 
+in user scripts. 
+}
 \define{Nested} patterns, where the arguments of a constructor can be themselves
 non-variable patterns, are not allowed.\endnote{
 The restriction to flat patterns is for simplicity and may be lifted in later versions.
@@ -812,7 +856,7 @@ Sort parameters are introduced with expressions of the form
  \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
 \end{center}
 where $u_1, \ldots, u_k$ are $k>0$ pairwise distinct sort parameters and
-$e$ is an expression containing occurrences of $u_1, \ldots, u_k$.
+$e$ is an expression containing zero or more occurrences of $u_1, \ldots, u_k$.
 \new{
 When $e$ is a term of sort \ter{Bool} the expression above is a formula
 with polymorphic types over the parameters, i.e., sort variables, $u_1, \ldots, u_k$.
@@ -872,8 +916,8 @@ if it occurs free in $e$ and does not occur in \expr{($u_1$ $\cdots$ $u_n$)}.
 \end{itemize}
 
 \noindent 
-Each non-free, or \define{bound}, occurrence of a variable in an expression
-has a \define{scope} defined as follows.
+Each non-free, or \define{bound}, occurrence of a variable or a parameter 
+in an expression has a \define{scope} defined as follows.
 
 \begin{itemize}
 \item
@@ -909,7 +953,7 @@ This shadowing rule follows common lexical scoping conventions.
 It is easy to avoid declarations like \expr{(par (Int) (f (Array Int Int) Int))},
 which are potentially confusing to human readers,
 simply by a more judicious choice of parameter names.
-In patterns like \expr{(cons x nil)} are problematic 
+%In patterns like \expr{(cons x nil)} are problematic 
 }
 Similarly, in a \ter{match} pattern like \expr{(cons x nil)},
 the symbol \ter{nil} is a variable regardless of the existence 
@@ -919,6 +963,7 @@ would be nested, which is not allowed.
 }
 
 \begin{remark}[No shadowing of theory symbols]
+\ctrem{How come we have this exception for function symbols but not for sort symbols?}
 One exception is that binders cannot shadow \define{theory function symbols},
 that is, function symbols from the declaration 
 (see Section~\ref{sec:theory-declarations})
