@@ -83,8 +83,9 @@ SMT-LIB's commitment to each of them is described in the following.
 %-------------------------------------------------------------------------------
 
 
-Version 2.6 of the SMT-LIB format adopts as its underlying logic
-a version of many-sorted first-order logic with equality~\cite{Man-MSL-93,Gal-86,Hen-01}.
+The most recent past version of the SMT-LIB format (Version 2.6 )
+adopts as its underlying logic a version of many-sorted first-order logic 
+with equality~\cite{Man-MSL-93,Gal-86,Hen-01}.
 Like traditional many-sorted logic, it has sorts (i.e., basic types) 
 and sorted terms.
 Unlike that logic, however,
@@ -103,6 +104,9 @@ the logic includes a \emph{let} binder
 and a \emph{match} binder
 analogous to constructs with the same name
 found in functional programming languages.
+
+Version 2.7 extends the logic of Version 2.6 with \todo{brief explanation.}
+
 
 SMT-LIB's underlying logic,
 henceforth \define{SMT-LIB logic},
@@ -181,8 +185,8 @@ for instance one with dependent types.
 \section{Input Formulas}
 %-------------------------------------------------------------------------------
 
-SMT-LIB adopts a single and general first-order (sorted) language 
-in which to write logical formulas.
+SMT-LIB adopts a single and general (sorted) language in which to write 
+logical formulas.
 It is often the case, however, that 
 SMT applications work with formulas expressed in some particular fragment 
 of the language.
