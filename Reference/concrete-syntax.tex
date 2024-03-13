@@ -433,7 +433,7 @@ because each namespace can always be identified syntactically.
 Within the term namespace, bound variables can shadow one another as well as
 function symbols in accordance with a lexical scoping discipline described 
 in Section~\ref{sec:concrete-terms}. 
-Similarly, sort parameters can shadow sort symbols,
+Similarly, sort parameters can shadow user sort symbols,
 as described in Section~\ref{sec:concrete-sorts}.
 \end{remark}
 
@@ -733,6 +733,11 @@ of respective sort $\sigma_1,\ldots,\sigma_k$.\endnote{
 The sorts of pattern variables are not specified explicitly
 since they can be readily inferred from the datatype.
 }
+An exception is the special variable \ter{\_} which can occur
+more than once.  This variable acts as a wildcard, with each occurrence
+matching any term of any sort, and cannot be used in
+any $t_1, \cdots t_{m + 1}$.
+
 The list $p_1,\ldots p_{m+1}$ may contain more than one pattern with the same constructor 
 or more than one pattern consisting of a variable.\endnote{
 Such lists are semantically redundant in the sense that some of the cases 
@@ -785,10 +790,10 @@ The scope of those variables is the term $t_i$.
 \end{lstlisting}
 
 \begin{remark}[No nested patterns]
-\ctrem{
-Maybe we should allow nested patterns and a catch-all syntax
-in Version 2.7, since these extensions would appear 
-in user scripts. 
+\pfrem{
+  Do not allow a single variable as a pattern, but allow \_ ?  To discuss
+  with Clark.  Rationale: otherwise typo can really lead to soundness
+  problems that got undetected. 
 }
 \define{Nested} patterns, where the arguments of a constructor can be themselves
 non-variable patterns, are not allowed.\endnote{
@@ -804,6 +809,7 @@ since it can be defined in terms of the other binders.
 Specifically, expression (\ref{eq:match})
 can be written equivalently as follows.
 \begin{enumerate}
+  \item \pfrem{We need to eliminate \_ here!!!}
 \item
 Suppose that for all $i=1,\ldots, m + 1$, the pattern $p_i$ has the form
 \expr{($c_i$ $x_{i,1}$ $\cdots$ $x_{i,k_i}$)} with $k_i>0$;
@@ -938,17 +944,27 @@ the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
 All binders follow a lexical scoping discipline, 
 consistently with the semantics of the SMT-LIB logic,
 as described in Section~\ref{sec:models}.
-In particular, a bound variable or parameter will shadow any variable or user-defined 
+In particular, a bound variable will shadow any variable or user-defined 
 function symbol with the same name from an enclosing scope.
+For instance, in a term like
+%\begin{center}
+\expr{(forall ((a Int)) (> (+ a 1) 0))},
+%\end{center}
+variable \expr{a} would shadow any user-declared function symbol
+called \expr{a}.
+Similarly, a parameter will shadow any user-defined 
+sort symbol with the same name.
 For instance, in a function symbol declaration like
 %\begin{center}
-\expr{(par (Int) (f (Array Int Int) Int))},
+\expr{(par (A) (f (Array A B) A))},
 %\end{center}
-all occurrences of \ter{Int} are sort parameters regardless of the existence
-of a previously defined sort symbol \ter{Int}.\endnote{
+all occurrences of \ter{A} are sort parameters regardless of the existence
+of a previously user-declared sort symbol \ter{A}, whereas \ter{B} must
+be either a user- or theory-declared sort symbol.\endnote{
 This shadowing rule follows common lexical scoping conventions.
-It is easy to avoid declarations like \expr{(par (Int) (f (Array Int Int) Int))},
-which are potentially confusing to human readers,
+It is easy to avoid declarations like \expr{(par (A) (f (Array A B) A))},
+which are potentially confusing to human readers if \ter{A}
+is a user-declared sort symbol,
 simply by a more judicious choice of parameter names.
 %In patterns like \expr{(cons x nil)} are problematic 
 }
@@ -960,16 +976,14 @@ would be nested, which is not allowed.
 }
 
 \begin{remark}[No shadowing of theory symbols]
-\ctrem{How come we have this exception for function symbols but not for sort symbols?}
-\pfrem{Indeed we should adjust the previous paragraph to disallow shadowing
- theory sorts (or any sort?) with parameters.}
-One exception is that binders cannot shadow \define{theory function symbols},
-that is, function symbols from the declaration 
+One exception to the shadowing rule above is that binders cannot shadow \define{theory function or sort symbols},
+that is, function or sort symbols from the declaration 
 (see Section~\ref{sec:theory-declarations})
 of a theory included in the current logic
 (see Section~\ref{sec:logic-declarations} and Subsection~\ref{sec:restarting}).
-In other words, variables and parameters cannot have the same name 
-as a theory function symbol in the same scope.\endnote{
+In other words, variables cannot have the same name 
+as a function symbol declared in the current logic, and parameters
+cannot have the same name as a sort symbol declared in the current logic.\endnote{
 The reason for this exception is mostly historical. 
 Many SMT solvers apply this restriction, possibly under the assumption
 that shadowing a theory symbol is, more often than not, unintended and 
