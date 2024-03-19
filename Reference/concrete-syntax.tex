@@ -792,8 +792,12 @@ The scope of those variables is the term $t_i$.
 \begin{remark}[No nested patterns]
 \pfrem{
   Do not allow a single variable as a pattern, but allow \_ ?  To discuss
-  with Clark.  Rationale: otherwise typo can really lead to soundness
-  problems that got undetected. 
+  with Clark.  Rationale/Pro: otherwise typo can really lead to soundness
+  problems that got undetected.  Cons: you cannot use the variable in the
+  result expression, but you need to either duplicated the matched term,
+  or use a variable to introduce a symbol for the matched term.
+  CT+PF thought it would be best to deprecate the usage of a variable,
+  and to remove it completely in SMT-LIB 3   
 }
 \define{Nested} patterns, where the arguments of a constructor can be themselves
 non-variable patterns, are not allowed.\endnote{
@@ -809,7 +813,8 @@ since it can be defined in terms of the other binders.
 Specifically, expression (\ref{eq:match})
 can be written equivalently as follows.
 \begin{enumerate}
-  \item \pfrem{We need to eliminate \_ here!!!}
+  \item If the match statement contains one or more occurrences of
+  the \expr{\_} symbol, each of them is replaced by a fresh variable.
 \item
 Suppose that for all $i=1,\ldots, m + 1$, the pattern $p_i$ has the form
 \expr{($c_i$ $x_{i,1}$ $\cdots$ $x_{i,k_i}$)} with $k_i>0$;
@@ -1688,15 +1693,7 @@ For instance, it is not possible to define by instantiation of
 the \ter{ArraysEx} declaration 
 a theory of just the arrays of sort \expr{(Array Int Real)},
 without all the other nested array sorts over $\{\ter{Int},\, \ter{Real}\}$.
-This, however, is a problem neither in theory nor in practice. 
-\ctrem{Revise}
-It is not a problem in practice because,
-since a script can only use formulas with monomorphic sorts,\footnote{%
-Note that sort parameters cannot occur in a formula.
-}
-any sorts that are not used in a script are, for practical purposes,
-irrelevant. 
-It is not a problem in theory either 
+This, however, is not a problem
 because scripts refer to logics, not directly to theories.
 And the language of a logic can be always restricted to contain only
 a selected subset of the sorts in the logic's theory.

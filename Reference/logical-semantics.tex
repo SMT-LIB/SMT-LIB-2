@@ -34,16 +34,15 @@ logical language.
 However, while not exactly syntactic sugar, they do not change the essence 
 of SMT-LIB logic with respect to traditional many-sorted FOL.
 Quantifiers are still first-order, the sort structure is flat (no subsorts),
-the logic's type system has no function types\footnote{\new{%
-Note that arrow types, of the form \expr{(-> $\tau_1$ $\tau_2$)},
-are defined in a theory, not in the base logic.
-}}, 
+the logic's type system has no function types, 
 no type quantifiers, no dependent types,
 no provisions for parametric or subsort polymorphism.
-The only polymorphism is of the \emph{ad-hoc} variety (a function symbol 
-can be given more than one rank), although there is a syntactical mechanism 
-for approximating parametric polymorphism.
-\pfrem{We need to carefully reread the above.}
+Since SMT-LIB 2.7, we allow rank-1 (prenex) polymorphism.
+Higher-order functions are provided as a theory, not in the base logic:
+arrow types of the form \expr{(-> $\tau_1$ $\tau_2$)} are defined
+in the HO-Core theory and can be used to specify the sort of a variable
+or an argument of a function symbol.
+
 As a consequence, all the classical meta-theoretic results from many-sorted 
 FOL apply to SMT-LIB logic when considered in its full generality, that is,
 with no restrictions on the possible models other than those imposed 
@@ -228,35 +227,34 @@ which is taken care of later by the well-sortedness rules.
 For all $n \geq 0$,
 distinct variables $x, x_1, \ldots, x_n \in \va$ and sort $\tau$,
 
-
 \begin{itemize}
 \item
 the prefix construct
-\ $\lambda\,x{:}\tau\ \_$ \ is 
+\ $\lambda\,x{:}\tau\ \vartextvisiblespace$ \ is 
 a \define{function abstraction binder}\index{binder!lambda binder}
 for $x$;
 
 \item
 the prefix construct
-\ $\exists\,x{:}\tau\ \_$ \ is 
+\ $\exists\,x{:}\tau\ \vartextvisiblespace$ \ is 
 a \define{sorted existential binder (or existential quantifier)}\index{binder!existential binder}
 for $x$;
 
 \item
 the prefix construct
-\ $\forall\,x{:}\tau\ \_$ \ is 
+\ $\forall\,x{:}\tau\ \vartextvisiblespace$ \ is 
 a \define{sorted universal binder (or universal quantifier)}\index{binder!universal binder}
 for $x$;
 
 \item
 the mixfix construct
-\ $\akey{let}\,x_1 = \_\:\cdots\:x_n = \_\ \akey{in}\ \_$ \ is 
+\ $\akey{let}\,x_1 = \vartextvisiblespace\:\cdots\:x_n = \vartextvisiblespace\ \akey{in}\ \vartextvisiblespace$ \ is 
 a \define{(parallel-)let binder}\index{binder!let binder}
 for $x_1, \ldots, x_n$.
 
 \item
 the mixfix construct 
-\ $\akey{match}\,\_\,\akey{with}\,p_1 \to \_\:\cdots\:p_n \to \_$ \ is 
+\ $\akey{match}\,\vartextvisiblespace\,\akey{with}\,p_1 \to \vartextvisiblespace\:\cdots\:p_n \to \vartextvisiblespace$ \ is 
 a \define{match binder} for the variables that occur in the pattern $p_i$ for each $i=1,\ldots,n$;
 
 \end{itemize}
@@ -883,13 +881,10 @@ From now on, when we say ``structure'' we will mean ``SMT-LIB structure.''
 The restrictions in SMT-LIB structures on the interpretation 
 of constructors, selectors and testers,
 together with the well-foundedness restrictions on those constructs in signatures,
+as discussed in Section~\ref{sec:new-symbols},
 guarantee that sorts with constructors indeed denote algebraic datatypes
 as traditionally understood in the literature.
 \end{remark}
-
-\pfrem{Some work is required in the above remark: well-foundedness is not mentioned
-anywhere above, and it is rather the constraints on structure that guarantees that
-the algebraic datatype exist.}
 
 \begin{remark}[Partiality of selectors]
 As in classical first-order logic, all function symbols in a signature $\Sigma$ 
@@ -997,7 +992,7 @@ $\str A'$ is just $\str A$ but seen as a $\Sigma'$-structure.
 
 A $\Sigma$-interpretation $\inter{I}$ assigns a meaning 
 to well-sorted $\Sigma$-terms by means of a uniquely determined
-(total) mapping $\mea{\inter I}{\_}$ of such terms into the universe 
+(total) mapping $\mea{\inter I}{\cdot}$ of such terms into the universe 
 of its structure.
 
 \begin{definition}[Interpretation of terms]
@@ -1149,11 +1144,14 @@ where $\inter I = (\str A, v)$
 \end{enumerate}
 \end{definition}
 
-\pfrem{Apply is a normal (interpreted) function and is defined in the core theory.
-There is therefore no dedicated rule for it here.}
+\begin{remark}
+  There is no rule above for higher-order function application
+  \expr{\_}, since \expr{\_} is a normal (interpreted) function symbol
+  defined in the HO-Core theory (see Figure~\ref{fig:HO-Core}).
+\end{remark}
 
 \noindent 
-One can show that $\mea{\inter I}{\_}$ is well-defined, and hence total, over
+One can show that $\mea{\inter I}{ \cdot }$ is well-defined, and hence total, over
 \emph{closed} terms that are \emph{well-sorted} with respect to $\inter I$'s signature.
 
 
