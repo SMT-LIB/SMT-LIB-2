@@ -9,9 +9,8 @@
 %===============================================================================
 \thispagestyle{empty}
 
-\pfrem{We should get rid of annotations in this chapter ($\alpha$) but
- this requires to explain somewhere that annotations do not change
- types.  Left for later.}
+\pfrem{There are still $\alpha$ attributes in theory and logic declaration
+To CT: maybe we should remove useless things from theory and logic.}
 
 
 The underlying logic of the SMT-LIB language is a variant of many-sorted 
@@ -164,10 +163,10 @@ if it contains a sort parameter, it is \emph{monomorphic} otherwise.
 As an example of a sort,
 if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0, 
 $\akey{List}$ is a sort symbol of arity 1, and
-$\akey{->}$ and $\akey{Array}$ are sort symbols of arity 2,
+$\fconstruct$ and $\akey{Array}$ are sort symbols of arity 2,
 then the expression
 \[
-  (\akey{->}\ \akey{Int}\ \akey{List}\ (\akey{Array}\ \akey{Int}\ (\akey{List}\ \akey{Real})))
+  \fconstruct(\akey{Int},\akey{List}(\akey{Array}(\akey{Int}, \akey{List}(\akey{Real}))))
 \] 
 and all of its subexpressions are monomorphic sorts.
 
@@ -177,7 +176,7 @@ Similarly to the example above,
 if $u_1, u_2$ are parameters, that is elements of $\sop$,
 the expression
 \[
-  (\akey{->}\ u_1\ u_2\ \akey{List}\ (\akey{Array}\ u_1\ (\akey{List}\ u_2)))
+  \fconstruct(u_1, \fconstruct(u_2,\akey{List}(\akey{Array}(u_1, \akey{List}(u_2)))))
 \]
 and all of its subexpressions are polymorphic sorts.
 
@@ -449,7 +448,7 @@ a \define{sorted variable} is
 a pair $(x,\tau)$ in $\va \times \sortt{\Sigma, \sop}$,
 which we write as $x{:}\tau$.
 We write $x{:}\tau \in \Sigma$
-to denote $x$ has sort $\tau$ in $\Sigma$.
+to denote that $x$ has sort $\tau$ in $\Sigma$.
 A \define{ranked function symbol} is 
 a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma, \sop}^+$,
 which we write as $f{:}\tau_1\cdots\tau_n\tau$.

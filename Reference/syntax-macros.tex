@@ -4,8 +4,8 @@
 \newcommand{\akey}[1]{\textbf{#1}}
 \newcommand{\seque}[1]{l_{\mathrm{#1}}}
 \newcommand{\bool}{\akey{Bool}}
-\newcommand{\fconstruct}{\akey{Fun}}
-\newcommand{\fconstructa}[2]{\akey{Fun}(#1, #2)}
+\newcommand{\fconstruct}{{\contour{black}{$\rightarrow$}}}
+\newcommand{\fconstructa}[2]{\fconstruct(#1, #2)}
 \newcommand{\fapply}{\akey{apply}}
 \newcommand{\fapplya}[2]{\akey{apply}(#1, #2)}
 
@@ -487,7 +487,6 @@ f \in \mathcal{F}, & \text{the set of function symbols}
 
 \newcommand{\termrules}{
 %% variable
-\pfrem{Remove alphas everywhere here.}\\
 \begin{tabular}{ll}
   \derives
   {}
@@ -523,7 +522,7 @@ f \in \mathcal{F}, & \text{the set of function symbols}
   \derives{
   \Sigma[x:\tau_1] \vdash t_2:\tau_2
   }
-  {\Sigma \vdash (\lambda (x {:} \tau_1)\; t_2) \alpha^*: \fconstructa{\tau_1}{\tau_2}}
+  {\Sigma \vdash (\lambda (x {:} \tau_1)\; t_2) : \fconstructa{\tau_1}{\tau_2}}
   &
   \end{tabular}
   \bigskip
@@ -534,15 +533,10 @@ f \in \mathcal{F}, & \text{the set of function symbols}
   \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
   \Sigma \vdash t_k:\tau_k
   }
-  {\Sigma \vdash (f^\tau\; t_1\; \cdots\; t_k)\ \alpha^*: \tau}
+  {\Sigma \vdash (f^\tau\; t_1\; \cdots\; t_k)\ : \tau}
   &
   if 
-  \(
-  \begin{cases}
-  f{:}\tau_1 \cdots \tau_k\tau \in \Sigma, \\
-  f{:}\tau_1 \cdots \tau_k\tau' \in \Sigma \ \text{ for some } \tau' \neq \tau
-  \end{cases}
-  \)
+  $f{:}\tau_1 \cdots \tau_k\tau \in \Sigma$
   \end{tabular}
   \bigskip
   
@@ -561,7 +555,7 @@ f \in \mathcal{F}, & \text{the set of function symbols}
   %% quantifiers
 \begin{tabular}{ll}
 \derives{\Sigma[x{:}\tau]\: \vdash t:\bool}
-{\Sigma \vdash (Q x{:}\tau\; t)\ \alpha^* : \bool}
+{\Sigma \vdash (Q x{:}\tau\; t)\ : \bool}
 &
 if $Q\, \in \{\exists, \forall\}$
 \end{tabular}
@@ -574,7 +568,7 @@ if $Q\, \in \{\exists, \forall\}$
 \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
 \Sigma \vdash t_{k+1}:\tau_{k+1} \\
 \Sigma[x_1{:}\tau_1,\: \ldots,\: x_{k+1}{:}\tau_{k+1}]\: \vdash t:\tau}
-{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ \alpha^* : \tau}
+{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ : \tau}
 &
 if $x_1, \ldots, x_{k+1}$ are all distinct
 \end{tabular}
@@ -586,7 +580,7 @@ if $x_1, \ldots, x_{k+1}$ are all distinct
 \Sigma \vdash t:\delta \\
 \Sigma[\bar x_i{:}\bar\tau_i]\: \vdash t_i:\tau \text{ for } i=1,\ldots,k+1
 }
-{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ \alpha^* : \tau}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ : \tau}
 &
 if 
 \(
@@ -607,7 +601,7 @@ if
 \Sigma[\bar x_i{:}\bar\tau_i]\: \vdash t_i:\tau \text{ for } i=1,\ldots,k\\
 \Sigma[x_i{:}\delta]\: \vdash t_i:\tau \text{ for } i=k+1,\ldots,n 
 }
-{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ \alpha^* : \tau}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ : \tau}
 &
 if 
 \(
