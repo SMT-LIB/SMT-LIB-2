@@ -5,7 +5,7 @@
 \newcommand{\seque}[1]{l_{\mathrm{#1}}}
 \newcommand{\bool}{\akey{Bool}}
 \newcommand{\fconstruct}{{\contour{black}{$\rightarrow$}}}
-\newcommand{\fconstructa}[2]{\fconstruct(#1, #2)}
+\newcommand{\fconstructa}[2]{#1\ \fconstruct\ #2}
 \newcommand{\fapply}{\akey{apply}}
 \newcommand{\fapplya}[2]{\akey{apply}(#1, #2)}
 
@@ -625,10 +625,10 @@ if
 \(
 \begin{array}{llcl}
  \text{(Sort symbol declarations)} &
- \mathit{sdec} & ::= & s\: n\: \alpha^*
+ \mathit{sdec} & ::= & s\: n
  \\[2ex]
  \text{(Fun.~symbol declarations)} &
- \mathit{fdec} & ::= & f\: \tau^+\: \alpha^*
+ \mathit{fdec} & ::= & f\: \tau^+
  \\[2ex]
  \text{(Theory attributes)} &
  \mathit{tattr} & ::= & \aattr{sorts} = \mathit{sdec}^+
@@ -636,9 +636,9 @@ if
    & & \alt& \aattr{sorts-description} = w \\
    & & \alt& \aattr{funs-description} = w \\
    & & \alt& \aattr{definition} = w
-       \alt  \aattr{values} = t^+ \\
-   & & \alt& \aattr{notes} = w
-       \alt  \alpha
+       \alt  \aattr{values} = t^+% \\
+   %& & \alt& \aattr{notes} = w
+   %    \alt  \alpha
  \\[2ex]
  \text{(Theory declarations)} &
  \mathit{tdec} & ::= & 
@@ -666,9 +666,9 @@ T \in \mathcal{T}, & \text{the set of theory names}
  \mathit{lattr} & ::= & \aattr{theories} = T^+
        \alt  \aattr{language} = w \\
    & & \alt& \aattr{extensions} = w
-       \alt  \aattr{values} = w \\
-   & & \alt& \aattr{notes} = w
-       \alt  \alpha
+       \alt  \aattr{values} = w% \\
+%   & & \alt& \aattr{notes} = w
+%       \alt  \alpha
  \\[2ex]
  \text{(Logic declarations)} &
  \mathit{ldec} & ::= & \akey{logic}\ L\  \mathit{lattr}^+
