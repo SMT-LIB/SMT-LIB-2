@@ -21,7 +21,7 @@ as well as the use of functions as first-class values.
 The latter is achieved by the addition of a background theory 
 of higher-order functions,
 which are modeled as values of sort \expr{(-> $\tau_1$ $\tau_2$)}
-\pfrem{in the concrete syntax}.
+in the concrete syntax.
 \end{newver}
 
 
@@ -133,9 +133,6 @@ In SMT-LIB logic, the language of sorts is extended from sort symbols
 to \emph{sort terms} built with symbols from the set $\so$ above.
 Formally, we have the following.
 
-\pfrem{People are confused with prefix as in concrete syntax, $s t_1 ...t_n$,
-without parentheses, $s(t_1,\dots t_n)$.}
-
 \begin{definition}[Sorts]
 For all non-empty subsets $S$ of $\so$ and 
 all mappings $\ar:S \to \mathbb{N}$,
@@ -166,10 +163,13 @@ $\akey{List}$ is a sort symbol of arity 1, and
 $\fconstruct$ and $\akey{Array}$ are sort symbols of arity 2,
 then the expression
 \[
-  \fconstructa{\akey{Int}}{\akey{List}(\akey{Array}(\akey{Int}, \akey{List}(\akey{Real})))}
+  \fconstructa{\akey{Int}}{(\akey{List}\ (\akey{Array}\ \akey{Int}\ 
+  (\akey{List}\ \akey{Real})))}
 \] 
-and all of its subexpressions are monomorphic sorts.  The
-constructor for function sorts $\fconstruct$ is used in an infix way to improve readability.
+and all of its subexpressions are monomorphic sorts.  
+We are using the
+constructor for function sorts $\fconstruct$ as 
+an infix, right-associative operator to improve readability.
 
 Note that function symbol declarations in theory declarations (defined later)
 use also polymorphic sorts.
@@ -177,7 +177,7 @@ Similarly to the example above,
 if $u_1, u_2$ are parameters, that is, elements of $\sop$,
 the expression
 \[
-  \fconstructa{u_1}{\fconstructa{u_2}{\akey{List}(\akey{Array}(u_1, \akey{List}(u_2)))}}
+  \fconstructa{u_1}{\fconstructa{u_2}{(\akey{List}\ (\akey{Array}\ u_1\ (\akey{List}\ u_2)))}}
 \]
 and all of its subexpressions are polymorphic sorts.
 
@@ -300,10 +300,6 @@ which determine the set of well-sorted terms.
 
 \subsection{Signatures} \label{sec:signature}
 
-\pfrem{I had the remark that what makes this chapter complicated is
-data types.  Maybe for SMT3 we can leave them aside and have a full
-section just on data types as a fix?}
-
 Well-sorted terms in SMT-LIB logic are terms that can be associated
 with a unique sort by means of a set of \emph{sorting rules}
 similar to typing rules in programming languages.
@@ -384,12 +380,17 @@ such that
 %\item
 %$(\eqs,\, \tau\tau\,\bool) \in R$ for all $\tau \in \sortt{\sorts \Sigma}$;
 
+\item 
+each constructor $c \in \cons{\Sigma}$ has a rank of the form $\tau_1 \ldots \tau_n\tau$
+where the top symbol of $\tau$ is the sort symbol $c$ is associated with;
 \item
 for all constructors $c \in \cons{\Sigma}$, 
 selectors $g_1 \cdots g_n = \mathrm{sel}_\Sigma(c)$, and
 sorts $\tau_1,\ldots,\tau_n,\tau \in \sortt{\sorts \Sigma, \sop}$,
 if $(c, \tau_1\cdots\tau_n\tau) \in R$
 then $(g_i,\tau\,\tau_i) \in R$ for all $i=1,\ldots,n$;
+
+where 
 
 \item
 for all constructors $c \in \cons{\Sigma}$ and 
@@ -409,10 +410,8 @@ in a \akey{match} expression.
 \end{enumerate}
 \end{itemize}
 
-A sort symbol in $\Sigma$ is an \define{algebraic data type}
-if it is assigned a non-empty set of constructors.
-\pfrem{It is not too clear what is meant here: for me, it is the top symbol of the sort 
-$\tau$ above}
+A sort in $\sortt{\sorts \Sigma, \sop}$ is an \define{(algebraic) datatype}
+if its top symbol is assigned a non-empty set of constructors.
 %\ctrem{notes on constructors, selectors and testers}
 \qed
 \end{definition}
@@ -511,7 +510,7 @@ $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 
 % Together with the mechanisms used 
 % to declare theories (described in Section~\ref{sec:theories})
-% and algebraic data types (described in Section~\ref{sec:new-symbols}),
+% and algebraic datatypes (described in Section~\ref{sec:new-symbols}),
 % overloading also provides an approximate form of \emph{parametric polymorphism}
 % by allowing one to declare function symbols with ranks
 % all having the \emph{same shape}.
@@ -523,7 +522,7 @@ $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 % Strictly speaking, this is still ad-hoc polymorphism
 % because SMT-LIB logic itself does not allow parametric sorts.\footnote{%
 % Parametric sort terms that occur in theory declarations 
-% and algebraic data type declarations
+% and algebraic datatype declarations
 % are meta-level syntax as far as SMT-LIB logic is concerned.
 % They are \emph{schemas} standing for concrete sorts.
 % }
@@ -552,17 +551,17 @@ that is, only if it is written as $f^{\tau_1}\bar{t}$ or $f^{\tau_2}\bar{t}$.
 As a consequence, from now on we will assume 
 that all ambiguous symbols are annotated as  described above.
 
-\pfrem{Maybe add an end-note on this non-issue: there might be
-two identical instances from two ranks:
-  f: u -> u
-  f: Int -> Int
-Technically, this would not be an ambiguity (it is the same function),
-but the issue does not even happen in 2.7 because there is no
-overloading for users (and we can be confidents theory designer will be
-careful).
-} 
+% \pfrem{Maybe add an end-note on this non-issue: there might be
+% two identical instances from two ranks:
+%   f: u -> u
+%   f: Int -> Int
+% Technically, this would not be an ambiguity (it is the same function),
+% but the issue does not even happen in 2.7 because there is no
+% overloading for users (and we can be confidents theory designer will be
+% careful).
+% } 
 
-\pfrem{User scripts and parametric sorts for declaring functions.}
+% \pfrem{User scripts and parametric sorts for declaring functions.}
 
 
 
@@ -651,16 +650,16 @@ semantically well defined.
 The first rule deals with \akey{match} expressions where no patterns consist 
 of a variable.
 In that case, exhaustiveness is enforced by requiring that each constructor
-of the data type appear in one of the patterns.
+of the datatype appear in one of the patterns.
 The second rule deals with \akey{match} expressions where one or more patterns 
 consist of a variable.
 In that case, exhaustiveness is guaranteed simply by the presence 
 of those variables.
-In both cases, the preconditions ensure that $\delta$ is a data type, 
+In both cases, the preconditions ensure that $\delta$ is a datatype, 
 not just any sort, by requiring it to have a non-empty set of constructors.
 \end{remark}
-\pfrem{Check the above, I have a vague memory that we recently changed the rules
-for match in the concrete syntax}
+\pfrem{Check the above, if ever we change the rules for variables in
+patterns.  See in plenary SMT discussion with Clark.}
 
 
 \begin{definition}[SMT-LIB formulas]
@@ -783,14 +782,14 @@ but ranked function symbols.
 % Also note that 
 % any $\Sigma$-structure is also a $\Sigma'$-structure 
 % for every variant $\Sigma'$ of $\Sigma$.
-
+%\pfrem{We are not saying anything about HO functions, which is normal but perhaps a note would help.  No OK, comes later.}
 
 \begin{definition}[Absolutely free structure]
 Let $\str A$ be a $\Sigma$-structure with universe $A$ and 
 let $G \subseteq A$.
 Let $\Sigma_G$ be the expansion of $\Sigma$ obtained by adding to $\Sigma$
-a constant symbol $a$ of sort $\sigma$
-for every $a \in G$ \pfrem{element in $G$} and monomorphic sort $\sigma \in \sorts\Sigma$ 
+a constant symbol $c_a$ of sort $\sigma$
+for every $a \in G$ and monomorphic sort $\sigma \in \sorts\Sigma$ 
 such that $a \in \sigma^{\str A}$.
 Then, $\str A$ is an \define{absolutely free structure (with generators $G$)}
 if 
@@ -857,10 +856,7 @@ if $\Omega$ is the signature obtained from $\Sigma$ by removing
 all of its non-constructor function symbols,
 the $\Omega$-reduct of $\str A$ is an absolutely free algebra with 
 generators $\bigcup_{ \sigma \in S} \sigma^{\str A}$
-where $S$ collects the sorts of $\sortt{\Sigma}$ that are not data types;
-\pfrem{Actually, data types instances.  Datatype is defined with sort
-constructors, here we mean all possible sorts built with these sort constructors.
-See previous remark about definition of a data type}
+where $S$ collects the sorts of $\sortt{\Sigma}$ that are not datatypes;
 
 \item
 for all constructors $c{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n>0$,
@@ -891,7 +887,7 @@ The restrictions in SMT-LIB structures on the interpretation
 of constructors, selectors and testers,
 together with the well-foundedness restrictions on those constructs in signatures,
 as discussed in Section~\ref{sec:new-symbols},
-guarantee that sorts with constructors indeed denote algebraic data types
+guarantee that sorts with constructors indeed denote algebraic datatypes
 as traditionally understood in the literature.
 \end{remark}
 
@@ -1026,12 +1022,13 @@ for all $\theta$ \ such that \
 \end{cases}
 \)
 
-\item
-$\mea{\inter I}{t\;\alpha_1\;\cdots\;\alpha_n} = \mea{\inter I}{t}$
+% PF removing since we handled that case in the introduction of the chapter
+%\item
+%$\mea{\inter I}{t\;\alpha_1\;\cdots\;\alpha_n} = \mea{\inter I}{t}$
 
 \item
 $\mea{\inter I}{x} = v(x{:}\sigma)$ 
-\quad if $\inter I = (\str A, v)$  
+\quad if $\inter I = (\str A, v)$ and $v$ is of sort $\sigma$
 
 \item
 $\mea{\inter I}{\hat{f}\;t_1\;\ldots\;t_n} = 
@@ -1042,8 +1039,9 @@ $
 \begin{cases}
  \inter I = (\str A, v) \text{ with signature } \Sigma,\\
  \hat{f} = f \text{ or } \hat{f} = f^\sigma,\\
- \text{for } i=1,\ldots,n \\
- \quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}
+ %\text{for } i=1,\ldots,n \\
+ %\quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}
+ f\text{ is of rank }\sigma_1\cdots\sigma_n\sigma
 \end{cases}
 \)
 
@@ -1054,10 +1052,10 @@ $
 \ if \  
 \(
 \begin{cases}
- \inter{I} \text{ has signature } \Sigma, \\
- \text{for } i=1,\ldots,n \\
- \quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
- \inter{I}' = {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n]
+ %\inter{I} \text{ has signature } \Sigma, \\
+ t_i \text{ has sort } \sigma_i \text{ and }a_i = \mea{\inter I}{t_i}\text{ for } i=1,\ldots,n ,\\
+%\quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
+ \text{and }\inter{I}' = {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n]
 \end{cases}
 \)
 
@@ -1091,7 +1089,7 @@ for all $\inter I'$
 
 \item
 $\mea{\inter I}{\lambda (x {:} \sigma)\; t} =
- \{ a \mapsto \mea{\inter I[x \mapsto a]}{t} \mid a \in \sigma^{\str A}
+ \{ a \mapsto \mea{\inter I[x {:} \sigma \mapsto a]}{t} \mid a \in \sigma^{\str A}
  \}
 $
 where $\inter I = (\str A, v)$
@@ -1174,7 +1172,7 @@ and is \define{unsatisfiable} otherwise.
 For a closed term $t$,
 its meaning $\mea{\inter I}{t}$ 
 in an interpretation $\inter{I} = (\str A, v)$ is independent of the choice 
-of the valuation $v$---because the term has no free variables.
+of the valuation $v$, since the term has no free variables.
 For such terms then, 
 we can write $\mea{\str A}{t}$ instead of $\mea{\inter I}{t}$.
 Similarly,
@@ -1226,7 +1224,7 @@ The combination mechanism is defined below.
 
 Two signatures $\Sigma_1$ and $\Sigma_2$ are \define{compatible} 
 if they have the same sort symbols, 
-have the same data type constructors, selectors and testers, and they agree 
+have the same datatype constructors, selectors and testers, and they agree 
 on both the arity they assign to sort symbols and 
 the sorts they assign to variables.\footnote{%
 Observe that compatibility is an equivalence relation on signatures.
@@ -1312,7 +1310,7 @@ and
 let $S$ and $F$ be respectively the set of all sort symbols and 
 all function symbols occurring in $T$.
 Let $\Omega$ be a signature
-\emph{whose set of sort symbols that are not data types
+\emph{whose set of sort symbols that are not datatypes
 includes all the symbols in $S$, with the same arity}.
 The definition provided in the \akey{definition} attribute of $T$
 must be such that
@@ -1347,7 +1345,7 @@ $\bar{\sigma}$ is an instance of $\bar \tau$, with $\bar\tau\in (\sortt{\Omega, 
 \end{enumerate}
 
 \item
-A function symbol of $\widehat\Omega$ is a data type constructor/selector/tester 
+A function symbol of $\widehat\Omega$ is a datatype constructor/selector/tester 
 in $\widehat\Omega$ iff it is so in $\Omega$.
 \end{enumerate}
 
@@ -1357,11 +1355,11 @@ if $f{:}\bar{\sigma} \in \widehat\Omega$
 because of Point~\ref{decl-ii} above.
 The \define{free sort symbols} of $\widehat T$ are
 the sort symbols of $\widehat\Omega$ that are not in $S$
-and are not data types.
+and are not datatypes.
 Similarly, the \define{free function symbols} of $\widehat T$
 are the ranked function symbols of $\widehat\Omega$
 that are not declared in $T$
-and are not data type constructors, selectors or testers.\footnote{%
+and are not datatype constructors, selectors or testers.\footnote{%
 Note that because of overloading 
 we talk about \emph{ranked} function symbols being free or not,
 not just function symbols.
@@ -1431,9 +1429,14 @@ a logic declaration specifies a \emph{single} logic,
 not a class of them,
 so we call the logic $L$ too.
 An abstract syntax of logic declarations is defined in 
-Figure~\ref{fig:logic-declaration}.  Again, the concrete
-syntax allows more logic attributes, that do not matter here.
-\pfrem{We should talk about extensions.}
+Figure~\ref{fig:logic-declaration}.  
+Again, the concrete syntax allows additional logic attributes
+that do not impact the semantics and can be ignored here.
+Logics allow extensions, defining further function symbols.
+For the sake of simplicity, we only 
+consider here logics without extensions, since those additional
+symbols could be considered to be defined in the logic's theories.
+
 
 Let $L$ be a logic declaration whose \akey{theories} attribute has value
 $T_1, \ldots, T_n$.
@@ -1508,7 +1511,7 @@ sort $\sigma$,
 and defining $V_\sigma$ to be that set.
 We call these constant symbols \define{abstract values}.
 Abstract values are useful to denote the elements of uninterpreted  
-sorts or sorts standing for structured data types
+sorts or sorts standing for structured datatypes
 such as lists, arrays, sets and so on.\footnote{%
 The concrete syntax reserves a special format for constant symbols 
 used as abstract values: 
@@ -1516,11 +1519,11 @@ they are members of the \nter{symbol} category
 that start with the character \ter{@}.
 }
 
-Recall that algebraic data types are not defined in theories but directly 
+Recall that algebraic datatypes are not defined in theories but directly 
 at the level of the underlying SMT-LIB logic. 
 For each such sort, the set of values is fixed to the set 
 of constructor terms built over values from other sorts.
-For example, in a parametric list data type $\delta$ 
+For example, in a parametric list datatype $\delta$ 
 with the usual $\mathrm{nil}$ and $\mathrm{cons}$ constructors,
 the set of values for $\delta$ consists of $\mathrm{nil}$ and 
 all terms of the form 
