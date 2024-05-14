@@ -846,35 +846,39 @@ or the \ter{let} subexpression, if $i=m$, is replaced by \expr{(let (($x$ $t$)) 
 \end{enumerate}
 
 
+%%-------------------------------------------------------------------------------
+%\subsection{Parameter Binders}
+%%-------------------------------------------------------------------------------
+%
+%SMT-LIB allows the declaration of polymorphic function symbols 
+%in theory declarations (see Section~\ref{sec:theory-declarations}) and 
+%of polymorphic datatypes in user scripts (see Section~\ref{sec:new-symbols}).
+%\new{
+%It also enables the assertion of formulas in user scripts 
+%(see Section~\ref{sec:assert})
+%containing terms of polymorphic sort.
+%}
+%Sort parameters are introduced with expressions of the form
+%\begin{center}
+% \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
+%\end{center}
+%where $u_1, \ldots, u_k$ are $k>0$ pairwise distinct sort parameters and
+%$e$ is an expression containing zero or more occurrences of $u_1, \ldots, u_k$.
+%\new{
+%When $e$ is a term of sort \ter{Bool} the expression above is a formula
+%with polymorphic types over the parameters, i.e., sort variables, $u_1, \ldots, u_k$.
+%Note that, the way \nter{pterm} is defined (see Section~\ref{sec:concrete-terms}),
+%only \emph{prenex} (or \emph{rank-1}) polymorphism is allowed in formulas.\endnote{%
+%This restriction is intentional, to simplify reasoning.
+%}}
+
 %-------------------------------------------------------------------------------
-\subsection{Parameter Binders}
+\subsection{Scoping of variables} \label{sec:free}
 %-------------------------------------------------------------------------------
 
-SMT-LIB allows the declaration of polymorphic function symbols 
-in theory declarations (see Section~\ref{sec:theory-declarations}) and 
-of polymorphic datatypes in user scripts (see Section~\ref{sec:new-symbols}).
-\new{It also enables the assertion of polymorphic formulas in user scripts (see Section~\ref{sec:assert}).}
-Sort parameters are introduced with expressions of the form
-\begin{center}
- \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
-\end{center}
-where $u_1, \ldots, u_k$ are $k>0$ pairwise distinct sort parameters and
-$e$ is an expression containing zero or more occurrences of $u_1, \ldots, u_k$.
-\new{
-When $e$ is a term of sort \ter{Bool} the expression above is a formula
-with polymorphic types over the parameters, i.e., sort variables, $u_1, \ldots, u_k$.
-Note that, the way \nter{pterm} is defined (see Section~\ref{sec:concrete-terms}),
-only \emph{prenex} (or \emph{rank-1}) polymorphism is allowed in formulas.\endnote{%
-This restriction is intentional, to simplify reasoning.
-}}
 
-%-------------------------------------------------------------------------------
-\subsection{Scoping of variables and parameters} \label{sec:free}
-%-------------------------------------------------------------------------------
-
-The notions of \define{free} variable/parameter occurrence in an s-expression,
-\define{bound} variable/parameter, and
-\define{(binder) scope} are defined as follows.
+The notions of \define{free} variable occurrence in an s-expression,
+\define{bound} variable, and \define{(binder) scope} are defined as follows.
 \smallskip
 
 \noindent A variable $x$:
@@ -903,21 +907,21 @@ if it occurs free in $t$ or it occurs free in some $t_i$ ($1\le i\le n$) and
 does not occur in the corresponding $p_i$.
 \end{itemize}
 
-\noindent A parameter $u$:
-\begin{itemize}
-\item
-occurs free in the expression $u$;
-\item
-occurs free in an expression \expr{($e_1$ $\cdots$ $e_n$)}
-if $e_1$ is not \ter{par} and $u$ occurs free in some $e_i$ ($1\le i\le n$); 
-\item
-occurs free in an expression
-\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)}
-if it occurs free in $e$ and does not occur in \expr{($u_1$ $\cdots$ $u_n$)}.
-\end{itemize}
+%\noindent A parameter $u$:
+%\begin{itemize}
+%\item
+%occurs free in the expression $u$;
+%\item
+%occurs free in an expression \expr{($e_1$ $\cdots$ $e_n$)}
+%if $e_1$ is not \ter{par} and $u$ occurs free in some $e_i$ ($1\le i\le n$); 
+%%\item
+%%occurs free in an expression
+%%\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)}
+%%if it occurs free in $e$ and does not occur in \expr{($u_1$ $\cdots$ $u_n$)}.
+%\end{itemize}
 
 \noindent 
-Each non-free, or \define{bound}, occurrence of a variable or a parameter 
+Each non-free, or \define{bound}, occurrence of a variable 
 in an expression has a \define{scope} defined as follows.
 
 \begin{itemize}
@@ -932,10 +936,10 @@ In an expression
 \expr{(match $t$ (($p_1$ $t_1$) $\cdots$ ($p_n$ $t_n$)))},
 the scope of each variable occurring in pattern $p_i$ is the corresponding term $t_i$
 ($1\le i\le n$).
-\item
-In an expression 
-\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)},
-the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
+%\item
+%In an expression 
+%\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)},
+%the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
 \end{itemize}
 
 \paragraph{Shadowing}
@@ -989,6 +993,9 @@ so best treated as an error.
 }
 \end{remark}
 
+%-------------------------------------------------------------------------------
+\subsection{Scoping of parameters} \label{sec:free-pars}
+%-------------------------------------------------------------------------------
 
 \subsection{Well-sortedness requirements} \label{well-sortedness}
 
