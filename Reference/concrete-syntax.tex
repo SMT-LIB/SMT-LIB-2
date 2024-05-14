@@ -510,8 +510,7 @@ Note that we treat monomorphic sorts as a special case of polymorphic ones,
 hence \ter{(Array Int Int)} is also a (trivially) polymorphic sort.
 Contextual information is needed in general to know whether a particular symbol
 occurring in a sort is a sort parameter or not.
-This information is provided in an extended syntax for terms, 
-as explained in Section~\ref{sec:concrete-terms}.
+Sort parameters are declared in a script with a specific command.
 
 We will say just \emph{sort} to mean a polymorphic sort, and 
 say instead \emph{monomorphic sort} when we want to emphasize 
@@ -582,20 +581,14 @@ of the form \expr{(as $f$ $\tau$)}.
 Terms are members of the syntactic category \nter{term}.
 Note that a term $t$ with binders or qualified identifiers contains 
 sort terms in it.
-Any parameters for these sorts have to be introduced 
-by an outer sort parameter binder \ter{par} for $t$, as specified 
-by the production rules below.
-\bigskip
+Any parameters for these sorts are declared 
+in a script by a command.
 
-\cPterms
-\bigskip
-
-We refer informally to members of \nter{pterm} as \define{polymorphic} terms.
-We remark that although members of \nter{term} are also polymorphic terms or 
-can occur as subterms of polymorphic terms, the opposite is not the case.\endnote{
-This restriction is intentional, to enforce \emph{prenex} polymorphism~\ref{} \todo{Add reference},
-a limited form of polymorphism that is general enough for our purposes.
-}
+% We refer informally to members of \nter{pterm} as \define{polymorphic} terms.
+% We remark that although members of \nter{term} are also polymorphic terms or 
+% can occur as subterms of polymorphic terms, the opposite is not the case.\endnote{
+% This restriction is intentional, to enforce \emph{prenex} polymorphism~\ref{} \todo{Add reference},
+% a limited form of polymorphism that is general enough for our purposes.
 
 
 SMT-LIB scripts can contain only \define{well-sorted} terms
