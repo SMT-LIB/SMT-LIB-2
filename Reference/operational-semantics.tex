@@ -862,8 +862,9 @@ in any case.
 \subsection{Introducing new symbols} \label{sec:new-symbols}
 %-------------------------------------------------------------------------------
 
-The next seven commands allow one to introduce new sort or function symbols
-by providing them with a rank declaration 
+The first command below allows the declaration of sort parameters.
+The next seven commands allow one to introduce new sort or function symbols 
+by providing them with a rank declaration
 (\ter{declare-sort}, \ter{declare-fun} and \ter{declare-const})
 or also with a definition 
 (\ter{define-sort}, \ter{define-fun}, \ter{define-fun-rec} and 
@@ -872,15 +873,24 @@ We refer to the former as \define{user-declared} symbols and
 the latter as \define{user-defined} symbols.
 Declarations and definitions are made global (permanent) or are added 
 to the current assertion level depending on 
-whether the \attr{global-declarations} option is set to \ter{true} or not.
+whether the option \attr{global-declarations} is set to \ter{true} or not.
 
 \begin{description}
+
+%%% declare-sort-parameter %%%
+%
+\item[\expr{(declare-sort-parameter $s$)}]
+adds sort parameter $s$.
+It is an error if $s$ is a sort symbol or parameter already present 
+in the current signature.
+\smallskip
 
 %%% declare-sort %%%
 %
 \item[\expr{(declare-sort $s$ $n$)}]
 adds sort symbol $s$ with associated arity $n$.
-It is an error if $s$ is a sort symbol present in the current signature.
+It is an error if $s$ is a sort symbol or parameter already present 
+in the current signature.
 \smallskip
 
 %%% define-sort %%%
