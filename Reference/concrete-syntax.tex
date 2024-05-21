@@ -261,7 +261,7 @@ The basic set of reserved words consists of the following:
  \verb|_| \quad
  \ter{!} \quad
  \ter{as} \quad
- \ter{lambda} \quad
+ \new{\ter{lambda}} \quad
  \ter{let} \quad
  \ter{exists} \quad
  \ter{forall} \quad
@@ -499,6 +499,7 @@ Int                         Bool
 (-> Int Real)               (-> Int (-> Int Real))
 \end{lstlisting}
 
+\begin{newver}
 A \define{monomorphic} sort is a sort containing no parameters.
 A \define{polymorphic} sort is a sort containing zero or more parameters.
 For instance, if \ter{X} and \ter{Y} are declared as sort parameters,
@@ -517,7 +518,7 @@ say instead \emph{monomorphic sort} when we want to emphasize
 that the sort has no parameters. 
 We will use $\sigma$ to denote monomorphic sorts and 
 $\tau$ to denote, more generally, polymorphic sorts.
-
+\end{newver}
 
 \subsection{Ranks}
 
@@ -547,7 +548,7 @@ constant symbols in the \nter{spec\_constant} category
 \define{variables}, 
 \define{function symbols}, 
 four kinds of \define{binders} 
-(introduced by the reserved words \ter{lambda}, \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
+(introduced by the reserved words \new{\ter{lambda},} \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
 and an annotation operator: the reserved word \ter{!}.
 In its simplest form, a term is 
 a special constant symbol,
@@ -563,7 +564,7 @@ As a consequence, contextual information is needed during parsing
 to know whether an identifier is to be treated as a variable or 
 a function symbol. 
 For variables, this information is provided by the binders 
-\ter{let}, \ter{lambda}, \ter{forall}, \ter{exists}, and \ter{match}, 
+\ter{let}, \new{\ter{lambda}}, \ter{forall}, \ter{exists}, and \ter{match}, 
 which are the only mechanism to introduce variables.
 Function symbols, in contrast, are predefined, as explained later.
 Recall that every function symbol $f$ is separately associated 
@@ -578,11 +579,13 @@ of the form \expr{(as $f$ $\tau$)}.
 \cTerms
 \bigskip
 
+\begin{newver}
 Terms are members of the syntactic category \nter{term}.
 Note that a term $t$ with binders or qualified identifiers contains 
 sort terms in it.
 Any parameters for these sorts are declared 
 in a script by a command.
+\end{newver}
 
 % We refer informally to members of \nter{pterm} as \define{polymorphic} terms.
 % We remark that although members of \nter{term} are also polymorphic terms or 
@@ -615,6 +618,8 @@ Another consequence is that function symbols can take formulas
 \subsection{Variable Binders}  \label{sec:binders}
 %-------------------------------------------------------------------------------
 
+\begin{newver}
+
 Variables are introduced by means of one of the five binders.
 Each binder allows the introduction of one or more variables with local scope.
 \ctrem{All the $\sigma$'s below should be $\tau$'s.  PF: yes, to do offline.}
@@ -644,6 +649,8 @@ has the same semantics as the term
   \end{equation}
   %
   See Section~\ref{sec:core} for more details on the use of this binder.
+
+\end{newver}
 
 \paragraph{Exists and forall quantifiers.}
 These binders correspond 
@@ -726,10 +733,12 @@ of respective sort $\sigma_1,\ldots,\sigma_k$.\endnote{
 The sorts of pattern variables are not specified explicitly
 since they can be readily inferred from the datatype.
 }
+\begin{newver}
 An exception is the special variable \ter{\_} which can occur
 more than once.  This variable acts as a wildcard, with each occurrence
 matching any term of any sort, and cannot be used in
 any $t_1, \cdots t_{m + 1}$.
+\end{newver}
 
 The list $p_1,\ldots p_{m+1}$ may contain more than one pattern with the same constructor 
 or more than one pattern consisting of a variable.\endnote{
@@ -806,8 +815,8 @@ since it can be defined in terms of the other binders.
 Specifically, expression (\ref{eq:match})
 can be written equivalently as follows.
 \begin{enumerate}
-  \item If the match statement contains one or more occurrences of
-  the \expr{\_} symbol, each of them is replaced by a fresh variable.
+  \item \new{If the match statement contains one or more occurrences of
+  the \expr{\_} symbol, each of them is replaced by a fresh variable.}
 \item
 Suppose that for all $i=1,\ldots, m + 1$, the pattern $p_i$ has the form
 \expr{($c_i$ $x_{i,1}$ $\cdots$ $x_{i,k_i}$)} with $k_i>0$;
@@ -891,9 +900,10 @@ if $e_1$ is \ter{par} or not a binder, and
 $x$ occurs free in some $e_i$ ($1\le i\le n$); 
 \item
 occurs free in an expression 
+\new{
 \expr{($Q$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)}
 where $Q$ is \ter{lambda}, \ter{forall}, or \ter{exists}
-if it does not occur in $\{x_1, \ldots, x_n\}$ and occurs free in $t$;
+if it does not occur in $\{x_1, \ldots, x_n\}$ and occurs free in $t$;}
 \item
 occurs free in an expression 
 \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)} if 

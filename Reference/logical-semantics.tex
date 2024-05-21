@@ -32,11 +32,13 @@ Quantifiers are still first-order, the sort structure is flat (no subsorts),
 the logic's type system has no function types, 
 no type quantifiers, no dependent types,
 no provisions for parametric or subsort polymorphism.
+\begin{newver}
 Since SMT-LIB 2.7, we allow rank-1 (prenex) polymorphism.
 Higher-order functions are provided as a theory, not in the base logic:
 arrow types of the form \expr{(-> $\tau_1$ $\tau_2$)} are defined
 in the HO-Core theory and can be used to specify the sort of a variable
 or an argument of a function symbol.
+\end{newver}
 
 As a consequence, all the classical meta-theoretic results from many-sorted 
 FOL apply to SMT-LIB logic when considered in its full generality, that is,
@@ -135,12 +137,12 @@ Formally, we have the following.
 \begin{definition}[Sorts]
 For all non-empty subsets $S$ of $\so$ and 
 all mappings $\ar:S \to \mathbb{N}$,
-the set $\sortt{S, \sop}$ of all \define{sorts}\index{sort} over $S$ and $\sop$ 
+the set \new{$\sortt{S, \sop}$} of all \define{sorts}\index{sort} over $S$ \new{and $\sop$} 
 (with respect to $\ar$)
 is defined inductively as follows:
 \begin{enumerate}
-\item 
-every $u \in \sop$ is a sort;
+\item \new{
+every $u \in \sop$ is a sort;}
 \item
 every $s \in S$ with $\ar(s) = 0$ is a sort;
 \item
@@ -151,11 +153,14 @@ $s\,\tau_1\,\cdots\,\tau_n\:$ is a sort.
 \end{enumerate}
 We say that $s \in S$ has (or is of) \define{arity} $n$ 
 if $\ar(s) = n$.
+\begin{newver}
 A sort is \emph{polymorphic} 
 if it contains a sort parameter, it is \emph{monomorphic} otherwise.
+\end{newver}
 \qed
 \end{definition}
 
+\begin{newver}
 As an example of a sort,
 if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0, 
 $\akey{List}$ is a sort symbol of arity 1, and
@@ -179,6 +184,7 @@ the expression
   \fconstructa{u_1}{\fconstructa{u_2}{(\akey{List}\ (\akey{Array}\ u_1\ (\akey{List}\ u_2)))}}
 \]
 and all of its subexpressions are polymorphic sorts.
+\end{newver}
 
 An abstract syntax for monomorphic sorts $\sigma$ and polymorphic sorts $\tau$,
 which ignores arity constraints for simplicity, 
@@ -228,10 +234,11 @@ distinct variables $x, x_1, \ldots, x_n \in \va$ and sort $\tau$,
 
 \begin{itemize}
 \item
+\new{
 the prefix construct
 \ $\lambda\,x{:}\tau\ \vartextvisiblespace$ \ is 
 a \define{function abstraction binder}\index{binder!lambda binder}
-for $x$;
+for $x$;}
 
 \item
 the prefix construct
@@ -282,7 +289,7 @@ more \define{attributes}\index{attribute}.
 Attributes have no logical meaning, 
 but they are a convenient mechanism for adding meta-logical information,
 as illustrated in Section~\ref{sec:concrete-terms}.
-For this reason annotations do not occur in the abstract syntax.
+\new{For this reason annotations do not occur in the abstract syntax.}
 
 % Syntactically, 
 % an attribute is either an attribute name $a \in \at$ or 
@@ -312,7 +319,7 @@ is a tuple $\Sigma$ consisting of:
 
 \begin{itemize}
 \item
-a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$ and $\fconstruct$;
+a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$\new{ and $\fconstruct$};
 
 \item
 a set $\funs{\Sigma} \subseteq \fu$ of \define{function} symbols;
@@ -342,7 +349,7 @@ assigning a (possibly empty) set of constructors to each sort symbol;
 \item
 a total mapping $\ar:\sorts{\Sigma} \to \mathbb{N}$,
 assigning an arity to each sort symbol,
-with $\ar(\bool) = 0$ and $\ar(\fconstruct) = 2$;
+with $\ar(\bool) = 0$ \new{and $\ar(\fconstruct) = 2$};
 
 \item
 a total mapping $\mathrm{sel}_\Sigma:\cons{\Sigma} \to (\sels \Sigma)^*$,
@@ -422,6 +429,7 @@ the signature defined by an SMT-LIB script is in fact a signature
 in the sense of Definition~\ref{def:signature}.
 \end{remark}
 
+\begin{newver}
 \begin{notation}
 In the following, we will write $\sortt{\Sigma, \sop}$ as an abbreviation 
 of $\sortt{\sorts \Sigma, \sop}$, and $\sortt{\Sigma}$ as the subset of all 
@@ -444,6 +452,7 @@ $\theta$.
 We will use the syntax $\{u_1 \mapsto \tau_1, \cdots u_n \mapsto \tau_n \}$
 to denote a sort substitution that maps $u_i$ to $\tau_i$ for each $i=1,\dots n$
 and maps every other sort parameter to itself.
+\end{newver}
 
 We will work with \emph{ranked} function symbols and \emph{sorted} variables
 in a signature.
@@ -632,11 +641,13 @@ most one sort in a given signature $\Sigma$.\endnote{
   to improve human comprehension of scripts written using overloaded
   function symbols. 
 }
+\begin{newver}
 This means that we can define a total function $\tsort$ that associates 
 to each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
 We can also define a function $\pars$ that associates to each well-sorted term $t$
 the set $\pars(t, \Sigma)$ of all parameters that occur in its sort or in that 
 of one of its subterms.
+\end{newver}
 
 \begin{remark}[Match rules]
 The two rules for the \akey{match} binder in Figure~\ref{fig:well-sorted-terms} 
@@ -815,12 +826,14 @@ For instance, no structure without constant symbols can be absolutely free
 with an empty set of generators.
 \medskip
 
+\begin{newver}
 For interpreting functional sorts, we will use the notion of a \define{map}, i.e., a functional binary relation.
 We will denote a map as a set of pairs of the form $a\mapsto b$.
+\end{newver}
 
 \medskip
 The SMT-LIB logic considers only structures that interpret in a special way 
-the sort \bool, the sort constructor \fconstruct, and any constructor, selector, and tester symbols in their signature.
+the sort \bool, \new{the sort constructor \fconstruct}, and any constructor, selector, and tester symbols in their signature.
 
 \begin{definition}[SMT-LIB $\Sigma$-structure]
 \label{def:structure}
@@ -829,9 +842,9 @@ An SMT-LIB structure is a $\Sigma$-structure $\str A$ such that
 \begin{enumerate}
 \item $\bool^{\str A} = \bo = \{ \false, \true \}$ with \false\ and \true\ distinct;
 
-\item for all monomorphic sorts $\sigma_1$ and $\sigma_2$,
+\item \new{for all monomorphic sorts $\sigma_1$ and $\sigma_2$,
   $(\fconstructa{\sigma_1}{\sigma_2})^{\str A}$ is the set of all total maps from
-  $\sigma_1^{\str A}$ to $\sigma_2^{\str A}$;
+  $\sigma_1^{\str A}$ to $\sigma_2^{\str A}$;}
 
 %CT unnecessary
 %\item
@@ -1005,8 +1018,8 @@ and
 let $\inter{I}$ be a $\Sigma$-interpretation.
 For every well-sorted term $t$ of sort $\tau$ with respect to $\Sigma$,
 $\mea{\inter I}{t}$ is defined recursively as follows,
-where Rule~\ref{ruleI} applies to polymorphic terms
-and the rest of the rules apply only to monomorphic terms.
+\new{where Rule~\ref{ruleI} applies to polymorphic terms
+and the rest of the rules apply only to monomorphic terms}.
 
 \begin{enumerate}
 \item \label{ruleI}
