@@ -889,14 +889,15 @@ in the current signature.}
 %
 \item[\expr{(declare-sort $s$ $n$)}]
 adds sort symbol $s$ with associated arity $n$.
-It is an error if $s$ is a sort symbol or parameter already present 
+It is an error if $s$ is a sort symbol \new{or parameter} already present 
 in the current signature.
 \smallskip
 
 %%% define-sort %%%
 %
 \item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
-adds sort symbol $s$ with associated arity $n$.
+adds sort symbol $s$ with arity $n$ and associates it with sort $\tau$,
+where $\tau$ may contain sort parameters.
 Subsequent well-sortedness checks must treat a sort term like
 \expr{($s$ $\sigma_1$ $\cdots$ $\sigma_n$)} 
 as an abbreviation for the term obtained by simultaneously substituting
@@ -909,9 +910,12 @@ but \emph{aliases} of sorts built with
 theory sort symbols and previously declared sort symbols.
 }
 
+\pfrem{Shadow sort parameters?}
+
+
 The command reports an error
-if $s$ is a sort symbol already present in the current signature or
-if $\tau$ is not a well-defined parametric sort 
+if $s$ is a sort symbol or parameter already present in the current signature or
+if $\tau$ is not a well-defined (polymorphic) sort 
 with respect to the current signature.
 This restriction prohibits (meaningless) circular definitions
 where $\tau$ contains $s$.
@@ -919,19 +923,24 @@ where $\tau$ contains $s$.
 
 %%% declare-fun %%%
 %
-\item[\expr{(declare-fun $f$ ($\sigma_1$ $\cdots$ $\sigma_n$) $\sigma$)}]
+\item[\expr{(declare-fun $f$ ($\tau_1$ $\cdots$ $\tau_n$) $\tau$)}]
 with $n \geq 0$ adds a new symbol $f$ 
-with associated rank $\sigma_1\cdots\sigma_n\sigma$.
+with associated rank $\tau_1\cdots\tau_n\tau$.
 The command reports an error if a function symbol with name $f$ 
-is already present in the current signature.
+is already present in the current signature.  Note that 
+$\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters.
+In that case $f$ is polymorphic. 
 \smallskip
 
 %%% declare-const %%%
 %
-\item[\expr{(declare-const $f$ $\sigma$)}]
-abbreviates the command \expr{(declare-fun $f$ () $\sigma$)}.
+\item[\expr{(declare-const $f$ $\tau$)}]
+abbreviates the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
+\pfrem{Do we add define-const in 2.7?.}
+
+\pfrem{We have to continue here.}
 %%% declare-datatypes %%%
 %
 \item[%

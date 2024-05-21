@@ -502,8 +502,8 @@ Int                         Bool
 \begin{newver}
 A \define{monomorphic} sort is a sort containing no parameters.
 A \define{polymorphic} sort is a sort containing zero or more parameters.
-For instance, if \ter{X} and \ter{Y} are declared as sort parameters,
-and \ter{Int} and \ter{Array} as sort symbols,
+For instance, if \ter{X} and \ter{Y} are sort parameters,
+and \ter{Int} and \ter{Array} are sort symbols,
 \ter{(Array Int Int)} is a monomorphic sort 
 while \ter{(Array Int Y)}, \ter{(Array X Int)}, and \ter{(Array X Y)} are
 all polymorphic sorts.
@@ -952,6 +952,16 @@ the scope of each variable occurring in pattern $p_i$ is the corresponding term 
 %the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
 \end{itemize}
 
+\begin{newver}
+\begin{remark}
+  Since there are no binders for sort parameters in user-scripts,
+  all occurrences of sort parameters in sort terms in user-scripts
+  are free.\endnote{
+    This effectively enforces a restriction to rank-1 polymorphism
+    in the language.}
+\end{remark}
+\end{newver}
+
 \paragraph{Shadowing}
 All binders follow a lexical scoping discipline, 
 consistently with the semantics of the SMT-LIB logic,
@@ -964,22 +974,23 @@ For instance, in a term like
 %\end{center}
 variable \expr{a} would shadow any user-declared function symbol
 called \expr{a}.
-Similarly, a parameter will shadow any user-defined 
-sort symbol with the same name.
-For instance, in a function symbol declaration like
-%\begin{center}
-\expr{(par (A) (f (Array A B) A))},
-%\end{center}
-all occurrences of \ter{A} are sort parameters regardless of the existence
-of a previously user-declared sort symbol \ter{A}, whereas \ter{B} must
-be either a user- or theory-declared sort symbol.\endnote{
-This shadowing rule follows common lexical scoping conventions.
-It is easy to avoid declarations like \expr{(par (A) (f (Array A B) A))},
-which are potentially confusing to human readers if \ter{A}
-is a user-declared sort symbol,
-simply by a more judicious choice of parameter names.
-%In patterns like \expr{(cons x nil)} are problematic 
-}
+% Similarly, a parameter will shadow any user-defined 
+% sort symbol with the same name.
+% For instance, in a function symbol declaration like
+% %\begin{center}
+% \expr{(par (A) (f (Array A B) A))},
+% %\end{center}
+% all occurrences of \ter{A} are sort parameters regardless of the existence
+% of a previously user-declared sort symbol \ter{A}, whereas \ter{B} must
+% be either a user- or theory-declared sort symbol.\endnote{
+% This shadowing rule follows common lexical scoping conventions.
+% It is easy to avoid declarations like \expr{(par (A) (f (Array A B) A))},
+% which are potentially confusing to human readers if \ter{A}
+% is a user-declared sort symbol,
+% simply by a more judicious choice of parameter names.
+% %In patterns like \expr{(cons x nil)} are problematic 
+% }
+% PF Moved to where parametric symbols are declared.
 Similarly, in a \ter{match} pattern like \expr{(cons x nil)},
 the symbol \ter{nil} is a variable regardless of the existence 
 of a previously defined constructor symbol \ter{nil}.\footnote{%
@@ -1238,11 +1249,28 @@ A function symbol declaration of the form,
 with $k > 0$, $n \geq 0$ and $u_1, \ldots, u_k$ all distinct,
 declares a \define{polymorphic function symbol} $f$ with rank $\tau_1\cdots\tau_n\tau$
 provided that $\tau$ and all $\tau_i$'s are polymorphic sorts over 
-the parameters $u_1, \ldots, u_k$.  
+the parameters $u_1, \ldots, u_k$, where \ter{par} is a binder for
+these parameters.
 This effectively declares a \emph{class} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways each occurrence in $\tau_1\cdots\tau_n\tau$
 of the sort parameters $u_1,\ldots,u_k$ with monomorphic sorts.
+
+Note that a parameter will shadow any sort symbol with the same name.
+For instance, in a function symbol declaration like
+%\begin{center}
+\expr{(par (A) (f (Array A B) A))},
+%\end{center}
+all occurrences of \ter{A} are sort parameters regardless of the existence
+of a previously declared sort symbol \ter{A}, whereas \ter{B} must
+be a previously declared sort symbol.\endnote{
+This shadowing rule follows common lexical scoping conventions.
+It is easy to avoid declarations like \expr{(par (A) (f (Array A B) A))},
+which are potentially confusing to human readers if \ter{A}
+is a sort symbol,
+simply by a more judicious choice of parameter names.
+%In patterns like \expr{(cons x nil)} are problematic 
+}
 
 As with sorts, each function symbol declaration 
 may additionally contain zero or more annotations $\alpha_1, \ldots, \alpha_n$,
