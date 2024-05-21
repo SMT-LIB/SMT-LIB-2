@@ -1022,7 +1022,7 @@ $\mea{\inter I}{t}$ is defined recursively as follows,
 and the rest of the rules apply only to monomorphic terms}.
 
 \begin{enumerate}
-\item \label{ruleI}
+\item \new{\label{ruleI}
 $\mea{\inter I}{t} = \true$ 
 iff \ $\mea{\inter I}{\theta(t)} = \true$ 
 for all $\theta$ \ such that \ 
@@ -1032,7 +1032,7 @@ for all $\theta$ \ such that \
  \{u_1, \ldots u_n\} = \pars(t, \Sigma),\; n > 0\\
  \sigma_1,\ldots,\sigma_n \in \sortt{\Sigma}
 \end{cases}
-\)
+\)}
 
 % PF removing since we handled that case in the introduction of the chapter
 %\item
@@ -1099,12 +1099,12 @@ for all $\inter I'$
 \end{cases}
 \)
 
-\item
+\item\new{
 $\mea{\inter I}{\lambda (x {:} \sigma)\; t} =
  \{ a \mapsto \mea{\inter I[x {:} \sigma \mapsto a]}{t} \mid a \in \sigma^{\str A}
  \}
 $
-where $\inter I = (\str A, v)$
+where $\inter I = (\str A, v)$}
 
 \item
 \(
@@ -1163,11 +1163,13 @@ where $\inter I = (\str A, v)$
 \end{enumerate}
 \end{definition}
 
+\begin{newver}
 \begin{remark}
   There is no rule above for higher-order function application
   \expr{\_}, since \expr{\_} is a normal (interpreted) function symbol
   defined in the HO-Core theory (see Figure~\ref{fig:HO-Core}).
 \end{remark}
+\end{newver}
 
 \noindent 
 One can show that $\mea{\inter I}{ \cdot }$ is well-defined, and hence total, over
@@ -1303,7 +1305,9 @@ satisfies $\varphi$ as well.
 In SMT-LIB, basic theories are obtained as instances of theory declarations.
 (In contrast, combined theories are defined in logic declarations.)
 An abstract syntax of theory declarations is defined in 
-Figure~\ref{fig:theory-declaration}.  The concrete syntax allows for further
+Figure~\ref{fig:theory-declaration}.
+\begin{newver}
+The concrete syntax allows for further
 theory attributes, and sort and function declaration can also have
 attributes.  Since they have no logical meaning, similarly to term attributes,
 these are simplified away in the abstract syntax.  Note that function symbol
@@ -1312,6 +1316,7 @@ when $\tau$ contains sort parameters.\footnote{%
 Recall that sort parameters are introduced
 in the concrete syntax with the binder \ter{par}.
 }
+\end{newver}
 
 To simplify the meta-notation let $T$ denote 
 a theory declaration with theory name $T$.
@@ -1441,14 +1446,15 @@ a logic declaration specifies a \emph{single} logic,
 not a class of them,
 so we call the logic $L$ too.
 An abstract syntax of logic declarations is defined in 
-Figure~\ref{fig:logic-declaration}.  
+Figure~\ref{fig:logic-declaration}.
+\begin{newver}  
 Again, the concrete syntax allows additional logic attributes
 that do not impact the semantics and can be ignored here.
 Logics allow extensions, defining further function symbols.
 For the sake of simplicity, we only 
 consider here logics without extensions, since those additional
 symbols could be considered to be defined in the logic's theories.
-
+\end{newver}
 
 Let $L$ be a logic declaration whose \akey{theories} attribute has value
 $T_1, \ldots, T_n$.

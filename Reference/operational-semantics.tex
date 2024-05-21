@@ -862,7 +862,7 @@ in any case.
 \subsection{Introducing new symbols} \label{sec:new-symbols}
 %-------------------------------------------------------------------------------
 
-The first command below allows the declaration of sort parameters.
+\new{The first command below allows the declaration of sort parameters.}
 The next seven commands allow one to introduce new sort or function symbols 
 by providing them with a rank declaration
 (\ter{declare-sort}, \ter{declare-fun} and \ter{declare-const})
@@ -880,9 +880,9 @@ whether the option \attr{global-declarations} is set to \ter{true} or not.
 %%% declare-sort-parameter %%%
 %
 \item[\expr{(declare-sort-parameter $s$)}]
-adds sort parameter $s$.
+\new{adds sort parameter $s$.
 It is an error if $s$ is a sort symbol or parameter already present 
-in the current signature.
+in the current signature.}
 \smallskip
 
 %%% declare-sort %%%
@@ -1187,7 +1187,6 @@ where $t$ is a well-sorted, \new{possibly parametric}, formula
 (i.e., a well-sorted element of \nter{pterm} of sort \ter{Bool}),
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
-
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 
