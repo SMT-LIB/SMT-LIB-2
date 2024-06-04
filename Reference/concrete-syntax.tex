@@ -433,8 +433,8 @@ because each namespace can always be identified syntactically.
 Within the term namespace, bound variables can shadow one another as well as
 function symbols in accordance with a lexical scoping discipline described 
 in Section~\ref{sec:concrete-terms}. 
-Similarly, sort parameters can shadow user sort symbols,
-as described in Section~\ref{sec:concrete-sorts}.
+Similarly, sort variables can shadow user sort symbols,
+as described in Section~\ref{sec:new-symbols}.
 \end{remark}
 
 
@@ -1013,10 +1013,6 @@ that shadowing a theory symbol is, more often than not, unintended and
 so best treated as an error.
 }
 \end{remark}
-
-%-------------------------------------------------------------------------------
-\subsection{Scoping of parameters} \label{sec:free-pars}
-%-------------------------------------------------------------------------------
 
 \subsection{Well-sortedness requirements} \label{well-sortedness}
 

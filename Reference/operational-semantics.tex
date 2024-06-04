@@ -897,11 +897,17 @@ in the current signature.
 %
 \item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
 adds sort symbol $s$ with arity $n$ and associates it with sort $\tau$,
-where $\tau$ may contain sort parameters.
+where the $u_i$'s are symbols used as \define{sort variables}, and $\tau$ may contain sort
+variables $u_1$, \dots, $u_n$, but no previously declared sort parameters.
+
+% (define-sort set-of-pairs (u v) (set (pair (u v))))
+% (define-sort set-of-pairs () (set (pair (u v))))
+% (set-of-pairs Int Real)
+
 Subsequent well-sortedness checks must treat a sort term like
-\expr{($s$ $\sigma_1$ $\cdots$ $\sigma_n$)} 
+\expr{($s$ $\tau_1$ $\cdots$ $\tau_n$)} 
 as an abbreviation for the term obtained by simultaneously substituting
-$\sigma_i$ for $u_i$, for $i\in\{1,\ldots,n\}$, in $\tau$.\endnote{
+$\tau_i$ for $u_i$, for $i\in\{1,\ldots,n\}$, in $\tau$.\endnote{
 Strictly speaking, only sort symbols introduced with \ter{declare-sort}
 expand the initial signature of theory sort symbols.
 Sort symbols introduced with \ter{define-sort} do not.
@@ -910,15 +916,21 @@ but \emph{aliases} of sorts built with
 theory sort symbols and previously declared sort symbols.
 }
 
-\pfrem{Shadow sort parameters?}
-
-
 The command reports an error
 if $s$ is a sort symbol or parameter already present in the current signature or
 if $\tau$ is not a well-defined (polymorphic) sort 
-with respect to the current signature.
+with respect to the current signature extended with sort variables 
+$u_1$, \dots, $u_n$.
 This restriction prohibits (meaningless) circular definitions
 where $\tau$ contains $s$.
+\begin{newver}
+These sort variables $u_i$'s shadow any previously user-declared sort symbol
+or parameter with the same name.
+However, they do not shadow theory sort symbols, analogously to bound variables
+versus declared theory symbols.  The command reports an error if a theory sort
+symbol is used as a sort variable $u_i$.
+\end{newver}
+
 \smallskip
 
 %%% declare-fun %%%
@@ -938,9 +950,12 @@ In that case $f$ is polymorphic.
 abbreviates the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
-\pfrem{Do we add define-const in 2.7?.}
+\pfrem{!!! par is actually var.}
 
-\pfrem{We have to continue here.}
+\pfrem{sort variables in datatypes must come from the par list.}
+
+\pfrem{using declared sort parameters only make sense in assertions.
+  We need order elsewhere.}
 %%% declare-datatypes %%%
 %
 \item[%
@@ -951,7 +966,9 @@ with respective arities $k_1,\dots,k_n$ and declarations $d_1,\dots,d_n$.
 Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
 If $k >0$ then $d$ is an expression of the form 
 \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
-where $u_1, \ldots, u_k$ are sort parameters;
+where $u_1, \ldots, u_k$ are sort variables;
+\endnote{Using sort variables as opposed to globally declared sort parameter
+is necessary because their order is meaningful.}
 otherwise, it is just $l$. 
 In either case, $l$ is a (parenthesis-delimited) list of \emph{one or more} 
 expressions of the form
@@ -1109,6 +1126,14 @@ of sort $\sigma$ with respect to the current signature extended
 with the sort associations $(x_1:\sigma_1),\; \ldots,\; (x_n:\sigma_n)$.
 \smallskip
 
+%%% define-const %%%
+%
+\new{
+\item[\expr{(define-const $f$ $t$)}] has the same effect as
+\expr{(define-fun $f$ () $t$)}.
+\smallskip
+}
+
 %%% define-funs-rec %%%
 %
 \item[\expr{(define-funs-rec ($d_1$ $\cdots$ $d_m$) ($t_1$ $\cdots$ $t_m$))},]
@@ -1181,6 +1206,7 @@ is an abbreviation of
 \expr{(define-funs-rec (($f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$)) ($t$))}
 \end{center}
 It provides a simpler syntax to define individual recursive functions.
+
 \end{description}
 
 
