@@ -622,7 +622,6 @@ Another consequence is that function symbols can take formulas
 
 Variables are introduced by means of one of the five binders.
 Each binder allows the introduction of one or more variables with local scope.
-\ctrem{All the $\sigma$'s below should be $\tau$'s.  PF: yes, to do offline.}
 
 \paragraph{Lambda.}
 
@@ -634,7 +633,7 @@ Specifically, a term of the form
 
 \begin{equation} \label{eq:lambda}
   \expr{
-  (lambda (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) 
+  (lambda (($x_1$ $\tau_1$) ($x_2$ $\tau_2$) $\cdots$ ($x_n$ $\tau_n$)) 
     $t$)
   }
 \end{equation}
@@ -642,9 +641,9 @@ has the same semantics as the term
 %
   \begin{equation} \label{eq:nested-lambda}
   \expr{
-   (lambda (($x_1$ $\sigma_1$)) 
-   (lambda (($x_2$ $\sigma_2$)) ($\cdots$ 
-   (lambda (($x_n$ $\sigma_n$)) $t$) $\cdots$)
+   (lambda (($x_1$ $\tau_1$)) 
+   (lambda (($x_2$ $\tau_2$)) ($\cdots$ 
+   (lambda (($x_n$ $\tau_n$)) $t$) $\cdots$)
   }
   \end{equation}
   %
@@ -662,7 +661,7 @@ Specifically, a formula of the form
 %
 \begin{equation} \label{eq:forall}
 \expr{
-(forall (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) 
+(forall (($x_1$ $\tau_1$) ($x_2$ $\tau_2$) $\cdots$ ($x_n$ $\tau_n$)) 
   $\varphi$)
 }
 \end{equation}
@@ -671,14 +670,14 @@ has the same semantics as the formula
 %
 \begin{equation} \label{eq:nested-forall}
 \expr{
- (forall (($x_1$ $\sigma_1$)) 
- (forall (($x_2$ $\sigma_2$)) ($\cdots$ 
- (forall (($x_n$ $\sigma_n$)) $\varphi$) $\cdots$)
+ (forall (($x_1$ $\tau_1$)) 
+ (forall (($x_2$ $\tau_2$)) ($\cdots$ 
+ (forall (($x_n$ $\tau_n$)) $\varphi$) $\cdots$)
 }
 \end{equation}
 %
 Note that the variables in the list 
-\expr{(($x_1$ $\sigma_1$)\ ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$))}
+\expr{(($x_1$ $\tau_1$)\ ($x_2$ $\tau_2$) $\cdots$ ($x_n$ $\tau_n$))}
 of (\ref{eq:forall}) are not required to be pairwise disjoint.
 However, because of the nested quantifier semantics, earlier occurrences 
 of same variable in the list are shadowed by the last occurrence---making 
@@ -722,17 +721,18 @@ It has the form
 %
 where $t$ is a term of some datatype sort $\delta$ and,
 for each $i=1,\ldots,m+1$,
-$p_i$ is a \define{pattern} for $\delta$, and $t_i$ a term of some sort $\sigma$.
+$p_i$ is a \define{pattern} for $\delta$, and $t_i$ a term of some sort $\tau$.
 A pattern $p$ in turn is either a variable $x$ of sort $\delta$, 
 a nullary constructor $c$ of $\delta$, 
 or a term of the form \expr{($c$ $x_1$ $\cdots$ $x_k$)}
 where $c$ is a constructor of $\delta$ of rank
-$\sigma_1\cdots\sigma_k\delta$ 
+$\tau_1\cdots\tau_k\delta$ 
 with $k > 0$, and $x_1, \ldots, x_k$ are \emph{distinct} variables 
-of respective sort $\sigma_1,\ldots,\sigma_k$.\endnote{
+of respective sort $\tau_1,\ldots,\tau_k$.\endnote{
 The sorts of pattern variables are not specified explicitly
 since they can be readily inferred from the datatype.
 }
+\pfrem{Should we say something about polymorphism for the above?}
 \begin{newver}
 An exception is the special variable \ter{\_} which can occur
 more than once.  This variable acts as a wildcard, with each occurrence
@@ -1026,7 +1026,7 @@ That is, function symbols with more than one possible output sort
 for the same sequence of input sorts (see Subsection~\ref{sec:signature}).
 }
 $f$ in a term \emph{must} occur as a qualified identifier of the form
-\expr{(as $f$ $\sigma$)} where $\sigma$ is the intended output sort
+\expr{(as $f$ $\tau$)} where $\tau$ is the intended output sort
 of that occurrence.\endnote{
 This restriction eliminates the need for a solver to do sort inference
 in order to determine the sorts of terms containing applications 
