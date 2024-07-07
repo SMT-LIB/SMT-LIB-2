@@ -882,7 +882,11 @@ whether the option \attr{global-declarations} is set to \ter{true} or not.
 \item[\expr{(declare-sort-parameter $s$)}]
 \new{adds sort parameter $s$.
 It is an error if $s$ is a sort symbol or parameter already present 
-in the current signature.}
+in the current signature.}\endnote{\new{SMT-LIB 2.7 somehow misnames sort
+parameters and variables.  In particular the \expr{par} constructs
+actually introduces sort variables.  We have adopted a pragmatic approach
+to this issue, not renaming the \expr{par} construct, for backward
+compatibility.}}
 \smallskip
 
 %%% declare-sort %%%
@@ -898,7 +902,7 @@ in the current signature.
 \item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
 adds sort symbol $s$ with arity $n$ and associates it with sort $\tau$,
 where the $u_i$'s are symbols used as \define{sort variables}, and $\tau$ may contain sort
-variables $u_1$, \dots, $u_n$, but no previously declared sort parameters.
+variables $u_1$, \dots, $u_n$\new{, but no previously declared sort parameters}.
 
 % (define-sort set-of-pairs (u v) (set (pair (u v))))
 % (define-sort set-of-pairs () (set (pair (u v))))
@@ -950,8 +954,6 @@ In that case $f$ is polymorphic.
 abbreviates the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
-\pfrem{!!! par is actually var.}
-
 \pfrem{sort variables in datatypes must come from the par list.}
 
 \pfrem{using declared sort parameters only make sense in assertions.
@@ -982,8 +984,9 @@ $(ii)$ $c$ is a symbol, a \define{constructor for $\delta$}, and
 $(iii)$ for each $j=1,\ldots,m$, $s_j$ is a symbol, a \define{selector for $c$}, and 
 $(iv)$ $\tau_j$ is a sort term
 that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbol.
+
 In the parametric case,
-the terms $\tau_i$ can contain the sort parameters $u_1, \ldots, u_k$.
+the terms $\tau_i$ can contain the sort parameters $u_1, \ldots, u_k$\new{, but no previously declared sort parameters}.
 The datatype $\delta$ must be \define{well founded} in the following inductive sense:
 it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
 such that $\tau_1\cdots\tau_m$ does not contain any of the datatypes 
@@ -1105,13 +1108,13 @@ This command provides a simpler syntax for defining a single datatype.
 
 %%% define-fun %%%
 %
-\item[\expr{(define-fun $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
+\item[\expr{(define-fun $f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$ $t$)}]
 with $n \geq 0$ and $t$ not containing $f$ is 
 semantically equivalent to the command sequence
 
 \begin{tabular}{l}
-\expr{(declare-fun $f$ ($\sigma_1$ $\cdots$ $\sigma_n$) $\sigma$)} \\
-\expr{(assert (forall (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) 
+\expr{(declare-fun $f$ ($\tau_1$ $\cdots$ $\tau_n$) $\tau$)} \\
+\expr{(assert (forall (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) 
        (= ($f$ $x_1$ $\cdots$ $x_n$) $t$))}.
 \end{tabular}
 
@@ -1122,8 +1125,8 @@ definitions,
 which are instead provided by \ter{define-fun-rec} and \ter{define-funs-rec}.
 The command reports an error if a function symbol with name $f$ is already 
 present in the current signature or if the argument $t$ is not a well-sorted term 
-of sort $\sigma$ with respect to the current signature extended 
-with the sort associations $(x_1:\sigma_1),\; \ldots,\; (x_n:\sigma_n)$.
+of sort $\tau$ with respect to the current signature extended 
+with the sort associations $(x_1:\tau_1),\; \ldots,\; (x_n:\tau_n)$.
 \smallskip
 
 %%% define-const %%%
@@ -1146,6 +1149,8 @@ with
 $n_i \geq 0$ and $f_1, \ldots, f_m$ pairwise distinct,
 is semantically equivalent to the command sequence 
 \smallskip
+
+\pfrem{$\sigma$ to $\tau$}
 
 {\small
 \begin{tabular}{l}
@@ -1198,6 +1203,7 @@ and
 $(x_{i,1}:\sigma_{i,1}),\; \ldots,\; (x_{i,n_i}:\sigma_{i,n_i})$.
 \smallskip
 
+\pfrem{$\sigma$ to $\tau$}
 %%% define-fun-rec %%%
 %
 \item[\expr{(define-fun-rec $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
@@ -1214,14 +1220,17 @@ It provides a simpler syntax to define individual recursive functions.
 \subsection{Asserting and inspecting formulas} \label{sec:assert}
 %-------------------------------------------------------------------------------
 
+\pfrem{Eliminate pterm}
 \begin{description}
 %%% assert %%%
 %
 \item[\expr{(assert $t$)}]
-where $t$ is a well-sorted, \new{possibly parametric}, formula 
-(i.e., a well-sorted element of \nter{pterm} of sort \ter{Bool}),
+where $t$ is a well-sorted formula 
+(i.e., a well-sorted element of \nter{term} of sort \ter{Bool}),
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
+\new{Any sort term occurring in $t$ may be polymorphic, i.e., it may contain
+previously declared sort parameters.}
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 
@@ -1261,6 +1270,33 @@ which is set to \ter{false} by default, is set to \ter{true}
 %
 \item[\expr{(check-sat)}] is an abbreviation of \expr{(check-sat-assuming ())}.
 \smallskip
+
+
+\pfrem{There is something to check about the very notion of polymorphism.
+Check the comments in the tex file.}
+
+% Consider we have such a definition
+% (define-const p (forall ((l (list alpha))) (>= (length l) 0)))
+% What does it mean to have
+% (check-sat-assuming (p q))
+% --->
+% (assert (par (alpha) (forall ((l (list alpha))) (>= (length l) 0)))) ?
+% And now
+% (check-sat-assuming ((not p) q))
+% --->
+% (assert (not p))
+% (check-sat)
+% The definition above is something like this
+% (assert (par (alpha) (= p (forall ((l (list alpha))) (>= (length l) 0)))))
+% (assert (= p (par (alpha) (forall ((l (list alpha))) (>= (length l) 0)))))
+% But we cannot easily distribute the quantifier inside
+% CN+CT+PF: it seems the only case that makes sense is the first one.
+% Need to clarify the meaning of define-const/-fun in the context of polymorphism
+
+% (check-sat-assuming (p q))
+
+% (assert (and p q))
+
 
 %%% check-sat-assuming %%%
 %
