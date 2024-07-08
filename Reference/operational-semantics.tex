@@ -1148,29 +1148,27 @@ with the sort associations $(x_1:\tau_1),\; \ldots,\; (x_n:\tau_n)$.
 where $m > 0$ and for $i=1,\ldots,m$,
 $d_i$ has the form
 \begin{center}
-\expr{($f_i$ (($x_{i,1}$ $\sigma_{i,1}$) $\cdots$ ($x_{i,n_i}$ $\sigma_{i,n_i}$)) $\sigma_i$)}
+\expr{($f_i$ (($x_{i,1}$ $\tau_{i,1}$) $\cdots$ ($x_{i,n_i}$ $\tau_{i,n_i}$)) $\tau_i$)}
 \end{center}
 with 
 $n_i \geq 0$ and $f_1, \ldots, f_m$ pairwise distinct,
 is semantically equivalent to the command sequence 
 \smallskip
 
-\pfrem{$\sigma$ to $\tau$}
-
 {\small
 \begin{tabular}{l}
-\expr{(declare-fun $f_1$ ($\sigma_{1,1}$ $\cdots$ $\sigma_{1,n_1}$) $\sigma_1$)} 
+\expr{(declare-fun $f_1$ ($\tau_{1,1}$ $\cdots$ $\tau_{1,n_1}$) $\tau_1$)} 
 \\
 \hspace{10em} \vdots 
 \\
-\expr{(declare-fun $f_m$ ($\sigma_{m,1}$ $\cdots$ $\sigma_{m,n_m}$) $\sigma_m$)} 
+\expr{(declare-fun $f_m$ ($\tau_{m,1}$ $\cdots$ $\tau_{m,n_m}$) $\tau_m$)} 
 \\
-\expr{(assert (forall (($x_{1,1}$ $\sigma_{1,1}$) $\cdots$ ($x_{1,n_1}$ $\sigma_{1,n_1}$)) 
+\expr{(assert (forall (($x_{1,1}$ $\tau_{1,1}$) $\cdots$ ($x_{1,n_1}$ $\tau_{1,n_1}$)) 
        (= ($f_1$ $x_{1,1}$ $\cdots$ $x_{1,n_1}$) $t_1$))}
 \\
 \hspace{16em} \vdots 
 \\
-\expr{(assert (forall (($x_{m,1}$ $\sigma_{m,1}$) $\cdots$ ($x_{m,n_m}$ $\sigma_{m,n_m}$)) 
+\expr{(assert (forall (($x_{m,1}$ $\tau_{m,1}$) $\cdots$ ($x_{m,n_m}$ $\tau_{m,n_m}$)) 
        (= ($f_m$ $x_{m,1}$ $\cdots$ $x_{m,n_m}$) $t_m$))} .
 \end{tabular}
 }
@@ -1200,21 +1198,25 @@ The only requirement is on the well-sortedness of the definitions.
 
 The command reports an error if for any $i \in \{1,\ldots,m\}$ 
 a function symbol with name $f_i$ is already present in the current signature 
-or if $t_i$ is not a well-sorted term of sort $\sigma_i$ with respect 
+or if $t_i$ is not a well-sorted term of sort $\tau_i$ with respect 
 to the current signature extended with the sort associations 
-$(f_1:\sigma_{1,1}\; \cdots\; \sigma_{1,n_1}\sigma_1)$, \ldots,
-$(f_m:\sigma_{m,1}\; \cdots\; \sigma_{m,n_m}\sigma_m)$
+$(f_1:\tau_{1,1}\; \cdots\; \tau_{1,n_1}\tau_1)$, \ldots,
+$(f_m:\tau_{m,1}\; \cdots\; \tau_{m,n_m}\tau_m)$
 and
-$(x_{i,1}:\sigma_{i,1}),\; \ldots,\; (x_{i,n_i}:\sigma_{i,n_i})$.
+$(x_{i,1}:\tau_{i,1}),\; \ldots,\; (x_{i,n_i}:\tau_{i,n_i})$.
+
+\new{
+Note that, for each $i$, $\tau_{i,1}$ $\cdots$ $\tau_{i,n_i}$, and $\tau_i$ may contain sort parameters.
+In that case $f_i$ is polymorphic. }
+
 \smallskip
 
-\pfrem{$\sigma$ to $\tau$}
 %%% define-fun-rec %%%
 %
-\item[\expr{(define-fun-rec $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
+\item[\expr{(define-fun-rec $f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$ $t$)}]
 is an abbreviation of
 \begin{center}
-\expr{(define-funs-rec (($f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$)) ($t$))}
+\expr{(define-funs-rec (($f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$)) ($t$))}
 \end{center}
 It provides a simpler syntax to define individual recursive functions.
 
@@ -1225,7 +1227,6 @@ It provides a simpler syntax to define individual recursive functions.
 \subsection{Asserting and inspecting formulas} \label{sec:assert}
 %-------------------------------------------------------------------------------
 
-\pfrem{Eliminate pterm}
 \begin{description}
 %%% assert %%%
 %
