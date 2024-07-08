@@ -954,10 +954,10 @@ In that case $f$ is polymorphic.
 abbreviates the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
-\pfrem{sort variables in datatypes must come from the par list.}
+%\pfrem{sort variables in datatypes must come from the par list.}
 
-\pfrem{using declared sort parameters only make sense in assertions.
-  We need order elsewhere.}
+%\pfrem{using declared sort parameters only make sense in assertions.
+%  We need order elsewhere.}
 %%% declare-datatypes %%%
 %
 \item[%
@@ -969,8 +969,12 @@ Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
 If $k >0$ then $d$ is an expression of the form 
 \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
 where $u_1, \ldots, u_k$ are sort variables;
-\endnote{Using sort variables as opposed to globally declared sort parameter
-is necessary because their order is meaningful.}
+\endnote{\new{Using sort variables as opposed to globally declared sort parameter
+is necessary because their order is meaningful, as arguments of the sort constructor.}}
+% The u_1, u_k correspond to the k arguments of the sort constructor.  
+% (Pair Int Real) is not the same of (Pair Real Int), and the relation to the pair
+% constructor and the order of arguments in the pair constructor is set through
+% the order of the sort variables in par
 otherwise, it is just $l$. 
 In either case, $l$ is a (parenthesis-delimited) list of \emph{one or more} 
 expressions of the form
@@ -986,7 +990,8 @@ $(iv)$ $\tau_j$ is a sort term
 that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbol.
 
 In the parametric case,
-the terms $\tau_i$ can contain the sort parameters $u_1, \ldots, u_k$\new{, but no previously declared sort parameters}.
+\new{the terms $\tau_i$ can contain only the sort parameters in the list $u_1, \ldots, u_k$}.%
+\footnote{\new{No previously declared sort parameters that is not shadowed by a $u_i$ can be used.}}%
 The datatype $\delta$ must be \define{well founded} in the following inductive sense:
 it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
 such that $\tau_1\cdots\tau_m$ does not contain any of the datatypes 
@@ -1229,13 +1234,44 @@ where $t$ is a well-sorted formula
 (i.e., a well-sorted element of \nter{term} of sort \ter{Bool}),
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
-\new{Any sort term occurring in $t$ may be polymorphic, i.e., it may contain
-previously declared sort parameters.}
+\new{If any subterm of $t$ has a polymorphic sort $\tau$ over sort parameters
+$u_1$,\ldots, $u_n$, then the sort parameters are implicitely
+universally quantified in the assertion.  That is, when a later check command is
+issued, the assertion will hold for all instances of $u_1$,\ldots, $u_n$
+with ground sorts in the signature at that time.}
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 
 have the additional effect of adding $t$ to the formulas tracked 
 by the commands \ter{get-assignment} and \ter{get-unsat-core}, as explained later.
+
+\begin{newver}
+\begin{remark}
+  Notice that, the commands
+  \begin{lstlisting}
+  (declare-sort-parameter A)
+  (assert (forall ((x A) (y A)) (= x y)))
+  \end{lstlisting}
+  states that every sort has a domain of size one.  The negation of the assertion
+  above would invole only one sort.  Properly negating this assertion then requires
+  the introduction of a fresh sort as in
+  \begin{lstlisting}
+  (declare-sort U 0)
+  (assert (not (forall ((x U) (y U)) (= x y))))
+  \end{lstlisting}
+  In contrast, the commands
+  \begin{lstlisting}
+  (declare-sort-parameter A)
+  (assert (not (forall ((x A) (y A)) (= x y))))
+  \end{lstlisting}
+  state that every domain must be of size at least two.
+  This means that special care must be taken in checking, e.g., the
+  validity of an implication \expr{(=> $p$ $q$)} by asserting $p$ and
+  the negation of $q$, and checking for satisfiability, when polymorphic
+  sorts are involved.
+\end{remark}
+\end{newver}
+
 \smallskip
 
 %%% get-assertions %%%
@@ -1271,10 +1307,6 @@ which is set to \ter{false} by default, is set to \ter{true}
 \item[\expr{(check-sat)}] is an abbreviation of \expr{(check-sat-assuming ())}.
 \smallskip
 
-
-\pfrem{There is something to check about the very notion of polymorphism.
-Check the comments in the tex file.}
-
 % Consider we have such a definition
 % (define-const p (forall ((l (list alpha))) (>= (length l) 0)))
 % What does it mean to have
@@ -1288,10 +1320,12 @@ Check the comments in the tex file.}
 % (check-sat)
 % The definition above is something like this
 % (assert (par (alpha) (= p (forall ((l (list alpha))) (>= (length l) 0)))))
-% (assert (= p (par (alpha) (forall ((l (list alpha))) (>= (length l) 0)))))
 % But we cannot easily distribute the quantifier inside
-% CN+CT+PF: it seems the only case that makes sense is the first one.
-% Need to clarify the meaning of define-const/-fun in the context of polymorphism
+% the above assertion is equivalent to
+% (assert (par (alpha) (=> p (forall ((l (list alpha))) (>= (length l) 0)))))
+% (assert (par (alpha) (<= p (forall ((l (list alpha))) (>= (length l) 0)))))
+% (assert (=> p (par (alpha) (forall ((l (list alpha))) (>= (length l) 0))))))
+% (assert (or p (par (alpha) (not (forall ((l (list alpha))) (>= (length l) 0)))))))
 
 % (check-sat-assuming (p q))
 
