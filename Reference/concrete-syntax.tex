@@ -750,10 +750,12 @@ unless every constructor of $\delta$ occurs in one of the patterns.\endnote{
 This guarantees that the match expressions are always well defined
 (see Section~\ref{sec:models}).
 }
+\begin{newver}
 The recommended choice for a single variable pattern is \ter{\_}, the use of
 other variables will be deprecated in future versions.\endnote{This will prevent
 typos while writing a nullary constructor to be taken as a variable pattern, thus
 changing the meaning of the match term without warning or error.}
+\end{newver}
 
 %For the expression~(\ref{eq:match}) to be well-formed
 %the list $p_1,\ldots p_n$ must satisfy these additional requirements:\footnote{%
@@ -931,7 +933,7 @@ in an expression has a \define{scope} defined as follows.
 \item
 In an expression 
 \expr{($Q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
-where $Q$ is either \ter{lambda}, \ter{forall}, or \ter{exists}, 
+where $Q$ is either \new{\ter{lambda}}, \ter{forall}, or \ter{exists}, 
 or in an expression \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)},
 the scope of each variable in $\{x_1, \ldots, x_n\}$ is the term $t$.
 \item
@@ -1245,6 +1247,7 @@ all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$
 by instantiating in all possible ways each occurrence in $\tau_1\cdots\tau_n\tau$
 of the sort parameters $u_1,\ldots,u_k$ with monomorphic sorts.
 
+\begin{newver}
 Note that a parameter will shadow any sort symbol with the same name.
 For instance, in a function symbol declaration like
 %\begin{center}
@@ -1260,6 +1263,7 @@ is a sort symbol,
 simply by a more judicious choice of parameter names.
 %In patterns like \expr{(cons x nil)} are problematic 
 }
+\end{newver}
 
 As with sorts, each function symbol declaration 
 may additionally contain zero or more annotations $\alpha_1, \ldots, \alpha_n$,
