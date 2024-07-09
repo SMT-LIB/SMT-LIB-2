@@ -543,7 +543,7 @@ of a sort parameter with a monomorphic sort.
 \section{Terms and Formulas} \label{sec:concrete-terms}
 %-------------------------------------------------------------------------------
 
-Abstractly, term are constructed out of 
+Abstractly, terms are constructed out of 
 constant symbols in the \nter{spec\_constant} category
 (numerals, decimals, strings, etc.),
 \define{variables}, 
@@ -582,10 +582,9 @@ of the form \expr{(as $f$ $\tau$)}.
 
 \begin{newver}
 Terms are members of the syntactic category \nter{term}.
-Note that a term $t$ with binders or qualified identifiers contains 
-sort terms in it.
-Any parameters for these sorts are declared 
-in a script by the command \ter{declare-sort-parameter}
+Note that sort terms occur in terms with binders or qualified identifiers.
+These sort terms may themselves contain parameters, 
+that must be declared in a script by the command \ter{declare-sort-parameter}
 (see Section~\ref{sec:new-symbols}).
 \end{newver}
 
