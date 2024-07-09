@@ -582,9 +582,9 @@ of the form \expr{(as $f$ $\tau$)}.
 
 \begin{newver}
 Terms are members of the syntactic category \nter{term}.
-Note that sort terms occur in terms with binders or qualified identifiers.
-These sort terms may themselves contain parameters, 
-that must be declared in a script by the command \ter{declare-sort-parameter}
+Note that sort terms occur within terms with binders or qualified identifiers.
+These sort terms may contain sort parameters, 
+which must be declared in a script by the command \ter{declare-sort-parameter}
 (see Section~\ref{sec:new-symbols}).
 \end{newver}
 
@@ -971,15 +971,16 @@ the scope of each variable occurring in pattern $p_i$ is the corresponding term 
 %the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
 \end{itemize}
 
-\begin{newver}
-\begin{remark}
-  Since there are no binders for sort parameters in user-scripts,
-  all occurrences of sort parameters in sort terms in user-scripts
-  are free.\endnote{
-    This effectively enforces a restriction to rank-1 polymorphism
-    in the language.}
-\end{remark}
-\end{newver}
+%CT REMOVED because incorrect.
+%\begin{newver}
+%\begin{remark}
+%  Since there are no binders for sort parameters in user-scripts,
+%  all occurrences of sort parameters in sort terms in user-scripts
+%  are free.\endnote{
+%    This effectively enforces a restriction to rank-1 polymorphism
+%    in the language.}
+%\end{remark}
+%\end{newver}
 
 \paragraph{Shadowing}
 All binders follow a lexical scoping discipline, 
