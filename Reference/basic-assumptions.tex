@@ -106,7 +106,12 @@ analogous to constructs with the same name
 found in functional programming languages.
 
 \begin{newver}
-Version 2.7 extends the logic of Version 2.6 with \todo{brief explanation.}
+Version 2.7 extends the logic of Version 2.6 with a $\lambda$ binder
+for function abstraction, creating terms with a sort the form
+\expr{(-> $\tau_1$ $\tau_2$)}, and an explicit application operator 
+for values of such sort. 
+This allows, in effect, the use of higher-order functions,
+while keeping the underlying logic nominally first order.
 \end{newver}
 
 SMT-LIB's underlying logic,
