@@ -817,12 +817,12 @@ where $s_1, \ldots, s_k$ are symbols, those symbols are \emph{always} to be pars
 \begin{newver}
 \begin{remark}[Double use of \ter{\_}]
 The special symbol \ter{\_} is used both to construct index terms 
-and as a wildcard symbol in \ter{match} patters.
+and as a wildcard symbol in \ter{match} patterns.
 These two different uses can always be disambiguated syntactically
 since \ter{\_} occurs in a function symbol position in the first case 
 (e.g., in \expr{(\_ BitVec 5)})
 and in an argument position in the second case
-(e.g., in \expr{(cons h \_)}, \expr{(cons \_ t)}, ort \expr{(cons \_ \_)}).
+(e.g., in \expr{(cons h \_)}, \expr{(cons \_ t)}, or \expr{(cons \_ \_)}).
 \end{remark}
 \end{newver}
 
@@ -870,7 +870,7 @@ by $t_i$.
 If instead for some minimal $i \in \{1,\ldots, m + 1\}$, the pattern $p_i$ is
 a variable $x$, then the whole $i$th \ter{ite} subexpression of (\ref{eq:match-alt}),
 if $i\leq m$, 
-or the \ter{let} subexpression, if $i=m$, is replaced by \expr{(let (($x$ $t$)) $t_i$)}.
+or the \ter{let} subexpression, if $i=m + 1$, is replaced by \expr{(let (($x$ $t$)) $t_i$)}.
 \end{enumerate}
 
 
