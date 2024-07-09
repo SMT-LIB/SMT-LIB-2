@@ -63,7 +63,36 @@ enclosed in parentheses.
 \subsection{Differences between Version 2.7 and Version 2.6}
 %-------------------------------------------------------------------------------
 
-\todo{Differences.}
+The command language is extended with a new command for declaring (global)
+sort parameters, which can be used to assert formulas with terms 
+of polymorphic sort in scripts.
+Semantically, the sort parameters are treated as implicitly universally quantified 
+sort variables in each asserted formula.
+This has the effect to allowing prenex (or rank-1) polymorphism in assertions 
+but not more general forms of polymorphism.
+
+The term language is extended with a $\lambda$ binder to construct 
+function abstractions, and a symbol for function application, \ter{\_},
+intentionally equal to that for the construction of indexed symbols 
+in Version 2.6.
+The semantics of the $\lambda$ binder and the application symbol are provided
+in a new theory, of higher-order functions, which includes 
+the binary sort constructor \ter{->} for function space sorts.
+In this version, values of sort \expr{(-> $\tau_1$ $\tau_2$)} are treated as 
+any other value, and so can be passed to and returned from functions.
+However, they are not identified with functions of rank $\tau_1\tau_2$
+(such as those introduced by \ter{declare-fun}),
+keeping the underlying logic of Version 2.7 first order.\footnote{%
+This identification will occur in Version 3, which will be based 
+on higher-order logic.
+}
+Consistently with this extension, the command language is extended 
+with the constant definition command \ter{define-const}, 
+which can be used in particular to define constants 
+of sort \expr{(-> $\tau_1$ $\tau_2$)}.
+
+The symbol \ter{\_} can now also be used (unambiguously) as a wildcard symbol 
+in \ter{match} patterns.
 \end{newver}
 
 %-------------------------------------------------------------------------------
