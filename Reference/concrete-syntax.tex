@@ -957,7 +957,7 @@ in an expression has a \define{scope} defined as follows.
 \item
 In an expression 
 \expr{($Q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
-where $Q$ is either \new{\ter{lambda}}, \ter{forall}, or \ter{exists}, 
+where $Q$ is either the binder \new{\ter{lambda}}, \ter{forall}, or \ter{exists}, 
 or in an expression \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)},
 the scope of each variable in $\{x_1, \ldots, x_n\}$ is the term $t$.
 \item
@@ -1848,7 +1848,7 @@ plus \ter{ite} and \ter{distinct}.
 The set of values for the \ter{Bool} sort is, predictably, $\{\ter{true},\ter{false}\}$.
 
 Another instance has a single additional sort symbol \ter{U}, say, 
-of arity 0, and a (possibly infinite) set number of function symbols 
+of arity 0, and a (possibly infinite) set of function symbols 
 with rank in \ter{U}$\!^+$.
 This theory corresponds to \emph{EUF}, 
 the (one-sorted) theory of equality and \emph{uninterpreted functions}
@@ -1956,9 +1956,9 @@ between \emph{functions} of rank $\sigma_1\sigma_2$
 and \emph{constants} or variables of sort \expr{(-> $\sigma_1$ $\sigma_2$)}.
 For instance, the latter can be passed as an argument to other functions 
 as any other datatype but the former cannot.\endnote{%
-This difference will disappear in the planned Version 3 of the standard
+\new{This difference will disappear in the planned Version 3 of the standard
 whose underlying logic will change from many-sorted logic 
-to a version of higher-order logic with dependent types.
+to a version of higher-order logic with dependent types.}
 }
 This is no real limitation because it is possible to convert from one to the other
 thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
