@@ -880,13 +880,18 @@ whether the option \attr{global-declarations} is set to \ter{true} or not.
 %%% declare-sort-parameter %%%
 %
 \item[\expr{(declare-sort-parameter $s$)}]
-\new{adds sort parameter $s$.
-It is an error if $s$ is a sort symbol or parameter already present 
-in the current signature.}\endnote{\new{SMT-LIB 2.7 somehow misnames sort
-parameters and variables.  In particular the \expr{par} constructs
-actually introduces sort variables.  We have adopted a pragmatic approach
-to this issue, not renaming the \expr{par} construct, for backward
-compatibility.}}
+\new{
+adds sort parameter $s$ to the current signature.
+The command reports an error if $s$ is a sort symbol or parameter already present 
+in the current signature.
+}\endnote{%
+\new{
+SMT-LIB 2.7 actually misnames sort parameters and variables.
+In particular the \expr{par} constructs actually introduces sort variables.
+We have adopted a pragmatic approach to this issue, 
+not renaming the \expr{par} construct, for backward compatibility.
+}
+}
 \smallskip
 
 %%% declare-sort %%%
@@ -943,15 +948,18 @@ symbol is used as a sort variable $u_i$.
 with $n \geq 0$ adds a new symbol $f$ 
 with associated rank $\tau_1\cdots\tau_n\tau$.
 The command reports an error if a function symbol with name $f$ 
-is already present in the current signature.\new{  Note that 
+is already present in the current signature.
+\new{
+Note that 
 $\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters.
-In that case $f$ is polymorphic.}
+In that case $f$ is polymorphic.
+}
 \smallskip
 
 %%% declare-const %%%
 %
 \item[\expr{(declare-const $f$ $\tau$)}]
-abbreviates the command \expr{(declare-fun $f$ () $\tau$)}.
+has the same effect as the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
 %\pfrem{sort variables in datatypes must come from the par list.}
@@ -969,8 +977,12 @@ Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
 If $k >0$ then $d$ is an expression of the form 
 \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
 where $u_1, \ldots, u_k$ are sort variables;
-\endnote{\new{Using sort variables as opposed to globally declared sort parameter
-is necessary because their order is meaningful, as arguments of the sort constructor.}}
+\endnote{
+\new{
+Using sort variables as opposed to globally declared sort parameter
+is necessary because their order is meaningful, as arguments of the sort constructor.
+}
+}
 % The u_1, u_k correspond to the k arguments of the sort constructor.  
 % (Pair Int Real) is not the same of (Pair Real Int), and the relation to the pair
 % constructor and the order of arguments in the pair constructor is set through
@@ -989,9 +1001,13 @@ $(iii)$ for each $j=1,\ldots,m$, $s_j$ is a symbol, a \define{selector for $c$},
 $(iv)$ $\tau_j$ is a sort term
 that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbol.
 
-In the parametric case,
+In the polymorphic case,
 \new{the terms $\tau_i$ can contain only the sort parameters in the list $u_1, \ldots, u_k$}.%
-\footnote{\new{No previously declared sort parameters that is not shadowed by a $u_i$ can be used.}}%
+\footnote{%
+\new{
+No previously declared sort parameters that is not shadowed by a $u_i$ can be used.
+}
+}
 The datatype $\delta$ must be \define{well founded} in the following inductive sense:
 it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
 such that $\tau_1\cdots\tau_m$ does not contain any of the datatypes 
@@ -1000,11 +1016,11 @@ from $\{\delta_1, \ldots, \delta_n\}$ or, if it does contain some, they are well
 A compliant solver must return an error in response to invocations of this command 
 that do not satisfy all of the restrictions above.  
 
-In the parametric case, 
+In the polymorphic case, 
 the command has the effect of declaring each $\delta$ as a sort symbol of arity $k$;
 each constructor $c$ as a function symbol of parametric rank $\tau_1\cdots\tau_m\delta$;
 and each $s_i$ as a function symbol of parametric rank $\delta\tau_i$.
-The non-parametric case is analogous.
+The monomorphic case is analogous.
 
 Note that the sort terms $\tau_1, \ldots,\tau_m$ can contain any previously defined 
 sort symbol as well as any of the datatypes $\delta_1, \ldots, \delta_n$,
@@ -1214,7 +1230,7 @@ In that case $f_i$ is polymorphic. }
 %%% define-fun-rec %%%
 %
 \item[\expr{(define-fun-rec $f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$ $t$)}]
-is an abbreviation of
+has the same effect as
 \begin{center}
 \expr{(define-funs-rec (($f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$)) ($t$))}
 \end{center}
@@ -1248,28 +1264,30 @@ by the commands \ter{get-assignment} and \ter{get-unsat-core}, as explained late
 
 \begin{newver}
 \begin{remark}
-  Notice that, the commands
-  \begin{lstlisting}
-  (declare-sort-parameter A)
-  (assert (forall ((x A) (y A)) (= x y)))
-  \end{lstlisting}
-  states that every sort has a domain of size one.  The negation of the assertion
-  above would invole only one sort.  Properly negating this assertion then requires
-  the introduction of a fresh sort as in
-  \begin{lstlisting}
-  (declare-sort U 0)
-  (assert (not (forall ((x U) (y U)) (= x y))))
-  \end{lstlisting}
-  In contrast, the commands
-  \begin{lstlisting}
-  (declare-sort-parameter A)
-  (assert (not (forall ((x A) (y A)) (= x y))))
-  \end{lstlisting}
-  state that every domain must be of size at least two.
-  This means that special care must be taken in checking, e.g., the
-  validity of an implication \expr{(=> $p$ $q$)} by asserting $p$ and
-  the negation of $q$, and checking for satisfiability, when polymorphic
-  sorts are involved.
+Notice that the commands
+\begin{lstlisting}
+(declare-sort-parameter A)
+(assert (forall ((x A) (y A)) (= x y)))
+\end{lstlisting}
+have the effect of stating that every sort has a domain of size one.
+The negation of the assertion above would involve only one sort.
+Properly negating this assertion then requires the introduction 
+of a fresh sort symbol, as in
+\begin{lstlisting}
+(declare-sort U 0)
+(assert (not (forall ((x U) (y U)) (= x y))))
+\end{lstlisting}
+In contrast, the commands
+\begin{lstlisting}
+(declare-sort-parameter A)
+(assert (not (forall ((x A) (y A)) (= x y))))
+\end{lstlisting}
+have the effect of stating that \emph{every} sort has a domain of size 
+at least two.
+In general, this means that, when polymorphic sorts are involved,
+special care must be taken in checking, for example, the validity 
+of an implication \expr{(=> $p$ $q$)} 
+by asserting $p$ and \expr{(not $q$)}, and then checking for satisfiability.
 \end{remark}
 \end{newver}
 
@@ -1305,7 +1323,7 @@ which is set to \ter{false} by default, is set to \ter{true}
 
 %%% check-sat %%%
 %
-\item[\expr{(check-sat)}] is an abbreviation of \expr{(check-sat-assuming ())}.
+\item[\expr{(check-sat)}] has the same effect as \expr{(check-sat-assuming ())}.
 \smallskip
 
 % Consider we have such a definition
