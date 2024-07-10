@@ -1991,6 +1991,27 @@ which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
 As an additional simplification, which does not introduce ambiguities,  
 it is possible to omit the \ter{\_} symbol altogether in applications and write
 \expr{(g t)} instead of \expr{(\_ g t)}.
+
+\begin{remark}
+Note that the SMT-LIB logic remains first-order in syntax:
+it is not possible to have a function symbol $g$ of rank $\tau_1 \cdots \tau_n$
+(with $n > 1$) as an argument to another function, as in \expr{(f g)}.
+The function $g$ has to be encapsulated into a $\lambda$-abstraction first.
+For instance, 
+if \ter{f} is a function symbol of rank \expr{(-> $\tau_1$ $\tau_2$)\,$\tau$} and
+$g$ is a function symbol of rank $\tau_1 \tau_2$,
+then the term  \expr{(f (lambda ((x $\tau_1$)) (g x)))} is well sorted, 
+and has sort $\tau$.
+
+Similarly, it is not possible to return a function of rank $\tau_1 \cdots \tau_n$
+(with $n > 1$) from another function but it is possible to return
+a constant of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.\endnote{\new{
+The difference between function symbols and constants of \ter{->} sorts
+will disappear in Version 3 where, in current terms, 
+there will be no function symbols but only constant symbols,
+possibly of sort \expr{(-> $\tau_1$ $\tau_2$)}.
+}}
+\end{remark}
 \end{newver} 
 
 
