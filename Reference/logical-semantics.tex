@@ -17,11 +17,15 @@ in particular, the identification of formulas with terms
 of a distinguished Boolean sort, and the use of sort symbols of arity 
 \begin{newver}
 greater than 0,
-as well as the use of functions as first-class values.
+as well as, starting with Version 2.7, the use of functions as first-class values.
 The latter is achieved by the addition of a background theory 
-of higher-order functions,
-which are modeled as values of sort \expr{(-> $\tau_1$ $\tau_2$)}
-in the concrete syntax.
+of (higher-order) functions,
+which are modeled in the concrete syntax 
+as values of sort \expr{(-> $\tau_1$ $\tau_2$)},
+constructible with a $\lambda$-abstraction binder.
+New to Version 2.7 is also the addition of prenex polymorphism in user-scripts,
+achieved through the declaration of sort parameters which can then 
+be used to make assertions containing terms of polymorphic sort.
 \end{newver}
 
 These features make for a more flexible and syntactically more uniform 
@@ -32,13 +36,15 @@ Quantifiers are still first-order, the sort structure is flat (no subsorts),
 the logic's type system has no function types, 
 no type quantifiers, no dependent types,
 no provisions for parametric or subsort polymorphism.
-\begin{newver}
-Since SMT-LIB 2.7, we allow rank-1 (prenex) polymorphism.
-Higher-order functions are provided as a theory, not in the base logic:
-arrow types of the form \expr{(-> $\tau_1$ $\tau_2$)} are defined
-in the HO-Core theory and can be used to specify the sort of a variable
-or an argument of a function symbol.
-\end{newver}
+%%CT
+%Removed because redundant with what is above now.
+%\begin{newver}
+%Since SMT-LIB 2.7, we allow rank-1 (prenex) polymorphism.
+%Higher-order functions are provided as a theory, not in the base logic:
+%arrow types of the form \expr{(-> $\tau_1$ $\tau_2$)} are defined
+%in the HO-Core theory and can be used to specify the sort of a variable
+%or an argument of a function symbol.
+%\end{newver}
 
 As a consequence, all the classical meta-theoretic results from many-sorted 
 FOL apply to SMT-LIB logic when considered in its full generality, that is,
@@ -47,7 +53,7 @@ by the \akey{Core} \new{and the \akey{HO-Core} background theories introduced
 in Section~\ref{sec:core} and~\ref{sec:ho-core}}.
 Those results still hold with \define{recursively axiomatizable} 
 background theories, i.e., theories defined as the set of all models
-of a recursive set of closed formulas (or \define{axioms}).
+of a recursive set of closed first-order formulas (or \define{axioms}).
 % As pointed out in Section~\ref{sec:theory-examples} the ability 
 % to use non-recursively axiomatizable theories as background theories
 % actually gives SMT-LIB logic the expressive power of higher-order logics.
@@ -102,7 +108,7 @@ containing the symbols $\eqs$, $\land$, and $\lnot$,
 %the set $\st$ of \define{Unicode character strings} $w$,
 
 \item
-a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$,
+a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$.
 
 %\item
 %the set $\na$ of \define{natural numbers} $n$,
