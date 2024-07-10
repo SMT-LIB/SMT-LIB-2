@@ -1945,15 +1945,16 @@ functions.
 % nested \ter{Set} sorts (second-order restriction) 
 % while, however, allowing additional function and predicate symbols.
 
-This version of SMT-LIB supports for higher-order logic through the addition
-of a new theory, HO-Core, as shown in Figure~\ref{fig:HO-Core}.
+This version of SMT-LIB adds support for higher-order logic through the addition
+of a new theory, HO-Core, shown in Figure~\ref{fig:HO-Core}.
 The theory includes a binary sort constructor \ter{->} for sorts 
 that denote function spaces 
 (for example \expr{(-> Int Real)} for the sort of functions from \ter{Int} to \ter{Real})
 and an explicit function application operator \ter{\_}.
+
 Note that, with this addition, the language distinguishes 
-between \emph{functions} of rank $\sigma_1\sigma_2$
-and \emph{constants} or variables of sort \expr{(-> $\sigma_1$ $\sigma_2$)}.
+between \emph{functions} of rank $\tau_1\tau_2$
+and \emph{constants} or variables of sort \expr{(-> $\tau_1$ $\tau_2$)}.
 For instance, the latter can be passed as an argument to other functions 
 as any other datatype but the former cannot.\endnote{%
 \new{This difference will disappear in the planned Version 3 of the standard
@@ -1962,22 +1963,30 @@ to a version of higher-order logic with dependent types.}
 }
 This is no real limitation because it is possible to convert from one to the other
 thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
-For instance, if \ter{f} is a function symbol of rank $\sigma_1\sigma_2$,
-one can create the corresponding higher-order constant as
-\expr{(lambda ((x $\sigma_1$)) (f x))}.
-Conversely, if \ter{g} is a constant of sort \expr{(-> $\sigma_1$ $\sigma_2$)}
-the corresponding function can be defined by the command (see~\ref{sec:new-symbols})
-\expr{(define-fun f ((x $\sigma_1$)) $\sigma_2$ (\_ g x))}.
+For instance, if \ter{f} is a function symbol of rank $\tau_1\tau_2$,
+one can define a corresponding higher-order constant with the command 
+(see~\ref{sec:new-symbols}) 
+\begin{center}
+\expr{(define-const c\_f (lambda ((x $\tau_1$)) (f x)))} .
+\end{center}
+%
+Conversely, if \ter{c} is a constant of sort \expr{(-> $\tau_1$ $\tau_2$)}
+the corresponding function can be defined by the command 
+\begin{center}
+\expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (\_ c x))} .
+\end{center}
 
-The \ter{->} constructor is defined as right-associative, allowing for instance the syntax
-\expr{(-> $\sigma_1$ $\sigma_2$ $\sigma_3$)} to be used in place of the syntax
-\expr{(-> $\sigma_1$ (-> $\sigma_2$ $\sigma_3$))}.
-Correspondingly, the application operator \ter{\_} is defined as left-associative, allowing the syntax
+The \ter{->} sort constructor is defined as right-associative, 
+allowing for instance the syntax
+\expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)} to be used in place of the syntax
+\expr{(-> $\tau_1$ (-> $\tau_2$ $\tau_3$))}.
+Correspondingly, the application operator \ter{\_} is defined as left-associative, 
+allowing the syntax
 \expr{(\_ $t_1$ $t_2$ $t_3$)} to be used in place of the syntax
 \expr{(\_ (\_ $t_1$ $t_2$) $t_3$)}.
-Note that this allows \emph{partial} applications \expr{(\_ g t)} of a constant \ter{g} 
-of sort \expr{(-> $\sigma_1$ $\sigma_2$ $\sigma_3$)},
-which is a term of sort \expr{(-> $\sigma_2$ $\sigma_3$)}.
+Note that this also allows the \emph{partial} application \expr{(\_ g t)} 
+of a constant \ter{g} of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
+which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
 
 As an additional simplification, which does not introduce ambiguities,  
 it is possible to omit the \ter{\_} symbol altogether in applications and write
