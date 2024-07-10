@@ -1,5 +1,11 @@
 Note: history only accounts for content changes, not release changes.
 
+2023-11-01
+  Reference/concrete-syntax.tex
+  Reference/operational-semantics.tex
+    Changed verbosity to have no standard default value
+    Changed default for print-success to be false
+
 2020-08-06
   Theories/UnicodeStrings.smt2
     Fixed an example in Strings constant definition.

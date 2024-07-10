@@ -507,11 +507,11 @@ The old name for \ter{produce-assertions}.
 Deprecated.
 
 \item[\attr{print-success}] 
-\quad default: \ter{true}
+\quad default: \ter{false}
 \quad support: required
 \\
-Setting this option to \ter{false} causes the solver to suppress the printing 
-of \ter{success} in all responses to commands.  
+Setting this option to \ter{true} causes the solver to print 
+\ter{success} as a response to commands.  
 Other output remains unchanged.
 
 \item[\attr{produce-assertions}] 
@@ -609,7 +609,7 @@ of an individual solver's results under the same external conditions.
 }
 
 \item[\attr{verbosity}] 
-\quad default: $0$
+\quad default: no standard default value
 \quad support: optional
 \\
 The argument is a numeral controlling the level of diagnostic output produced

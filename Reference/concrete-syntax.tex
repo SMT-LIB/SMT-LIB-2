@@ -2313,8 +2313,8 @@ shown in Figure~\ref{fig:command-responses}.
 Every response must be an instance of \nter{general\_response} which specifies
 generic response possibilities as well as command-specific responses
 for certain commands (specified by \nter{specific\_success\_response}).  In
-addition, with the \attr{print-success} option set to \ter{false}, a solver
-produces no response in cases when it would have otherwise returned \ter{success}.
+addition, with the \attr{print-success} option set to \ter{true}, a solver
+returns \ter{success} after a successful command.
 
 Regular output, including error messages, is printed 
 on the \define{regular output channel}.
@@ -2396,8 +2396,6 @@ for the following commands:
 %
 \begin{minipage}[t]{.5\linewidth}
 \begin{verbatim}
-(set-option :print-success false)
-
 (push 1)
 
 (assert (> z x))
@@ -2430,7 +2428,6 @@ for the following commands:
 \begin{verbatim}
 (set-info :smt-lib-version 2.7)
 ...
-(set-option :print-success false)
 (set-option :produce-models true)
 
 (declare-const x Int)
