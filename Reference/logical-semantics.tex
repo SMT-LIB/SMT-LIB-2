@@ -412,8 +412,8 @@ then $(p,\tau\,\bool) \in R$;
 
 \item
 there is no constructor $c \in \cons{\Sigma}$ such that
-$(c, \bar{\tau}_1\tau), (c, \bar{\tau}_2\tau) \in R$ 
-for distinct $\bar{\tau}_1$ and $\bar{\tau}_2$.\endnote{
+$(c, \overline{\tau}_1\tau), (c, \overline{\tau}_2\tau) \in R$ 
+for distinct $\overline{\tau}_1$ and $\overline{\tau}_2$.\endnote{
 Because of this constraint, the return sort of a constructor uniquely determines 
 the sort of its arguments.
 That removes the need to specify the sort of the pattern variables
@@ -498,8 +498,8 @@ every constructor of $\Sigma$ has the same selectors and testers in $\Omega$
 that it has in $\Sigma$;
 for all $x \in \va$ and $\tau \in \sortt{\Sigma, \sop}$,
 $x{:}\tau \in \Sigma$ iff $x{:}\tau \in \Omega$;
-for all $f \in \fu$ and $\bar{\tau} \in \sortt{\Sigma, \sop}^+$,
-if $f{:}\bar{\tau} \in \Sigma$ then $f{:}\bar{\tau} \in \Omega$.
+for all $f \in \fu$ and $\overline{\tau} \in \sortt{\Sigma, \sop}^+$,
+if $f{:}\overline{\tau} \in \Sigma$ then $f{:}\overline{\tau} \in \Omega$.
 In that case, $\Sigma$ is a \define{subsignature} of $\Omega$.
 \qed
 \end{definition}
@@ -550,7 +550,7 @@ $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 
 A function symbol $f$ can be \define{ambiguous}\index{ambiguous symbol}
 in an SMT-LIB signature $\Sigma$.
-That is the case if $f:\bar{\tau}\tau_1 \in \Sigma$ and $f:\bar{\tau}\tau_2 \in \Sigma$ 
+That is the case if $f:\overline{\tau}\tau_1 \in \Sigma$ and $f:\overline{\tau}\tau_2 \in \Sigma$ 
 where $\tau_1$ and $\tau_2$ are different sorts.
 Thanks to the requirement in Definition~\ref{def:signature} that
 variables have exactly one sort in a signature,
@@ -559,11 +559,11 @@ every term can have at most one sort.
 In contrast,
 with an ambiguous symbol like $f$ above
 a term of the form $f\, \bar{t}$,
-where the terms $\bar t$ have sorts $\bar \tau$, can be given 
+where the terms $\bar t$ have sorts $\overline \tau$, can be given 
 a unique sort only if $f$ is annotated with one of the result sorts $\tau_1, \tau_2$,
 that is, only if it is written as $f^{\tau_1}\bar{t}$ or $f^{\tau_2}\bar{t}$. 
-As a consequence, from now on we will assume 
-that all ambiguous symbols are annotated as  described above.
+As a consequence, from now on \emph{we will assume 
+that all ambiguous symbols are annotated as  described above}.
 
 % \pfrem{Maybe add an end-note on this non-issue: there might be
 % two identical instances from two ranks:
@@ -1253,10 +1253,10 @@ is the smallest compatible signature
 that is an expansion of both $\Sigma_1$ and $\Sigma_2$,
 i.e., the unique signature $\Sigma$ compatible 
 with $\Sigma_1$ and $\Sigma_2$ such that,
-for all $f \in \fu$ and $\bar{\tau} \in \sortt{\Sigma}^+$,
-$f{:}\bar{\tau} \in \Sigma$ iff 
-$f{:}\bar{\tau} \in \Sigma_1$ or
-$f{:}\bar{\tau} \in \Sigma_2$.
+for all $f \in \fu$ and $\overline{\tau} \in \sortt{\Sigma}^+$,
+$f{:}\overline{\tau} \in \Sigma$ iff 
+$f{:}\overline{\tau} \in \Sigma_1$ or
+$f{:}\overline{\tau} \in \Sigma_2$.
 
 \begin{definition}[Theory Combination]
 \label{def:theorycomb}
@@ -1360,8 +1360,8 @@ $f{:}\bar{\sigma} \in \widehat\Omega$ iff
 $f{:}\bar{\sigma} \in \Omega$, or
 
 \item \label{decl-ii}
-$T$ contains a declaration of the form $f\;\bar{\tau}$ and
-$\bar{\sigma}$ is an instance of $\bar \tau$, with $\bar\tau\in (\sortt{\Omega, \sop})^+$.
+$T$ contains a declaration of the form $f\;\overline{\tau}$ and
+$\bar{\sigma}$ is an instance of $\overline \tau$, with $\bar\tau\in (\sortt{\Omega, \sop})^+$.
 \end{enumerate}
 
 \item
