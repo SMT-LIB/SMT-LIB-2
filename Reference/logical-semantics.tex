@@ -104,20 +104,22 @@ containing the symbols $\eqs$, $\land$, and $\lnot$,
 %%PF \st \na \te \lo do not seem to be explicitly used below, so we
 %% remove it for now and rephrase sorts-description, ... so that
 %% we are not using these sets implicitly anymore
-%\item
-%the set $\st$ of \define{Unicode character strings} $w$,
+%
+%%CT Reintroduced \st \te \lo because they are needed for theories and logics
+\item
+the set $\st$ of \define{Unicode character strings} $w$,
 
 \item
 a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$.
 
-%\item
-%the set $\na$ of \define{natural numbers} $n$,
+\item
+the set $\na$ of \define{natural numbers} $n$,
 
-%\item
-%an infinite set $\te$ of \define{theory names} $T$,
+\item
+an infinite set $\te$ of \define{theory names} $T$,
 
-%\item
-%an infinite set $\lo$ of \define{logic names} $L$.
+\item
+an infinite set $\lo$ of \define{logic names} $L$.
 
 
 \end{itemize}
@@ -472,9 +474,9 @@ to denote that $x$ has sort $\tau$ in $\Sigma$.
 A \define{ranked function symbol} is 
 a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma, \sop}^+$,
 which we write as $f{:}\tau_1\cdots\tau_n\tau$.
-\new{We write  $f{:}\tau'_1\cdots\tau'_n\tau' \in \Sigma$
-if $f$ has rank $\tau_1\cdots\tau_n\tau$ in $\Sigma$, and
-$\tau'_1\cdots\tau'_n\tau'$ is an instance of rank $\tau_1\cdots\tau_n\tau$}.
+\new{We write  $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$
+if $f$ has some rank $\hat\tau_1\cdots\hat\tau_n\hat\tau$ in $\Sigma$, and
+$\tau'_1\cdots\tau'_n\tau'$ is an instance of $\hat\tau_1\cdots\hat\tau_n\hat\tau$}.
 
 We will also consider signatures that differ from a given signature $\Sigma$
 only by the sort they assign to variables,
