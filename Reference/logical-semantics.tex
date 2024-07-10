@@ -886,7 +886,8 @@ $i=1,\ldots,n$,
 
 \item
 for all constructors $c{:}\bar{\sigma}\sigma \in \Sigma$,
-testers $q$ with $\mathrm{tes}_\Sigma(c) = q$, and 
+testers $q$ with $\mathrm{tes}_\Sigma(c) = q$, and
+% PF Why do we have a center environment here?
 \begin{center}
   values $v \in \sigma^{\str A}$,
  $q^{\str A}(v) = \true$ iff $v$ is in the range of $(c{:}\bar{\sigma}\sigma)^{\str A}$.
@@ -1028,7 +1029,7 @@ and the rest of the rules apply only to monomorphic terms}.
 \item \new{\label{ruleI}
 $\mea{\inter I}{t} = \true$ 
 iff \ $\mea{\inter I}{\theta(t)} = \true$ 
-for all $\theta$ \ such that \ 
+for all $\theta$\, such that \ 
 \(
 \begin{cases}
  \theta = \{u_1 \mapsto \sigma_1,\;\ldots,\;u_n\mapsto \sigma_n\}, \\
@@ -1450,6 +1451,7 @@ not a class of them,
 so we call the logic $L$ too.
 An abstract syntax of logic declarations is defined in 
 Figure~\ref{fig:logic-declaration}.
+% PF I would swap the two previous sentences
 \begin{newver}  
 Again, the concrete syntax allows additional logic attributes
 that do not impact the semantics and can be ignored here.
