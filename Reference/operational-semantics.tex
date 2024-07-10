@@ -943,7 +943,7 @@ symbol is used as a sort variable $u_i$.
 with $n \geq 0$ adds a new symbol $f$ 
 with associated rank $\tau_1\cdots\tau_n\tau$.
 The command reports an error if a function symbol with name $f$ 
-is already present in the current signature.\new{  Note that 
+is already present in the current signature.  \new{Note that 
 $\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters.
 In that case $f$ is polymorphic.}
 \smallskip
@@ -991,7 +991,7 @@ that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbo
 
 In the parametric case,
 \new{the terms $\tau_i$ can contain only the sort parameters in the list $u_1, \ldots, u_k$}.%
-\footnote{\new{No previously declared sort parameters that is not shadowed by a $u_i$ can be used.}}%
+\footnote{\new{No previously declared sort parameters that is not shadowed by a $u_i$ can be used.}}
 The datatype $\delta$ must be \define{well founded} in the following inductive sense:
 it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
 such that $\tau_1\cdots\tau_m$ does not contain any of the datatypes 
@@ -1809,7 +1809,7 @@ at \href{http://www.smt-lib.org/benchmarks.shtml}{www.smt-lib.org}.
 \item[\attr{smt-lib-version}] \ 
 possible values: a decimal.
 \\
-The value of this attribute is the version of SMT-LIB used by the benchmark (e.g., \ter{2.6}).
+The value of this attribute is the version of SMT-LIB used by the benchmark (e.g., \ter{2.7}).
 For benchmarks in the official repository a call to \ter{set-info} with this attribute can occur only as the first command of a script.
 
 \item[\attr{source}] \ 
