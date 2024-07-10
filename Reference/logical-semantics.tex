@@ -22,7 +22,7 @@ The latter is achieved by the addition of a background theory
 of (higher-order) functions,
 which are modeled in the concrete syntax 
 as values of sort \expr{(-> $\tau_1$ $\tau_2$)},
-constructible with a $\lambda$-abstraction binder.
+which are constructible with a $\lambda$-abstraction binder.
 New to Version 2.7 is also the addition of prenex polymorphism in user-scripts,
 achieved through the declaration of sort parameters which can then 
 be used to make assertions containing terms of polymorphic sort.
@@ -35,7 +35,7 @@ of SMT-LIB logic with respect to traditional many-sorted FOL.
 Quantifiers are still first-order, the sort structure is flat (no subsorts),
 the logic's type system has no function types, 
 no type quantifiers, no dependent types,
-no provisions for parametric or subsort polymorphism.
+no provisions for subsort polymorphism.
 %%CT
 %Removed because redundant with what is above now.
 %\begin{newver}
@@ -325,7 +325,7 @@ is a tuple $\Sigma$ consisting of:
 
 \begin{itemize}
 \item
-a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$\new{ and $\fconstruct$};
+a set $\sorts{\Sigma} \subseteq \so$ of \define{sort} symbols containing $\bool$ \new{and $\fconstruct$};
 
 \item
 a set $\funs{\Sigma} \subseteq \fu$ of \define{function} symbols;
