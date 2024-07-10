@@ -61,6 +61,7 @@ headheight=14pt
 
 \usepackage{verbatim}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage[outline]{contour}
 \usepackage{xspace}
 \usepackage{makeidx}
 \usepackage{tocbibind}
@@ -90,7 +91,8 @@ headheight=14pt
 \usepackage{listings}
 \lstset{%
 %frameround=tttt,
-frame=shadowbox, 
+frame=shadowbox,
+frame=single,
 basicstyle=\small\ttfamily\color{NavyBlue},
 %frame=trBL,
 %color=\color{blue},
@@ -130,8 +132,9 @@ belowskip=\bigskipamount}
 \begin{document}
 
 \title{\Huge
-The SMT-LIB Standard\\[1ex]
-\thisversion\\[1ex]
+The SMT-LIB Standard \\[1ex]
+\thisversion \\[1ex]
+(Draft) \\[1ex]
 %Reference Manual\\[2ex]
 }
 
@@ -144,14 +147,16 @@ Cesare Tinelli
 \\[2ex]
 }
 
-\date{{\bf Release:} 2021-05-12} %\today}
+\date{{\bf Release:} DRAFT
+%\today
+}
 \vfill
 
 \maketitle
 \thispagestyle{empty}
 
 \newpage
-\noindent Copyright \copyright\ 2015-21 Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
+\noindent Copyright \copyright\ 2015-24 Clark Barrett, Pascal Fontaine, and Cesare Tinelli.
 \medskip
 
 \noindent {\em

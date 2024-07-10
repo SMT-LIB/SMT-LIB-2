@@ -1,7 +1,6 @@
-% basic-assumptions.tex
-
 %!TEX root = main.tex
 
+% basic-assumptions.tex
 
 %===============================================================================
 \chapter{Basic Assumptions and Structure} 
@@ -84,8 +83,9 @@ SMT-LIB's commitment to each of them is described in the following.
 %-------------------------------------------------------------------------------
 
 
-\thisversion of the SMT-LIB format adopts as its underlying logic
-a version of many-sorted first-order logic with equality~\cite{Man-MSL-93,Gal-86,Hen-01}.
+The most recent past version of the SMT-LIB format (Version 2.6 )
+adopts as its underlying logic a version of many-sorted first-order logic 
+with equality~\cite{Man-MSL-93,Gal-86,Hen-01}.
 Like traditional many-sorted logic, it has sorts (i.e., basic types) 
 and sorted terms.
 Unlike that logic, however,
@@ -104,6 +104,15 @@ the logic includes a \emph{let} binder
 and a \emph{match} binder
 analogous to constructs with the same name
 found in functional programming languages.
+
+\begin{newver}
+Version 2.7 extends the logic of Version 2.6 with a $\lambda$ binder
+for function abstraction, creating terms with a sort the form
+\expr{(-> $\tau_1$ $\tau_2$)}, and an explicit application operator 
+for values of such sort. 
+This allows, in effect, the use of higher-order functions,
+while keeping the underlying logic nominally first order.
+\end{newver}
 
 SMT-LIB's underlying logic,
 henceforth \define{SMT-LIB logic},
@@ -182,8 +191,8 @@ for instance one with dependent types.
 \section{Input Formulas}
 %-------------------------------------------------------------------------------
 
-SMT-LIB adopts a single and general first-order (sorted) language 
-in which to write logical formulas.
+\new{SMT-LIB adopts a single and general (sorted) language in which to write 
+logical formulas.}
 It is often the case, however, that 
 SMT applications work with formulas expressed in some particular fragment 
 of the language.

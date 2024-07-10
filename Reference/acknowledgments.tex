@@ -19,7 +19,7 @@ three international work groups consisting of developers and users of SMT tools:
 the SMT-API work group, led by A.~Stump,
 the SMT-LOGIC work group, led by C.~Tinelli, and
 the SMT-MODELS work group, led by C.~Barrett.
-The Version 2.0 document was written by  C.~Barrett, A.~Stump and C.~Tinelli.
+The Version 2.0 document was written by C.~Barrett, A.~Stump and C.~Tinelli.
 
 Particular thanks are due to the following work group members, 
 who contributed numerous suggestions and helpful constructive criticism 
@@ -65,7 +65,7 @@ Special thanks go to the following people
 for their thoughtful feedback and useful suggestions:
 Martin Brain,
 Adrien Champion,
-J\"{u}rgen Christ,
+J{\"u}rgen Christ,
 David Cok,
 Morgan Deters,
 Bruno Dutertre,
@@ -82,9 +82,9 @@ We also thank David Cok and J\"{u}rgen Christ for their very careful
 proof reading of this document.
 
 
-\section*{\thisversion}
+\section*{Version 2.6}
 
-The main difference between \thisversion, the current one, and Version 2.5 is the addition of algebraic datatypes to the language.
+The main difference between 2.6 and Version 2.5 is the addition of algebraic datatypes to the language.
 Special thanks go to the following people
 for their feedback and useful suggestions on this extension:
 Guillaume Bury,
@@ -94,7 +94,30 @@ Viktor Kuncak,
 Jochen Hoenicke,
 Pierre van de Laar,
 Calvin Loncaric,
-Andres Nötzli,
+Andres N{\"o}tzli,
 Andrew Reynolds,
 and
 Cristina Serban.
+
+\section*{\thisversion}
+
+\begin{newver}
+The main difference between 2.7 and Version 2.6 is two extensions of 
+the SMT-LIB's base logic:
+$(i)$ support for prenex polymorphism in user-defined sorts and functions, and
+$(ii)$ an extension to higher-order logic obtained, 
+in essence, by the introduction of a theory of functions.
+Bar a couple of minor differences,
+Version 2.7 is fully backward-compatible with Version 2.6
+and is a transition version in preparation for the planned Version 3
+whose base logic will be a higher-order logic with dependent (and polymorphic)
+types.
+Special thanks go to 
+Nikolaj Bj{\o}rner and
+Andrew Reynolds for propositing this transition version and 
+for their feedback and useful suggestions on it.
+
+Pascal Fontaine is grateful to Jasmin Blanchette for his support through his European Research Council (ERC) starting grant Matryoshka (713999).  
+He also thanks Amazon for its support through the Amazon Research Award program 
+(SMT: Modules, Formats, and Standards).
+\end{newver}

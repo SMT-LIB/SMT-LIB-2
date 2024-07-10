@@ -14,14 +14,20 @@
 %-------------------------------------------------------------------------------
 
 This document is mostly self-contained, though 
-it assumes some familiarity with first-order logic, \emph{aka} predicate calculus.
-The reader is referred to any of several textbooks on the to\-pic~\cite{Gal-86,Fit-96,Hen-01,Men-09}. 
+it assumes some familiarity with first-order logic, \emph{aka} predicate calculus,
+and higher-order logic, \emph{aka} simple type theory.
+The reader is referred to any of several textbooks 
+on first-order logic~\cite{Gal-86,Fit-96,Hen-01,Men-09} 
+\new{%
+and monographs on higher-order logic~\cite{andrews86,HOL}.
+}%
 Previous knowledge of Version 1.2 of the SMT-LIB standard~\cite{RanTin-RR-06}
-is not necessary.
-In fact, Version 1.2 users are warned that this version,
+is not necessary.\footnote{%
+Version 2 and its subversions,
 while largely based on Version 1.2, 
 is \emph{not} backward compatible with it.
 See the Version 2.0 document~\cite{BarST-RR-10} for a summary of the major differences.
+}
 
 This document provides BNF-style abstract and concrete syntax 
 for a number of SMT-LIB languages.
@@ -45,6 +51,53 @@ in the definition of the SMT-LIB standard are provided
 in Appendix~\ref{chap:notes}, 
 with reference in the main text given as a superscript number 
 enclosed in parentheses.
+
+\begin{newver}
+%-------------------------------------------------------------------------------
+\subsection{Change log for Version 2.7}
+%-------------------------------------------------------------------------------
+
+\paragraph{Release: DRAFT}
+\begin{itemize}
+\item %First 
+Draft release of Version 2.7.
+\end{itemize}
+
+%-------------------------------------------------------------------------------
+\subsection{Differences between Version 2.7 and Version 2.6}
+%-------------------------------------------------------------------------------
+
+The command language is extended with a new command for declaring (global)
+sort parameters, which can be used to assert formulas with terms 
+of polymorphic sort in scripts.
+Semantically, the sort parameters are treated as implicitly universally quantified 
+sort variables in each asserted formula.
+This has the effect to allowing prenex (or rank-1) polymorphism in assertions 
+but not more general forms of polymorphism.
+
+The term language is extended with a $\lambda$ binder to construct 
+function abstractions, and a symbol for function application, \ter{\_},
+intentionally equal to that for the construction of indexed symbols 
+in Version 2.6.
+The semantics of the $\lambda$ binder and the application symbol are provided
+in a new theory, of higher-order functions, which includes 
+the binary sort constructor \ter{->} for function space sorts.
+In this version, values of sort \expr{(-> $\tau_1$ $\tau_2$)} are treated as 
+any other value, and so can be passed to and returned from functions.
+However, they are not identified with functions of rank $\tau_1\tau_2$
+(such as those introduced by \ter{declare-fun}),
+keeping the underlying logic of Version 2.7 first order.\footnote{%
+This identification will occur in Version 3, which will be based 
+on higher-order logic.
+}
+Consistently with this extension, the command language is extended 
+with the constant definition command \ter{define-const}, 
+which can be used in particular to define constants 
+of sort \expr{(-> $\tau_1$ $\tau_2$)}.
+
+The symbol \ter{\_} can now also be used (unambiguously) as a wildcard symbol 
+in \ter{match} patterns.
+\end{newver}
 
 %-------------------------------------------------------------------------------
 \subsection{Change log for Version 2.6}
@@ -127,7 +180,7 @@ First release of Version 2.5.
 Version 2.5 is an extension of Version 2.0 and, with two minor exceptions,
 is fully backward compatible with it.
 There is then no need to have separate support for 2.0 
-if one supports \thisversion.
+if one supports Version 2.6.
 The following list summarizes notable differences and extensions.
 The first two items are the only non-backward compatible changes.
 
@@ -361,7 +414,7 @@ to an annual SMT solver competition, SMT-COMP~\cite{BardMS-CAV-05},
 based on benchmarks from the library.
 
 At the time of this writing, 
-the library contains more than 100,000 benchmarks and continues to grow.
+the library contains more than 400,000 benchmarks and continues to grow.
 Formulas in SMT-LIB format are accepted by the great majority 
 of current SMT solvers.
 Moreover, much published experimental work in SMT relies significantly 
@@ -384,7 +437,7 @@ expanded their SMT-LIB interface considerably,
 allowing users to tap the numerous functionalities 
 that most modern SMT solvers provide.
 
-Like Version 2.0 and later versions, \thisversion defines:
+Like Version 2.0 and later versions, Version 2.7 defines:
 \begin{itemize}
 \item
 a language for writing \emph{terms and formulas} in a sorted (i.e., typed) 

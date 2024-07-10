@@ -400,7 +400,7 @@ This restriction might be removed in future versions.
 
 
 %-------------------------------------------------------------------------------
-\subsection{In-line definitions}
+\subsection{In-line definitions}\label{sec:inline-defn}
 %-------------------------------------------------------------------------------
 
 Any closed subterm $t$ occurring in the argument(s) of a command $c$
@@ -862,8 +862,9 @@ in any case.
 \subsection{Introducing new symbols} \label{sec:new-symbols}
 %-------------------------------------------------------------------------------
 
-The next seven commands allow one to introduce new sort or function symbols
-by providing them with a rank declaration 
+\new{The first command below allows the declaration of sort parameters.}
+The next seven commands allow one to introduce new sort or function symbols 
+by providing them with a rank declaration
 (\ter{declare-sort}, \ter{declare-fun} and \ter{declare-const})
 or also with a definition 
 (\ter{define-sort}, \ter{define-fun}, \ter{define-fun-rec} and 
@@ -872,25 +873,50 @@ We refer to the former as \define{user-declared} symbols and
 the latter as \define{user-defined} symbols.
 Declarations and definitions are made global (permanent) or are added 
 to the current assertion level depending on 
-whether the \attr{global-declarations} option is set to \ter{true} or not.
+whether the option \attr{global-declarations} is set to \ter{true} or not.
 
 \begin{description}
+
+%%% declare-sort-parameter %%%
+%
+\item[\expr{(declare-sort-parameter $s$)}]
+\new{
+adds sort parameter $s$ to the current signature.
+The command reports an error if $s$ is a sort symbol or parameter already present 
+in the current signature.
+}\endnote{%
+\new{
+SMT-LIB 2.7 actually misnames sort parameters and variables.
+In particular the \expr{par} constructs actually introduces sort variables.
+We have adopted a pragmatic approach to this issue, 
+not renaming the \expr{par} construct, for backward compatibility.
+}
+}
+\smallskip
 
 %%% declare-sort %%%
 %
 \item[\expr{(declare-sort $s$ $n$)}]
 adds sort symbol $s$ with associated arity $n$.
-It is an error if $s$ is a sort symbol present in the current signature.
+It is an error if $s$ is a sort symbol \new{or parameter} already present 
+in the current signature.
 \smallskip
 
 %%% define-sort %%%
 %
 \item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
-adds sort symbol $s$ with associated arity $n$.
+adds sort symbol $s$ with arity $n$ and associates it with sort $\tau$,
+where the $u_i$'s are symbols used as \define{sort variables}, and $\tau$ may contain sort
+variables $u_1$, \dots, $u_n$\new{, but no previously declared sort parameters}.
+
+% (define-sort set-of-pairs (u v) (set (pair (u v))))
+% (define-sort set-of-pairs () (set (pair (u v))))
+% (set-of-pairs Int Real)
+
 Subsequent well-sortedness checks must treat a sort term like
-\expr{($s$ $\sigma_1$ $\cdots$ $\sigma_n$)} 
+\expr{($s$ $\tau_1$ $\cdots$ $\tau_n$)} 
 as an abbreviation for the term obtained by simultaneously substituting
-$\sigma_i$ for $u_i$, for $i\in\{1,\ldots,n\}$, in $\tau$.\endnote{
+$\tau_i$ for $u_i$, for $i\in\{1,\ldots,n\}$, in $\tau$.\endnote{
 Strictly speaking, only sort symbols introduced with \ter{declare-sort}
 expand the initial signature of theory sort symbols.
 Sort symbols introduced with \ter{define-sort} do not.
@@ -900,28 +926,46 @@ theory sort symbols and previously declared sort symbols.
 }
 
 The command reports an error
-if $s$ is a sort symbol already present in the current signature or
-if $\tau$ is not a well-defined parametric sort 
-with respect to the current signature.
+if $s$ is a sort symbol or parameter already present in the current signature or
+if $\tau$ is not a well-defined (polymorphic) sort 
+with respect to the current signature extended with sort variables 
+$u_1$, \dots, $u_n$.
 This restriction prohibits (meaningless) circular definitions
 where $\tau$ contains $s$.
+\begin{newver}
+These sort variables $u_i$'s shadow any previously user-declared sort symbol
+or parameter with the same name.
+However, they do not shadow theory sort symbols, analogously to bound variables
+versus declared theory symbols.  The command reports an error if a theory sort
+symbol is used as a sort variable $u_i$.
+\end{newver}
+
 \smallskip
 
 %%% declare-fun %%%
 %
-\item[\expr{(declare-fun $f$ ($\sigma_1$ $\cdots$ $\sigma_n$) $\sigma$)}]
+\item[\expr{(declare-fun $f$ ($\tau_1$ $\cdots$ $\tau_n$) $\tau$)}]
 with $n \geq 0$ adds a new symbol $f$ 
-with associated rank $\sigma_1\cdots\sigma_n\sigma$.
+with associated rank $\tau_1\cdots\tau_n\tau$.
 The command reports an error if a function symbol with name $f$ 
 is already present in the current signature.
+\new{
+Note that 
+$\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters.
+In that case $f$ is polymorphic.
+}
 \smallskip
 
 %%% declare-const %%%
 %
-\item[\expr{(declare-const $f$ $\sigma$)}]
-abbreviates the command \expr{(declare-fun $f$ () $\sigma$)}.
+\item[\expr{(declare-const $f$ $\tau$)}]
+has the same effect as the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
+%\pfrem{sort variables in datatypes must come from the par list.}
+
+%\pfrem{using declared sort parameters only make sense in assertions.
+%  We need order elsewhere.}
 %%% declare-datatypes %%%
 %
 \item[%
@@ -932,7 +976,17 @@ with respective arities $k_1,\dots,k_n$ and declarations $d_1,\dots,d_n$.
 Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
 If $k >0$ then $d$ is an expression of the form 
 \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
-where $u_1, \ldots, u_k$ are sort parameters;
+where $u_1, \ldots, u_k$ are sort variables;
+\endnote{
+\new{
+Using sort variables as opposed to globally declared sort parameter
+is necessary because their order is meaningful, as arguments of the sort constructor.
+}
+}
+% The u_1, u_k correspond to the k arguments of the sort constructor.  
+% (Pair Int Real) is not the same of (Pair Real Int), and the relation to the pair
+% constructor and the order of arguments in the pair constructor is set through
+% the order of the sort variables in par
 otherwise, it is just $l$. 
 In either case, $l$ is a (parenthesis-delimited) list of \emph{one or more} 
 expressions of the form
@@ -946,8 +1000,14 @@ $(ii)$ $c$ is a symbol, a \define{constructor for $\delta$}, and
 $(iii)$ for each $j=1,\ldots,m$, $s_j$ is a symbol, a \define{selector for $c$}, and 
 $(iv)$ $\tau_j$ is a sort term
 that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbol.
-In the parametric case,
-the terms $\tau_i$ can contain the sort parameters $u_1, \ldots, u_k$.
+
+In the polymorphic case,
+\new{the terms $\tau_i$ can contain only the sort parameters in the list $u_1, \ldots, u_k$}.%
+\footnote{%
+\new{
+No previously declared sort parameters that is not shadowed by a $u_i$ can be used.
+}
+}
 The datatype $\delta$ must be \define{well founded} in the following inductive sense:
 it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
 such that $\tau_1\cdots\tau_m$ does not contain any of the datatypes 
@@ -956,11 +1016,11 @@ from $\{\delta_1, \ldots, \delta_n\}$ or, if it does contain some, they are well
 A compliant solver must return an error in response to invocations of this command 
 that do not satisfy all of the restrictions above.  
 
-In the parametric case, 
+In the polymorphic case, 
 the command has the effect of declaring each $\delta$ as a sort symbol of arity $k$;
 each constructor $c$ as a function symbol of parametric rank $\tau_1\cdots\tau_m\delta$;
 and each $s_i$ as a function symbol of parametric rank $\delta\tau_i$.
-The non-parametric case is analogous.
+The monomorphic case is analogous.
 
 Note that the sort terms $\tau_1, \ldots,\tau_m$ can contain any previously defined 
 sort symbol as well as any of the datatypes $\delta_1, \ldots, \delta_n$,
@@ -1069,13 +1129,13 @@ This command provides a simpler syntax for defining a single datatype.
 
 %%% define-fun %%%
 %
-\item[\expr{(define-fun $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
+\item[\expr{(define-fun $f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$ $t$)}]
 with $n \geq 0$ and $t$ not containing $f$ is 
 semantically equivalent to the command sequence
 
 \begin{tabular}{l}
-\expr{(declare-fun $f$ ($\sigma_1$ $\cdots$ $\sigma_n$) $\sigma$)} \\
-\expr{(assert (forall (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) 
+\expr{(declare-fun $f$ ($\tau_1$ $\cdots$ $\tau_n$) $\tau$)} \\
+\expr{(assert (forall (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) 
        (= ($f$ $x_1$ $\cdots$ $x_n$) $t$))}.
 \end{tabular}
 
@@ -1086,9 +1146,17 @@ definitions,
 which are instead provided by \ter{define-fun-rec} and \ter{define-funs-rec}.
 The command reports an error if a function symbol with name $f$ is already 
 present in the current signature or if the argument $t$ is not a well-sorted term 
-of sort $\sigma$ with respect to the current signature extended 
-with the sort associations $(x_1:\sigma_1),\; \ldots,\; (x_n:\sigma_n)$.
+of sort $\tau$ with respect to the current signature extended 
+with the sort associations $(x_1:\tau_1),\; \ldots,\; (x_n:\tau_n)$.
 \smallskip
+
+%%% define-const %%%
+%
+\new{
+\item[\expr{(define-const $f$ $\tau$ $t$)}] has the same effect as
+\expr{(define-fun $f$ () $\tau$ $t$)}.
+\smallskip
+}
 
 %%% define-funs-rec %%%
 %
@@ -1096,7 +1164,7 @@ with the sort associations $(x_1:\sigma_1),\; \ldots,\; (x_n:\sigma_n)$.
 where $m > 0$ and for $i=1,\ldots,m$,
 $d_i$ has the form
 \begin{center}
-\expr{($f_i$ (($x_{i,1}$ $\sigma_{i,1}$) $\cdots$ ($x_{i,n_i}$ $\sigma_{i,n_i}$)) $\sigma_i$)}
+\expr{($f_i$ (($x_{i,1}$ $\tau_{i,1}$) $\cdots$ ($x_{i,n_i}$ $\tau_{i,n_i}$)) $\tau_i$)}
 \end{center}
 with 
 $n_i \geq 0$ and $f_1, \ldots, f_m$ pairwise distinct,
@@ -1105,18 +1173,18 @@ is semantically equivalent to the command sequence
 
 {\small
 \begin{tabular}{l}
-\expr{(declare-fun $f_1$ ($\sigma_{1,1}$ $\cdots$ $\sigma_{1,n_1}$) $\sigma_1$)} 
+\expr{(declare-fun $f_1$ ($\tau_{1,1}$ $\cdots$ $\tau_{1,n_1}$) $\tau_1$)} 
 \\
 \hspace{10em} \vdots 
 \\
-\expr{(declare-fun $f_m$ ($\sigma_{m,1}$ $\cdots$ $\sigma_{m,n_m}$) $\sigma_m$)} 
+\expr{(declare-fun $f_m$ ($\tau_{m,1}$ $\cdots$ $\tau_{m,n_m}$) $\tau_m$)} 
 \\
-\expr{(assert (forall (($x_{1,1}$ $\sigma_{1,1}$) $\cdots$ ($x_{1,n_1}$ $\sigma_{1,n_1}$)) 
+\expr{(assert (forall (($x_{1,1}$ $\tau_{1,1}$) $\cdots$ ($x_{1,n_1}$ $\tau_{1,n_1}$)) 
        (= ($f_1$ $x_{1,1}$ $\cdots$ $x_{1,n_1}$) $t_1$))}
 \\
 \hspace{16em} \vdots 
 \\
-\expr{(assert (forall (($x_{m,1}$ $\sigma_{m,1}$) $\cdots$ ($x_{m,n_m}$ $\sigma_{m,n_m}$)) 
+\expr{(assert (forall (($x_{m,1}$ $\tau_{m,1}$) $\cdots$ ($x_{m,n_m}$ $\tau_{m,n_m}$)) 
        (= ($f_m$ $x_{m,1}$ $\cdots$ $x_{m,n_m}$) $t_m$))} .
 \end{tabular}
 }
@@ -1146,41 +1214,83 @@ The only requirement is on the well-sortedness of the definitions.
 
 The command reports an error if for any $i \in \{1,\ldots,m\}$ 
 a function symbol with name $f_i$ is already present in the current signature 
-or if $t_i$ is not a well-sorted term of sort $\sigma_i$ with respect 
+or if $t_i$ is not a well-sorted term of sort $\tau_i$ with respect 
 to the current signature extended with the sort associations 
-$(f_1:\sigma_{1,1}\; \cdots\; \sigma_{1,n_1}\sigma_1)$, \ldots,
-$(f_m:\sigma_{m,1}\; \cdots\; \sigma_{m,n_m}\sigma_m)$
+$(f_1:\tau_{1,1}\; \cdots\; \tau_{1,n_1}\tau_1)$, \ldots,
+$(f_m:\tau_{m,1}\; \cdots\; \tau_{m,n_m}\tau_m)$
 and
-$(x_{i,1}:\sigma_{i,1}),\; \ldots,\; (x_{i,n_i}:\sigma_{i,n_i})$.
+$(x_{i,1}:\tau_{i,1}),\; \ldots,\; (x_{i,n_i}:\tau_{i,n_i})$.
+
+\new{
+Note that, for each $i$, $\tau_{i,1}$ $\cdots$ $\tau_{i,n_i}$, and $\tau_i$ may contain sort parameters.
+In that case $f_i$ is polymorphic. }
+
 \smallskip
 
 %%% define-fun-rec %%%
 %
-\item[\expr{(define-fun-rec $f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$ $t$)}]
-is an abbreviation of
+\item[\expr{(define-fun-rec $f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$ $t$)}]
+has the same effect as
 \begin{center}
-\expr{(define-funs-rec (($f$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $\sigma$)) ($t$))}
+\expr{(define-funs-rec (($f$ (($x_1$ $\tau_1$) $\cdots$ ($x_n$ $\tau_n$)) $\tau$)) ($t$))}
 \end{center}
 It provides a simpler syntax to define individual recursive functions.
+
 \end{description}
 
 
 %-------------------------------------------------------------------------------
-\subsection{Asserting and inspecting formulas}
+\subsection{Asserting and inspecting formulas} \label{sec:assert}
 %-------------------------------------------------------------------------------
 
 \begin{description}
 %%% assert %%%
 %
 \item[\expr{(assert $t$)}]
-where $t$ is a well-sorted formula (i.e., a well-sorted term of sort \ter{Bool}),
+where $t$ is a well-sorted formula 
+(i.e., a well-sorted element of \nter{term} of sort \ter{Bool}),
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
+\new{If any subterm of $t$ has a polymorphic sort $\tau$ over sort parameters
+$u_1$,\ldots, $u_n$, then the sort parameters are implicitely
+universally quantified in the assertion.  That is, when a later check command is
+issued, the assertion will hold for all instances of $u_1$,\ldots, $u_n$
+with ground sorts in the signature at that time.}
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 
 have the additional effect of adding $t$ to the formulas tracked 
 by the commands \ter{get-assignment} and \ter{get-unsat-core}, as explained later.
+
+\begin{newver}
+\begin{remark}
+Notice that the commands
+\begin{lstlisting}
+(declare-sort-parameter A)
+(assert (forall ((x A) (y A)) (= x y)))
+\end{lstlisting}
+have the effect of stating that every sort has a domain of size one.
+The negation of the assertion above would involve only one sort.
+Properly negating this assertion then requires the introduction 
+of a fresh sort symbol, as in
+\begin{lstlisting}
+(declare-sort U 0)
+(assert (not (forall ((x U) (y U)) (= x y))))
+\end{lstlisting}
+In contrast, the commands
+\begin{lstlisting}
+(declare-sort-parameter A)
+(assert (not (forall ((x A) (y A)) (= x y))))
+\end{lstlisting}
+have the effect of stating that \emph{every} sort has a domain of size 
+at least two.
+In general, this means that, when polymorphic sorts are involved,
+special care must be taken in checking, for example, the validity 
+of an implication \expr{(=> $p$ $q$)} 
+by asserting $p$ and \expr{(not $q$)}, and then checking for satisfiability.
+\end{remark}
+\end{newver}
+
 \smallskip
 
 %%% get-assertions %%%
@@ -1213,8 +1323,33 @@ which is set to \ter{false} by default, is set to \ter{true}
 
 %%% check-sat %%%
 %
-\item[\expr{(check-sat)}] is an abbreviation of \expr{(check-sat-assuming ())}.
+\item[\expr{(check-sat)}] has the same effect as \expr{(check-sat-assuming ())}.
 \smallskip
+
+% Consider we have such a definition
+% (define-const p (forall ((l (list alpha))) (>= (length l) 0)))
+% What does it mean to have
+% (check-sat-assuming (p q))
+% --->
+% (assert (par (alpha) (forall ((l (list alpha))) (>= (length l) 0)))) ?
+% And now
+% (check-sat-assuming ((not p) q))
+% --->
+% (assert (not p))
+% (check-sat)
+% The definition above is something like this
+% (assert (par (alpha) (= p (forall ((l (list alpha))) (>= (length l) 0)))))
+% But we cannot easily distribute the quantifier inside
+% the above assertion is equivalent to
+% (assert (par (alpha) (=> p (forall ((l (list alpha))) (>= (length l) 0)))))
+% (assert (par (alpha) (<= p (forall ((l (list alpha))) (>= (length l) 0)))))
+% (assert (=> p (par (alpha) (forall ((l (list alpha))) (>= (length l) 0))))))
+% (assert (or p (par (alpha) (not (forall ((l (list alpha))) (>= (length l) 0)))))))
+
+% (check-sat-assuming (p q))
+
+% (assert (and p q))
+
 
 %%% check-sat-assuming %%%
 %
@@ -1692,7 +1827,7 @@ at \href{http://www.smt-lib.org/benchmarks.shtml}{www.smt-lib.org}.
 \item[\attr{smt-lib-version}] \ 
 possible values: a decimal.
 \\
-The value of this attribute is the version of SMT-LIB used by the benchmark (e.g., \ter{2.6}).
+The value of this attribute is the version of SMT-LIB used by the benchmark (e.g., \ter{2.7}).
 For benchmarks in the official repository a call to \ter{set-info} with this attribute can occur only as the first command of a script.
 
 \item[\attr{source}] \ 

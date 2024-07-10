@@ -2,12 +2,14 @@
 
 % macros.tex
 
-\newcommand{\thisversion}{Version 2.6\xspace}
+\newcommand{\thisversion}{Version 2.7\xspace}
 
-\newcommand{\rem}[2]{\textsf{[#1: #2]}}
+\newcommand{\rem}[2]{{\color{red} \textsf{[#1: #2]}}}
+\newcommand{\todo}[1]{\rem{To do}{#1}}
 \newcommand{\cbrem}[1]{\rem{CB}{#1}}
 \newcommand{\asrem}[1]{\rem{AS}{#1}}
 \newcommand{\ctrem}[1]{\rem{CT}{#1}}
+\newcommand{\pfrem}[1]{\rem{PF}{#1}}
 %\newcommand{\ctrem}[1]{\ignorespaces}
 
 \newcommand{\new}[1]{{\color{FireBrick} #1}}
@@ -25,6 +27,7 @@
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{constraint}{Constraint}
 \newtheorem{remark}{Remark}
+\newtheorem{notation}{Notation}
 %\newtheorem{example}{Example}
 
 
@@ -34,8 +37,8 @@
 {\hspace{\stretch{1}}%
 \rule{1ex}{1ex}}
 
-%\newcommand{\define}[1]{{\textcolor{MediumBlue}{\textsl{#1}}}}
-\newcommand{\define}[1]{{\textcolor{Maroon}{\textsl{#1}}}}
+\newcommand{\define}[1]{{\textcolor{MediumBlue}{\textsl{#1}}}}
+%\newcommand{\define}[1]{{\textcolor{Maroon}{\textsl{#1}}}}
 
 \newcommand{\mode}[1]{\textsf{#1}}
 
@@ -65,6 +68,9 @@
 \newcommand{\sels}[1]{#1^\mathrm{G}}
 \newcommand{\tests}[1]{#1^\mathrm{T}}
 \newcommand{\sortt}[1]{\mathit{Sort}(#1)}
+\newcommand{\sorttt}[2]{\mathit{Sort}_{#1}(#2)}
+\newcommand{\tsort}{\mathit{sort}}
+\newcommand{\pars}{\mathit{pars}}
 %\newcommand{\subsorts}[1]{#1^{<:}}
 \newcommand{\abset}[1]{\mathcal{#1}}
 \newcommand{\so}{\abset{S}}
@@ -121,6 +127,16 @@
 \end{array}
 \)}
 
+
+\newcommand\vartextvisiblespace[1][1em]{%
+  \makebox[#1]{%
+    \kern.07em 
+    \vrule height.3ex
+    \hrulefill
+    \vrule height.3ex
+    \kern.07em
+  }% <-- don't forget this one!
+}
 
 
 

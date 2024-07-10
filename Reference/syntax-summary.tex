@@ -131,6 +131,8 @@ These keywords have a predefined meaning in \thisversion.
 \ter{declare-datatypes} \ 
 \ter{declare-fun} \ 
 \ter{declare-sort} \ 
+\ter{\new{declare-sort-parameter}} \ 
+\ter{\new{define-const}} \ 
 \ter{define-fun} \ 
 \ter{define-fun-rec} \ 
 \ter{define-sort} \ 
@@ -263,16 +265,16 @@ solver generated function symbols other than abstract values.
 
 \[
 \begin{array}{llll}
-b \in \bo, & \text{the set of boolean values}  &
-r \in \ra, & \text{the set of non-negative rational numbers} \\
+b \in \bo, & \text{the set of boolean values} \\
+%r \in \ra, & \text{the set of non-negative rational numbers} \\
 n \in \na, & \text{the set of natural numbers}  &
 w \in \st, & \text{the set of character strings} \\
 s \in \so, & \text{the set of sort symbols} &
 u \in \sop, & \text{the set of sort parameters} \\
 f \in \fu, & \text{the set of function symbols\ \ } &
 x \in \va, & \text{the set of variables} \\
-a \in \at, &  \text{the set of attribute names\ \ } &
-v \in \val, &  \text{the set of attribute values} \\
+%a \in \at, &  \text{the set of attribute names\ \ } &
+%v \in \val, &  \text{the set of attribute values} \\
 T \in \te, & \text{the set of theory names} &
 L \in \lo, & \text{the set of logic names}
 \end{array}
@@ -292,7 +294,13 @@ L \in \lo, & \text{the set of logic names}
 
 \newpage
 \subsection*{Well-sorting rules for terms}
-\ 
+
+\new{
+$f{:}\tau_1\cdots\tau_n\tau \in \Sigma$
+iff $f$ has some rank $\hat\tau_1\cdots\hat\tau_n\hat\tau$ in $\Sigma$, and
+$\tau_1\cdots\tau_n\tau$ is an instance of $\hat\tau_1\cdots\hat\tau_n\hat\tau$
+}
+\medskip
 
 \termrules
 \medskip

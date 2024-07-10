@@ -4,7 +4,10 @@
 \newcommand{\akey}[1]{\textbf{#1}}
 \newcommand{\seque}[1]{l_{\mathrm{#1}}}
 \newcommand{\bool}{\akey{Bool}}
-
+\newcommand{\fconstruct}{{\contour{black}{$\rightarrow$}}}
+\newcommand{\fconstructa}[2]{#1\ \fconstruct\ #2}
+\newcommand{\fapply}{\akey{apply}}
+\newcommand{\fapplya}[2]{\akey{apply}(#1, #2)}
 
 \newcommand{\nter}[2][]{{\textcolor{OliveGreen}{\ensuremath{\langle}\emph{\sffamily{#2}}\ensuremath{\rangle^{#1}}}}\xspace}
 
@@ -135,10 +138,13 @@
  \nter{match\_case} & ::= & \ter{(} \nter{pattern} \nter{term} \ter{)}
  \\[1ex]
  \nter{term} & ::= & \nter{spec\_constant} \\
-             &\alt&  \nter{qual\_identifier} \\ 
+             &\alt &  \nter{qual\_identifier} \\ 
              &\alt & \ter{(} \nter{qual\_identifier} \nter[+]{term} \ter{)} \\
              &\alt & \ter{(} \ter{let} 
                              \ter{(} \nter[+]{var\_binding} \ter{)} \nter{term}
+                     \ter{)} \\
+             &\alt & \ter{(} \ter{\new{lambda}} 
+                             \ter{(} \nter[+]{sorted\_var} \ter{)} \nter{term}
                      \ter{)} \\
              &\alt & \ter{(} \ter{forall} 
                              \ter{(} \nter[+]{sorted\_var} \ter{)} \nter{term}
@@ -277,7 +283,9 @@
   & \alt & \ter{(} \ter{declare-fun} \nter{symbol}
             \ter{(} \nter[*]{sort} \ter{)} \nter{sort}
            \ter{)} \\
-  & \alt & \ter{(} \ter{declare-sort} \nter{symbol} \nter{numeral} \ter{)}\\
+  & \alt & \ter{(} \ter{declare-sort} \nter{symbol} \nter{numeral} \ter{)} \\
+  & \alt & \ter{(} \ter{\new{declare-sort-parameter}} \nter{symbol} \ter{)} \\
+  & \alt & \ter{(} \ter{\new{define-const}} \nter{symbol} \nter{sort} \nter{term} \ter{)} \\
   & \alt & \ter{(} \ter{define-fun} \nter{function\_def} \ter{)} \\
   & \alt & \ter{(} \ter{define-fun-rec} \nter{function\_def} \ter{)}
            \\
@@ -411,11 +419,11 @@
 \newcommand{\sortterms}{
 \(
 \begin{array}{llcl}
- \text{(Sorts)} & 
+ \text{(Monomorphic Sorts)} & 
  \sigma
  & ::= & s\: \sigma^*
  \\[2ex]
- \text{(Parametric Sorts)} &
+ \text{(Polymorphic Sorts)} &
  \tau & ::= & u \alt s\: \tau^*
 \end{array}
 \)
@@ -434,21 +442,21 @@ u \in \mathcal{U}, & \text{the set of sort parameters}
 \newcommand{\terms}{
 \(
 \begin{array}{llcl}
- \text{(Attributes)} &
-  \alpha & ::= & a \alt a = v
- \\[2.2ex]
- \text{(Patterns)} &
+%  \text{(Attributes)} &
+%   \alpha & ::= & a \alt a = v
+%  \\[2.2ex]
+  \text{(Patterns)} &
   p & ::= & x \alt f\: x^*
- \\[2.2ex]
+  \\[2.2ex]
   \text{(Terms)} &
   \mathit{t} & ::= & x % \alt c
-      \alt f\: t^* \alt f^\sigma\: t^* \\ %\alt t \eqs t \\
-  & & \alt & \exists\, (x{:}\sigma)^+\ t \alt
-              \forall\, (x{:}\sigma)^+\ t \alt
+      \alt f\: t^* \alt f^\tau\: t^* \alt \lambda\, (x{:}\tau)\ t \alt
+      \exists\, (x{:}\tau)\ t \alt
+      \forall\, (x{:}\tau)\ t \\ %\alt t \eqs t \\
+  & & \alt & 
   %& & \alt & 
   \akey{let}\ (x = t)^+\ \akey{in}\ t
-      \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+ \\
-  & & \alt & \mathit{t} \ \alpha^+ \\
+      \alt   \akey{match}\ t\ \akey{with}\ (p \to t)^+
  \end{array}
 \)
 }
@@ -474,69 +482,87 @@ f \in \mathcal{F}, & \text{the set of function symbols}
 \newcommand{\termrules}{
 %% variable
 \begin{tabular}{ll}
-\derives
-{}
-{\Sigma \vdash x\ \alpha^*:\sigma}
-&
-if $x{:}\sigma \in \Sigma$
-\end{tabular}
-\bigskip
+  \derives
+  {}
+  {\Sigma \vdash x:\tau}
+  &
+  if $x{:}\tau \in \Sigma$
+  \end{tabular}
+  \bigskip
 
-%% function application
+  %% function application
 \begin{tabular}{ll}
-\derives{
-\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
-\Sigma \vdash t_k:\sigma_k
-}
-{\Sigma \vdash (f\; t_1\; \cdots\; t_k)\ \alpha^*: \sigma}
-&
-%\text{if $f:\sigma_1 \cdots \sigma_k\sigma \in \Sigma$ and
-%         $f:\sigma_1 \cdots \sigma_k\sigma' \notin \Sigma$ with 
-%         $\sigma' \neq \sigma$}
-if
-\(
-\begin{cases}
-f{:}\sigma_1 \cdots \sigma_k\sigma \in \Sigma, \\
-f{:}\sigma_1 \cdots \sigma_k\sigma' \notin \Sigma \ \text{ for all } \sigma' \neq \sigma
-\end{cases}
-\)
-\end{tabular}
-\bigskip
-
-%% annotated function application
+  \derives{
+  \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
+  \Sigma \vdash t_k:\tau_k
+  }
+  {\Sigma \vdash (f\; t_1\; \cdots\; t_k): \tau}
+  &
+  %\text{if $f:\tau_1 \cdots \tau_k\tau \in \Sigma$ and
+  %         $f:\tau_1 \cdots \tau_k\tau' \notin \Sigma$ with 
+  %         $\tau' \neq \tau$}
+  if
+  \(
+  \begin{cases}
+  f{:}\tau_1 \cdots \tau_k\tau \in \Sigma, \\
+  f{:}\tau_1 \cdots \tau_k\tau' \notin \Sigma \ \text{ for all } \tau' \neq \tau
+  \end{cases}
+  \)
+  \end{tabular}
+  \bigskip
+  
+  %% lambda
 \begin{tabular}{ll}
-\derives{
-\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
-\Sigma \vdash t_k:\sigma_k
-}
-{\Sigma \vdash (f^\sigma\; t_1\; \cdots\; t_k)\ \alpha^*: \sigma}
-&
-if 
-\(
-\begin{cases}
-f{:}\sigma_1 \cdots \sigma_k\sigma \in \Sigma, \\
-f{:}\sigma_1 \cdots \sigma_k\sigma' \in \Sigma \ \text{ for some } \sigma' \neq \sigma
-\end{cases}
-\)
-\end{tabular}
-\bigskip
-
-%% quantifiers
+  \derives{
+  \Sigma[x:\tau_1] \vdash t_2:\tau_2
+  }
+  {\Sigma \vdash (\lambda (x {:} \tau_1)\; t_2) : \fconstructa{\tau_1}{\tau_2}}
+  &
+  \end{tabular}
+  \bigskip
+  
+  %% annotated function application
 \begin{tabular}{ll}
-\derives{\Sigma[x_1{:}\sigma_1,\: \ldots,\: x_{k+1}{:}\sigma_{k+1}]\: \vdash t:\bool}
-{\Sigma \vdash (Q x_1{:}\sigma_1\, \cdots\, x_{k+1}{:}\sigma_{k+1}\; t)\ \alpha^* : \bool}
+  \derives{
+  \Sigma \vdash t_1:\tau_1 \quad \cdots \quad
+  \Sigma \vdash t_k:\tau_k
+  }
+  {\Sigma \vdash (f^\tau\; t_1\; \cdots\; t_k)\ : \tau}
+  &
+  if 
+  $f{:}\tau_1 \cdots \tau_k\tau \in \Sigma$
+  \end{tabular}
+  \bigskip
+  
+%  %% %% application
+% \begin{tabular}{ll}
+%   \derives{
+%   \Sigma \vdash t:\fconstructa{\tau_1}{\tau} \quad \Sigma \vdash t_1:\tau_1
+%   }
+%   {\Sigma \vdash \fapplya{t}{t_1}\ \alpha^*: \tau}
+%   &
+%   \end{tabular}
+%   \bigskip
+% There is no need for such a typing rule since \fapply is a normal interpreted
+% function.  Typing rules above are sufficient.
+  
+  %% quantifiers
+\begin{tabular}{ll}
+\derives{\Sigma[x{:}\tau]\: \vdash t:\bool}
+{\Sigma \vdash (Q x{:}\tau\; t)\ : \bool}
 &
 if $Q\, \in \{\exists, \forall\}$
 \end{tabular}
 \bigskip
 
-%% let
+ 
+  %% let
 \begin{tabular}{ll}
 \derives{
-\Sigma \vdash t_1:\sigma_1 \quad \cdots \quad
-\Sigma \vdash t_{k+1}:\sigma_{k+1} \\
-\Sigma[x_1{:}\sigma_1,\: \ldots,\: x_{k+1}{:}\sigma_{k+1}]\: \vdash t:\sigma}
-{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ \alpha^* : \sigma}
+\Sigma \vdash t_1:\tau_1 \quad \cdots \quad
+\Sigma \vdash t_{k+1}:\tau_{k+1} \\
+\Sigma[x_1{:}\tau_1,\: \ldots,\: x_{k+1}{:}\tau_{k+1}]\: \vdash t:\tau}
+{\Sigma \vdash (\akey{let}\ x_1 = t_1\;\cdots\; x_{k+1} = t_{k+1}\ \akey{in}\ t)\ : \tau}
 &
 if $x_1, \ldots, x_{k+1}$ are all distinct
 \end{tabular}
@@ -546,9 +572,9 @@ if $x_1, \ldots, x_{k+1}$ are all distinct
 \begin{tabular}{ll}
 \derives{
 \Sigma \vdash t:\delta \\
-\Sigma[\bar x_i{:}\bar\sigma_i]\: \vdash t_i:\sigma \text{ for } i=1,\ldots,k+1
+\Sigma[\bar x_i{:}\bar\tau_i]\: \vdash t_i:\tau \text{ for } i=1,\ldots,k+1
 }
-{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ \alpha^* : \sigma}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ c_1\:\bar x_1 \to t_1 \;\cdots\; c_{k+1}\:\bar x_{k+1} \to t_{k+1})\ : \tau}
 &
 if 
 \(
@@ -566,10 +592,10 @@ if
 \begin{tabular}{ll}
 \derives{
 \Sigma \vdash t:\delta \\
-\Sigma[\bar x_i{:}\bar\sigma_i]\: \vdash t_i:\sigma \text{ for } i=1,\ldots,k\\
-\Sigma[x_i{:}\delta]\: \vdash t_i:\sigma \text{ for } i=k+1,\ldots,n 
+\Sigma[\bar x_i{:}\bar\tau_i]\: \vdash t_i:\tau \text{ for } i=1,\ldots,k\\
+\Sigma[x_i{:}\delta]\: \vdash t_i:\tau \text{ for } i=k+1,\ldots,n 
 }
-{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ \alpha^* : \sigma}
+{\Sigma \vdash (\akey{match}\ t\ \akey{with}\ p_1 \to t_1 \;\cdots\; p_n \to t_n)\ : \tau}
 &
 if 
 \(
@@ -579,7 +605,7 @@ if
                       \hspace{6.7em} \{x_{k+1}, \ldots, x_n\}, \\
 \;k < n,\\
 \text{ for all } i=1,\ldots,k \\
-\quad c_i{:}\bar\sigma_i\delta \in \Sigma \text{ and}\\
+\quad c_i{:}\bar\tau_i\delta \in \Sigma \text{ and}\\
 \quad \bar{x}_i \text{ contains no repetitions}
 \end{cases}
 \)
@@ -593,13 +619,10 @@ if
 \(
 \begin{array}{llcl}
  \text{(Sort symbol declarations)} &
- \mathit{sdec} & ::= & s\: n\: \alpha^*
+ \mathit{sdec} & ::= & s\: n
  \\[2ex]
  \text{(Fun.~symbol declarations)} &
- \mathit{fdec} & ::= & f\: \sigma^+\: \alpha^*
- \\[2ex]
- \text{(Param. fun.~symbol declarations)} &
- \mathit{pdec} & ::= & \mathit{fdec} \alt \Pi\, u^+\: (f\: \tau^+\: \alpha^*)
+ \mathit{fdec} & ::= & f\: \tau^+
  \\[2ex]
  \text{(Theory attributes)} &
  \mathit{tattr} & ::= & \aattr{sorts} = \mathit{sdec}^+
@@ -607,9 +630,9 @@ if
    & & \alt& \aattr{sorts-description} = w \\
    & & \alt& \aattr{funs-description} = w \\
    & & \alt& \aattr{definition} = w
-       \alt  \aattr{values} = t^+ \\
-   & & \alt& \aattr{notes} = w
-       \alt  \alpha
+       \alt  \aattr{values} = t^+% \\
+   %& & \alt& \aattr{notes} = w
+   %    \alt  \alpha
  \\[2ex]
  \text{(Theory declarations)} &
  \mathit{tdec} & ::= & 
@@ -637,9 +660,9 @@ T \in \mathcal{T}, & \text{the set of theory names}
  \mathit{lattr} & ::= & \aattr{theories} = T^+
        \alt  \aattr{language} = w \\
    & & \alt& \aattr{extensions} = w
-       \alt  \aattr{values} = w \\
-   & & \alt& \aattr{notes} = w
-       \alt  \alpha
+       \alt  \aattr{values} = w% \\
+%   & & \alt& \aattr{notes} = w
+%       \alt  \alpha
  \\[2ex]
  \text{(Logic declarations)} &
  \mathit{ldec} & ::= & \akey{logic}\ L\  \mathit{lattr}^+

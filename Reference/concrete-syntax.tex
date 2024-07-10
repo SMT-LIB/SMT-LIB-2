@@ -261,6 +261,7 @@ The basic set of reserved words consists of the following:
  \verb|_| \quad
  \ter{!} \quad
  \ter{as} \quad
+ \ter{\new{lambda}} \quad
  \ter{let} \quad
  \ter{exists} \quad
  \ter{forall} \quad
@@ -405,7 +406,7 @@ indexed identifiers are defined more systematically
 as the application of the reserved word \verb+_+
 to a symbol and one or more \emph{indices}.
 Indices can be numerals or symbols.\endnote{
-Symbols have been added as indices in \thisversion for increased flexibility.
+Symbols have been added as indices in Version 2.6 for increased flexibility.
 }
 \bigskip
 
@@ -432,8 +433,8 @@ because each namespace can always be identified syntactically.
 Within the term namespace, bound variables can shadow one another as well as
 function symbols in accordance with a lexical scoping discipline described 
 in Section~\ref{sec:concrete-terms}. 
-Similarly, sort parameters can shadow sort symbols,
-as described in Section~\ref{sec:concrete-sorts}.
+Similarly, sort variables can shadow user sort symbols,
+as described in Section~\ref{sec:new-symbols}.
 \end{remark}
 
 
@@ -471,10 +472,10 @@ their values.
 A major subset of the SMT-LIB language is 
 the language of \emph{well-sorted} terms,
 used to represent logical expressions.
-Such terms are typed, or \define{sorted} in logical terminology; 
+Such terms are typed, or \define{sorted} in first-order logic terminology; 
 that is, each is associated with a (unique) \define{sort}.
 The set of sorts consists itself of \define{sort terms}.
-In essence, a sort term is 
+In essence, a sort is 
 a \define{sort symbol},
 a \define{sort parameter}, 
 or a sort symbol applied to a sequence of sort terms.
@@ -494,19 +495,38 @@ Int                         Bool
 (_ BitVec 3)                (List (Array Int Real))
 
 ((_ FixedSizeList 4) Real)  (Set (_ Bitvec 3))       
+
+(-> Int Real)               (-> Int (-> Int Real))
 \end{lstlisting}
 
-A \define{(non-)parametric} sort is a sort containing (no) parameters.
-We will use $\sigma$ to denote non-parametric sorts and 
-$\tau$ to denote possibly parametric sorts.
+\begin{newver}
+A \define{monomorphic} sort is a sort containing no parameters.
+A \define{polymorphic} sort is a sort containing zero or more parameters.
+For instance, if \ter{X} and \ter{Y} are sort parameters,
+and \ter{Int} and \ter{Array} are sort symbols, 
+then \ter{(Array Int Int)} is a monomorphic sort 
+while \ter{(Array Int Y)}, \ter{(Array X Int)}, and \ter{(Array X Y)} are
+all polymorphic sorts.
+Note that we treat monomorphic sorts as a special case of polymorphic ones,
+hence \ter{(Array Int Int)} is also a (trivially) polymorphic sort.
+Contextual information is needed in general to know whether a particular symbol
+occurring in a sort is a sort parameter or not.
+Local sort parameter are introduced by a specific binder, \ter{par}.
+Global sort parameters are declared in a script by a specific command.
 
+We will say just \emph{sort} to mean a polymorphic sort, and 
+say instead \emph{monomorphic sort} when we want to emphasize 
+that the sort has no parameters. 
+We will use $\sigma$ to denote monomorphic sorts and 
+$\tau$ to denote, more generally, polymorphic sorts.
+\end{newver}
 
 \subsection{Ranks}
 
 Each function symbol in an SMT-LIB script is associated with one or more 
 \define{ranks}, non-empty sequences of sorts.
 Intuitively, a function symbol $f$ with rank $\sigma_1\cdots\sigma_n\sigma$,
-with none of the sorts parametric,
+(with sorts being monomorphic),
 denotes a function that takes as input $n$ values of respective sorts
 $\sigma_1, \ldots, \sigma_n$,
 and returns a value of sort $\sigma$.
@@ -516,21 +536,21 @@ where each sort may contain sort parameters,
 actually stands for a whole \emph{class} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
-of a sort parameter with a non-parametric sort.
+of a sort parameter with a monomorphic sort.
 
 
 %-------------------------------------------------------------------------------
 \section{Terms and Formulas} \label{sec:concrete-terms}
 %-------------------------------------------------------------------------------
 
-Abstractly, term are constructed out of 
+Abstractly, terms are constructed out of 
 constant symbols in the \nter{spec\_constant} category
 (numerals, decimals, strings, etc.),
 \define{variables}, 
 \define{function symbols}, 
 four kinds of \define{binders} 
-(introduced by the reserved words \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
-and an annotation operator (the reserved word \ter{!}).
+(introduced by the reserved words \new{\ter{lambda},} \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
+and an annotation operator: the reserved word \ter{!}.
 In its simplest form, a term is 
 a special constant symbol,
 a variable,
@@ -544,23 +564,41 @@ while a function symbol can be any \nter{identifier}
 As a consequence, contextual information is needed during parsing
 to know whether an identifier is to be treated as a variable or 
 a function symbol. 
-For variables, this information is provided by the three binders 
+For variables, this information is provided by the binders 
+\ter{let}, \new{\ter{lambda}}, \ter{forall}, \ter{exists}, and \ter{match}, 
 which are the only mechanism to introduce variables.
 Function symbols, in contrast, are predefined, as explained later.
-Recall that every function symbol $f$ is separately associated with one or more ranks,
+Recall that every function symbol $f$ is separately associated 
+with one or more ranks,
 each specifying the sorts of $f$'s arguments and result.
 To simplify sort checking,
-a function symbol in a term can be annotated with one of its result sorts $\sigma$.
+a function symbol in a term can be annotated with one of its result sorts $\tau$.
 Such an annotated function symbol is a \define{qualified identifier}
-of the form \expr{(as $f$ $\sigma$)}.
+of the form \expr{(as $f$ $\tau$)}.
 \bigskip
 
 \cTerms
 \bigskip
 
+\begin{newver}
+Terms are members of the syntactic category \nter{term}.
+Note that sort terms occur within terms with binders or qualified identifiers.
+These sort terms may contain sort parameters, 
+which must be declared in a script by the command \ter{declare-sort-parameter}
+(see Section~\ref{sec:new-symbols}).
+\end{newver}
+
+% We refer informally to members of \nter{pterm} as \define{polymorphic} terms.
+% We remark that although members of \nter{term} are also polymorphic terms or 
+% can occur as subterms of polymorphic terms, the opposite is not the case.\endnote{
+% This restriction is intentional, to enforce \emph{prenex} polymorphism~\ref{} \todo{Add reference},
+% a limited form of polymorphism that is general enough for our purposes.
+
+
 SMT-LIB scripts can contain only \define{well-sorted} terms
 (see Section~\ref{well-sortedness}).
-Formulas in SMT-LIB are just well-sorted terms of sort \ter{Bool}.
+Formulas in SMT-LIB are just well-sorted terms of sort \ter{Bool}
+ (see Section~\ref{sec:core}).
 As a consequence, there is no syntactic distinction 
 between function and predicate symbols;
 the latter are simply function symbols whose result sort is \ter{Bool}.
@@ -581,9 +619,38 @@ Another consequence is that function symbols can take formulas
 \subsection{Variable Binders}  \label{sec:binders}
 %-------------------------------------------------------------------------------
 
-Variables are introduced by means of one of the four binders.
-Each binder allows the introduction of one or more variables 
-or parameters with local scope.
+\begin{newver}
+
+Variables are introduced by means of one of the five binders.
+Each binder allows the introduction of one or more variables with local scope.
+
+\paragraph{Lambda.}
+
+
+This binder corresponds to the abstraction binder of higher-order logic.
+It takes a non-empty list of variables, 
+which abbreviates a sequential nesting of lambda abstractions.
+Specifically, a term of the form
+
+\begin{equation} \label{eq:lambda}
+  \expr{
+  (lambda (($x_1$ $\tau_1$) ($x_2$ $\tau_2$) $\cdots$ ($x_n$ $\tau_n$)) 
+    $t$)
+  }
+\end{equation}
+has the same semantics as the term
+%
+  \begin{equation} \label{eq:nested-lambda}
+  \expr{
+   (lambda (($x_1$ $\tau_1$)) 
+   (lambda (($x_2$ $\tau_2$)) ($\cdots$ 
+   (lambda (($x_n$ $\tau_n$)) $t$) $\cdots$)
+  }
+  \end{equation}
+  %
+  See Section~\ref{sec:core} for more details on the use of this binder.
+
+\end{newver}
 
 \paragraph{Exists and forall quantifiers.}
 These binders correspond 
@@ -595,7 +662,7 @@ Specifically, a formula of the form
 %
 \begin{equation} \label{eq:forall}
 \expr{
-(forall (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) 
+(forall (($x_1$ $\tau_1$) ($x_2$ $\tau_2$) $\cdots$ ($x_n$ $\tau_n$)) 
   $\varphi$)
 }
 \end{equation}
@@ -604,14 +671,14 @@ has the same semantics as the formula
 %
 \begin{equation} \label{eq:nested-forall}
 \expr{
- (forall (($x_1$ $\sigma_1$)) 
- (forall (($x_2$ $\sigma_2$)) ($\cdots$ 
- (forall (($x_n$ $\sigma_n$)) $\varphi$) $\cdots$)
+ (forall (($x_1$ $\tau_1$)) 
+ (forall (($x_2$ $\tau_2$)) ($\cdots$ 
+ (forall (($x_n$ $\tau_n$)) $\varphi$) $\cdots$)
 }
 \end{equation}
 %
 Note that the variables in the list 
-\expr{(($x_1$ $\sigma_1$)\ ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$))}
+\expr{(($x_1$ $\tau_1$)\ ($x_2$ $\tau_2$) $\cdots$ ($x_n$ $\tau_n$))}
 of (\ref{eq:forall}) are not required to be pairwise disjoint.
 However, because of the nested quantifier semantics, earlier occurrences 
 of same variable in the list are shadowed by the last occurrence---making 
@@ -655,29 +722,42 @@ It has the form
 %
 where $t$ is a term of some datatype sort $\delta$ and,
 for each $i=1,\ldots,m+1$,
-$p_i$ is a \define{pattern} for $\delta$, and $t_i$ a term of some sort $\sigma$.
+$p_i$ is a \define{pattern} for $\delta$, and $t_i$ a term of some sort $\tau$.
 A pattern $p$ in turn is either a variable $x$ of sort $\delta$, 
+\new{the special variable \ter{\_}},
 a nullary constructor $c$ of $\delta$, 
 or a term of the form \expr{($c$ $x_1$ $\cdots$ $x_k$)}
 where $c$ is a constructor of $\delta$ of rank
-$\sigma_1\cdots\sigma_k\delta$ 
+$\tau_1\cdots\tau_k\delta$ 
 with $k > 0$, and $x_1, \ldots, x_k$ are \emph{distinct} variables 
-of respective sort $\sigma_1,\ldots,\sigma_k$.\endnote{
+of respective sort $\tau_1,\ldots,\tau_k$.\endnote{
 The sorts of pattern variables are not specified explicitly
 since they can be readily inferred from the datatype.
 }
+\begin{newver}
+An exception is the special variable \ter{\_} which can only occur 
+in place of one or more of the variables $x_1, \ldots, x_k$.
+This variable acts as a wildcard, with each occurrence matching any term
+of any sort, hence effectively behaving as a fresh variable.
+\end{newver}
+
 The list $p_1,\ldots p_{m+1}$ may contain more than one pattern with the same constructor 
 or more than one pattern consisting of a variable.\endnote{
 Such lists are semantically redundant in the sense that some of the cases 
 can be dropped without affecting its meaning.
 This is allowed to simplify parsing.
 }
-However, it \emph{must} contain a pattern consisting of a variable, 
+However, it \emph{must} contain a pattern consisting of a variable,
 unless every constructor of $\delta$ occurs in one of the patterns.\endnote{
 This guarantees that the match expressions are always well defined
 (see Section~\ref{sec:models}).
 }
-
+\begin{newver}
+The recommended choice for a single variable pattern is \ter{\_}, the use of
+other variables will be deprecated in future versions.\endnote{This will prevent
+typos while writing a nullary constructor to be taken as a variable pattern, thus
+changing the meaning of the match term without warning or error.}
+\end{newver}
 
 %For the expression~(\ref{eq:match}) to be well-formed
 %the list $p_1,\ldots p_n$ must satisfy these additional requirements:\footnote{%
@@ -700,7 +780,7 @@ The scope of those variables is the term $t_i$.
 
 \begin{lstlisting}[linewidth=29em]
 ; Axiom for list append: version 1
-; List is a parametric datatype 
+; List is a polymorphic datatype 
 ; with constructors "nil" and "cons"
 ;
 (forall ((l1 (List Int)) (l2 (List Int)))
@@ -714,7 +794,14 @@ The scope of those variables is the term $t_i$.
   (= (append l1 l2)
      (match l1 (
        ((cons h t) (cons h (append t l2)))
-       (x l2)))))   ; x is a variable
+       (_ l2)))))
+
+; Axiom for list length
+(forall ((l (List Int)))
+  (= (length l)
+     (match l (
+       (nil 0)
+       ((cons _ t) (length t))))))
 \end{lstlisting}
 
 \begin{remark}[No nested patterns]
@@ -727,11 +814,28 @@ where $s_1, \ldots, s_k$ are symbols, those symbols are \emph{always} to be pars
 \qed
 \end{remark}
 
+\begin{newver}
+\begin{remark}[Double use of \ter{\_}]
+The special symbol \ter{\_} is used both to construct index terms 
+and as a wildcard symbol in \ter{match} patterns.
+These two different uses can always be disambiguated syntactically
+since \ter{\_} occurs in a function symbol position in the first case 
+(e.g., in \expr{(\_ BitVec 5)})
+and in an argument position in the second case
+(e.g., in \expr{(cons h \_)}, \expr{(cons \_ t)}, or \expr{(cons \_ \_)}).
+\end{remark}
+\end{newver}
+
 Strictly speaking, the \ter{match} binder is not essential 
 since it can be defined in terms of the other binders. 
 Specifically, expression (\ref{eq:match})
 can be written equivalently as follows.
 \begin{enumerate}
+\item 
+\new{
+If the match statement contains one or more occurrences of \expr{\_}, 
+each of them is replaced by a fresh variable.
+}
 \item
 Suppose that for all $i=1,\ldots, m + 1$, the pattern $p_i$ has the form
 \expr{($c_i$ $x_{i,1}$ $\cdots$ $x_{i,k_i}$)} with $k_i>0$;
@@ -766,32 +870,43 @@ by $t_i$.
 If instead for some minimal $i \in \{1,\ldots, m + 1\}$, the pattern $p_i$ is
 a variable $x$, then the whole $i$th \ter{ite} subexpression of (\ref{eq:match-alt}),
 if $i\leq m$, 
-or the \ter{let} subexpression, if $i=m$, is replaced by \expr{(let (($x$ $t$)) $t_i$)}.
+or the \ter{let} subexpression, if $i=m + 1$, is replaced by \expr{(let (($x$ $t$)) $t_i$)}.
 \end{enumerate}
 
 
+%%-------------------------------------------------------------------------------
+%\subsection{Parameter Binders}
+%%-------------------------------------------------------------------------------
+%
+%SMT-LIB allows the declaration of polymorphic function symbols 
+%in theory declarations (see Section~\ref{sec:theory-declarations}) and 
+%of polymorphic datatypes in user scripts (see Section~\ref{sec:new-symbols}).
+%\new{
+%It also enables the assertion of formulas in user scripts 
+%(see Section~\ref{sec:assert})
+%containing terms of polymorphic sort.
+%}
+%Sort parameters are introduced with expressions of the form
+%\begin{center}
+% \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
+%\end{center}
+%where $u_1, \ldots, u_k$ are $k>0$ pairwise distinct sort parameters and
+%$e$ is an expression containing zero or more occurrences of $u_1, \ldots, u_k$.
+%\new{
+%When $e$ is a term of sort \ter{Bool} the expression above is a formula
+%with polymorphic types over the parameters, i.e., sort variables, $u_1, \ldots, u_k$.
+%Note that, the way \nter{pterm} is defined (see Section~\ref{sec:concrete-terms}),
+%only \emph{prenex} (or \emph{rank-1}) polymorphism is allowed in formulas.\endnote{%
+%This restriction is intentional, to simplify reasoning.
+%}}
+
 %-------------------------------------------------------------------------------
-\subsection{Parameter Binders}
+\subsection{Scoping of variables} \label{sec:free}
 %-------------------------------------------------------------------------------
 
-SMT-LIB allows the declaration of parametric function symbols 
-in theory declarations (see Section~\ref{sec:theory-declarations}) 
-and of parametric datatypes in user scripts (see Section~\ref{sec:new-symbols}).
-Sort parameters are introduced with expressions of the form
-\begin{center}
- \expr{(par ($u_1$ $\cdots$ $u_k$) $e$)}
-\end{center}
-where $u_1, \ldots, u_k$ are $k>0$ pairwise distinct sort parameters and
-$e$ is an expression containing occurrences of $u_1, \ldots, u_k$.
 
-
-%-------------------------------------------------------------------------------
-\subsection{Scoping of variables and parameters} \label{sec:free}
-%-------------------------------------------------------------------------------
-
-The notions of \define{free} variable/parameter occurrence in an s-expression,
-\define{bound} variable/parameter, and
-\define{(binder) scope} are defined as follows.
+The notions of \define{free} variable occurrence in an s-expression,
+\define{bound} variable, and \define{(binder) scope} are defined as follows.
 \smallskip
 
 \noindent A variable $x$:
@@ -804,9 +919,10 @@ if $e_1$ is \ter{par} or not a binder, and
 $x$ occurs free in some $e_i$ ($1\le i\le n$); 
 \item
 occurs free in an expression 
-\expr{(forall ($s_1$ $\cdots$ $s_n$) $t$)} or
-\expr{(exists ($s_1$ $\cdots$ $s_n$) $t$)} 
-if it does not occur in $s_1, \ldots, s_n$ and occurs free in $t$;
+\new{
+\expr{($Q$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)}
+where $Q$ is \ter{lambda}, \ter{forall}, or \ter{exists}
+if it does not occur in $\{x_1, \ldots, x_n\}$ and occurs free in $t$;}
 \item
 occurs free in an expression 
 \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)} if 
@@ -820,28 +936,28 @@ if it occurs free in $t$ or it occurs free in some $t_i$ ($1\le i\le n$) and
 does not occur in the corresponding $p_i$.
 \end{itemize}
 
-\noindent A parameter $u$:
-\begin{itemize}
-\item
-occurs free in the expression $u$;
-\item
-occurs free in an expression \expr{($e_1$ $\cdots$ $e_n$)}
-if $e_1$ is not \ter{par} and $u$ occurs free in some $e_i$ ($1\le i\le n$); 
-\item
-occurs free in an expression
-\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)}
-if it occurs free in $e$ and does not occur in \expr{($u_1$ $\cdots$ $u_n$)}.
-\end{itemize}
+%\noindent A parameter $u$:
+%\begin{itemize}
+%\item
+%occurs free in the expression $u$;
+%\item
+%occurs free in an expression \expr{($e_1$ $\cdots$ $e_n$)}
+%if $e_1$ is not \ter{par} and $u$ occurs free in some $e_i$ ($1\le i\le n$); 
+%%\item
+%%occurs free in an expression
+%%\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)}
+%%if it occurs free in $e$ and does not occur in \expr{($u_1$ $\cdots$ $u_n$)}.
+%\end{itemize}
 
 \noindent 
-Each non-free, or \define{bound}, occurrence of a variable in an expression
-has a \define{scope} defined as follows.
+Each non-free, or \define{bound}, occurrence of a variable 
+in an expression has a \define{scope} defined as follows.
 
 \begin{itemize}
 \item
 In an expression 
-\expr{($q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
-where $q$ is either \ter{forall} or \ter{exists}, 
+\expr{($Q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
+where $Q$ is either the binder \new{\ter{lambda}}, \ter{forall}, or \ter{exists}, 
 or in an expression \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)},
 the scope of each variable in $\{x_1, \ldots, x_n\}$ is the term $t$.
 \item
@@ -849,30 +965,52 @@ In an expression
 \expr{(match $t$ (($p_1$ $t_1$) $\cdots$ ($p_n$ $t_n$)))},
 the scope of each variable occurring in pattern $p_i$ is the corresponding term $t_i$
 ($1\le i\le n$).
-\item
-In an expression 
-\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)},
-the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
+%\item
+%In an expression 
+%\expr{(par ($u_1$ $\cdots$ $u_n$) $e$)},
+%the scope of each parameter in $\{u_1, \ldots, u_n\}$ is the expression $e$.
 \end{itemize}
+
+%CT REMOVED because incorrect.
+%\begin{newver}
+%\begin{remark}
+%  Since there are no binders for sort parameters in user-scripts,
+%  all occurrences of sort parameters in sort terms in user-scripts
+%  are free.\endnote{
+%    This effectively enforces a restriction to rank-1 polymorphism
+%    in the language.}
+%\end{remark}
+%\end{newver}
 
 \paragraph{Shadowing}
 All binders follow a lexical scoping discipline, 
 consistently with the semantics of the SMT-LIB logic,
 as described in Section~\ref{sec:models}.
-In particular, a bound variable or parameter will shadow any variable or user-defined 
+In particular, a bound variable will shadow any variable or user-defined 
 function symbol with the same name from an enclosing scope.
-For instance, in a function symbol declaration like
+For instance, in a term like
 %\begin{center}
-\expr{(par (Int) (f (Array Int Int) Int))},
+\expr{(forall ((a Int)) (> (+ a 1) 0))},
 %\end{center}
-all occurrences of \ter{Int} are sort parameters regardless of the existence
-of a previously defined sort symbol \ter{Int}.\endnote{
-This shadowing rule follows common lexical scoping conventions.
-It is easy to avoid declarations like \expr{(par (Int) (f (Array Int Int) Int))},
-which are potentially confusing to human readers,
-simply by a more judicious choice of parameter names.
-In patterns like \expr{(cons x nil)} are problematic 
-}
+variable \expr{a} would shadow any user-declared function symbol
+called \expr{a}.
+% Similarly, a parameter will shadow any user-defined 
+% sort symbol with the same name.
+% For instance, in a function symbol declaration like
+% %\begin{center}
+% \expr{(par (A) (f (Array A B) A))},
+% %\end{center}
+% all occurrences of \ter{A} are sort parameters regardless of the existence
+% of a previously user-declared sort symbol \ter{A}, whereas \ter{B} must
+% be either a user- or theory-declared sort symbol.\endnote{
+% This shadowing rule follows common lexical scoping conventions.
+% It is easy to avoid declarations like \expr{(par (A) (f (Array A B) A))},
+% which are potentially confusing to human readers if \ter{A}
+% is a user-declared sort symbol,
+% simply by a more judicious choice of parameter names.
+% %In patterns like \expr{(cons x nil)} are problematic 
+% }
+% PF Moved to where parametric symbols are declared.
 Similarly, in a \ter{match} pattern like \expr{(cons x nil)},
 the symbol \ter{nil} is a variable regardless of the existence 
 of a previously defined constructor symbol \ter{nil}.\footnote{%
@@ -881,20 +1019,20 @@ would be nested, which is not allowed.
 }
 
 \begin{remark}[No shadowing of theory symbols]
-One exception is that binders cannot shadow \define{theory function symbols},
-that is, function symbols from the declaration 
+One exception to the shadowing rule above is that binders cannot shadow \define{theory function or sort symbols},
+that is, function or sort symbols from the declaration 
 (see Section~\ref{sec:theory-declarations})
 of a theory included in the current logic
 (see Section~\ref{sec:logic-declarations} and Subsection~\ref{sec:restarting}).
-In other words, variables and parameters cannot have the same name 
-as a theory function symbol in the same scope.\endnote{
+In other words, variables cannot have the same name 
+as a function symbol declared in the current logic, and parameters
+cannot have the same name as a sort symbol declared in the current logic.\endnote{
 The reason for this exception is mostly historical. 
 Many SMT solvers apply this restriction, possibly under the assumption
 that shadowing a theory symbol is, more often than not, unintended and 
 so best treated as an error.
 }
 \end{remark}
-
 
 \subsection{Well-sortedness requirements} \label{well-sortedness}
 
@@ -908,7 +1046,7 @@ That is, function symbols with more than one possible output sort
 for the same sequence of input sorts (see Subsection~\ref{sec:signature}).
 }
 $f$ in a term \emph{must} occur as a qualified identifier of the form
-\expr{(as $f$ $\sigma$)} where $\sigma$ is the intended output sort
+\expr{(as $f$ $\tau$)} where $\tau$ is the intended output sort
 of that occurrence.\endnote{
 This restriction eliminates the need for a solver to do sort inference
 in order to determine the sorts of terms containing applications 
@@ -1033,7 +1171,7 @@ From Version 2.0 on,
 theory declarations may also declare entire families 
 of overloaded function symbols by using ranks that contain 
 \emph{sort parameters}, locally scoped sort symbols of arity 0. 
-This kind of parametricity entails that a theory declaration generally defines 
+This kind of polymorphism entails that a theory declaration generally defines 
 a whole \emph{class} of similar theories.
 
 The syntax of theory declarations, specified in Figure~\ref{fig:theory-decls},
@@ -1099,8 +1237,8 @@ each in the form of an \nter{attribute}.
 In this version, there are no predefined annotations for sort declarations.
 
 The value of a \attr{funs} attribute is a non-empty sequence
-of possibly parametric function symbol declarations \nter{par\_fun\_symbol\_decl}.
-A (non-parametric) function symbol declaration \nter{fun\_symbol\_decl}
+of possibly polymorphic function symbol declarations \nter{par\_fun\_symbol\_decl}.
+A (monomorphic) function symbol declaration \nter{fun\_symbol\_decl}
 of the form \expr{($c$ $\sigma$)},
 where $c$ is an element of \nter{spec\_constant},
 declares $c$ to have sort $\sigma$.
@@ -1112,24 +1250,47 @@ This is done for instance in the theory declaration in Figure~\ref{fig:Integers}
 The same can be done for the set of \nter{decimal} and \nter{string} constants
 by using \ter{DECIMAL} and \ter{STRING}, respectively. 
  
-A (non-parametric) function symbol declaration of the form
+A function symbol declaration of the form
 \begin{center}
 \expr{($f$ $\sigma_1\ \cdots\ \sigma_n$ $\sigma$)}
 \end{center}
-with $n \geq 0$ declares a function symbol $f$ with rank $\sigma_1\cdots\sigma_n\sigma$.
+with $n \geq 0$ declares a \define{monomorphic function symbol} $f$ with rank 
+$\sigma_1\cdots\sigma_n\sigma$
+provided that $\sigma$ and all $\sigma_i$'s are monomorphic sorts.
 
-A parametric function symbol declaration, which has the form,
+A function symbol declaration of the form,
 \begin{center}
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))}
 \end{center}
 with $k > 0$, $n \geq 0$ and $u_1, \ldots, u_k$ all distinct,
-declares a function symbol $f$ with parametric rank $\tau_1\cdots\tau_n\tau$.
-This effectively declares a whole class of function symbols, 
+declares a \define{polymorphic function symbol} $f$ with rank $\tau_1\cdots\tau_n\tau$
+provided that $\tau$ and all $\tau_i$'s are polymorphic sorts over 
+the parameters $u_1, \ldots, u_k$, where \ter{par} is a binder for
+these parameters.
+This effectively declares a \emph{class} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways each occurrence in $\tau_1\cdots\tau_n\tau$
-of the sort parameters $u_1,\ldots,u_k$ with non-parametric sorts.
+of the sort parameters $u_1,\ldots,u_k$ with monomorphic sorts.
 
-As with sorts, each (parametric) function symbol declaration 
+\begin{newver}
+Note that a parameter will shadow any sort symbol with the same name.
+For instance, in a function symbol declaration like
+%\begin{center}
+\expr{(par (A) (f (Array A B) A))},
+%\end{center}
+all occurrences of \ter{A} are sort parameters regardless of the existence
+of a previously declared sort symbol \ter{A}, whereas \ter{B} must
+be a previously declared sort symbol.\endnote{
+This shadowing rule follows common lexical scoping conventions.
+It is easy to avoid declarations like \expr{(par (A) (f (Array A B) A))},
+which are potentially confusing to human readers if \ter{A}
+is a sort symbol,
+simply by a more judicious choice of parameter names.
+%In patterns like \expr{(cons x nil)} are problematic 
+}
+\end{newver}
+
+As with sorts, each function symbol declaration 
 may additionally contain zero or more annotations $\alpha_1, \ldots, \alpha_n$,
 each in the form of an \nter{attribute}.
 In this version, there are only 4 predefined function symbol annotations,
@@ -1249,7 +1410,7 @@ seems enough.
 }
 For some theories, 
 a mix of formal notation and natural language might be more appropriate.
-In the presence of parametric function symbol declarations,
+In the presence of polymorphic function symbol declarations,
 the definition must also specify the meaning of each instance of the
 declared symbol.\endnote{
 Version 1.2 allowed one to specify a finitely-axiomatizable theory formally
@@ -1315,7 +1476,7 @@ and any number of occurrences of other attributes.
 \item
 Each sort symbol used in a \attr{funs} attribute is 
 previously declared in some \attr{sorts} attribute.
-In each parametric function symbol declaration
+In each polymorphic function symbol declaration
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))},
 any symbol other than $f$ that is not a previously declared sort symbol
 must be one of the sort parameters $u_1, \ldots, u_k$. 
@@ -1346,153 +1507,51 @@ such a theory would not be not very interesting).
 
 \subsubsection*{Core theory}
 
-\begin{figure}[t]
-\small
-{\color{NavyBlue}
-\begin{verbatim}
-(theory Core
-
- :sorts ( (Bool 0) )
-
- :funs ( (true Bool)  (false Bool)  (not Bool Bool)
-         (=> Bool Bool Bool :right-assoc)  (and Bool Bool Bool :left-assoc)
-         (or Bool Bool Bool :left-assoc)  (xor Bool Bool Bool :left-assoc)
-         (par (A) (= A A Bool :chainable))
-         (par (A) (distinct A A Bool :pairwise))
-         (par (A) (ite Bool A A A)) )
-
- :definition
- "For every expanded signature Sigma, the instance of Core with that signature
-  is the theory consisting of all Sigma-models in which: 
-  - the sort Bool denotes the set {true, false} of Boolean values;
-  - for all sorts s in Sigma, 
-    - (= s s Bool) denotes the function that
-      returns true iff its two arguments are identical;
-    - (distinct s s Bool) denotes the function that
-      returns true iff its two arguments are not identical;
-    - (ite Bool s s) denotes the function that
-      returns its second argument or its third depending on whether 
-      its first argument is true or not;
-  - the other function symbols of Core denote the standard Boolean operators
-    as expected."
-  
-  :values "The set of values for the sort Bool is {true, false}." 
-)
-\end{verbatim}
-}%
-\caption{The \ter{Core} theory declaration.}
-\label{fig:Core}
-\end{figure}
-
-
-\begin{figure}[t]
-\small
-{\color{NavyBlue}
-\begin{verbatim}
-(theory Ints
- :sorts ( (Int 0) )
- :funs ( (NUMERAL Int) 
-         (- Int Int)                 ; negation
-         (- Int Int Int :left-assoc) ; subtraction
-         (+ Int Int Int :left-assoc) 
-         (* Int Int Int :left-assoc)
-         (<= Int Int Bool :chainable)
-         (<  Int Int Bool :chainable)
-         (>= Int Int Bool :chainable)
-         (>  Int Int Bool :chainable) )
- :definition 
- "For every expanded signature Sigma, the instance of Ints with that
-  signature is the theory consisting of all Sigma-models that interpret 
-  - the sort Int as the set of all integers,
-  - the function symbols of Ints as expected. "
- :values 
- "The Int values are all the numerals and all the terms of the form (- n)
-  where n is a non-zero numeral." 
-)
-\end{verbatim}
-}
-\caption{A possible theory declaration for the integer numbers.}
-\label{fig:Integers}
-\end{figure}
-
-
 To provide the usual set of Boolean connectives for building formulas,
 in addition to the predefined logical symbol \ter{distinct},
 a basic core theory is implicitly included in every other SMT-LIB theory.
-%\endnote{
-%The theory declaration \ter{Empty} in Version 1.2 of SMT-LIB is 
-%superseded by the \ter{Core} theory declaration schema.
-%}
-Concretely, every theory declaration is assumed to contain implicitly
-the \attr{sorts} and \attr{funs} attributes of the \ter{Core} theory declaration
-shown in Figure~\ref{fig:Core},
-and to define the symbols in those attributes in the same way as in \ter{Core}.
-
-Note the absence of a symbol for double implication.
-Such a connective is superfluous 
-because the equality symbol \ter{=} can be used in its place. 
-Note how the attributes specified in the declarations of the various symbols
-of this theory allow one, for instance, to write expressions like 
-
-\begin{itemize} \setlength\itemsep{0ex}
-\item[] \expr{(=> x y z)}
-\item[] \expr{(and x y z)}
-\item[] \expr{(= x y z)}
-\item[] \expr{(distinct x y z)}
-\end{itemize}
-
-\noindent respectively as abbreviations for the terms
-
-\begin{itemize} \setlength\itemsep{0ex}
-\item[] \expr{(=> x (=> y z))}
-\item[] \expr{(and (and x y) z)}
-\item[] \expr{(and (= x y) (= y z))}
-\item[] \expr{(and (distinct x y) (distinct x z) (distinct y z))} .
-\end{itemize}
-
-The simplest instance of \ter{Core} is the theory with no additional sort
-and function symbols.
-In that theory, there is only one sort, \ter{Bool},
-and \ter{ite} has only one rank, \expr{(ite Bool Bool Bool Bool)}.
-%\footnote{%
-%That \ter{ite} operator plays the role of the \ter{if\_then\_else} connective in Version 1.2.
-%}
-In other words, this is just the theory of the Booleans with the standard Boolean operators
-plus \ter{ite} and \ter{distinct}.
-The set of values for the \ter{Bool} sort is, predictably, $\{\ter{true},\ter{false}\}$.
-
-Another instance has a single additional sort symbol \ter{U}, say, 
-of arity 0, and a (possibly infinite) set number of function symbols 
-with rank in \ter{U}$\!^+$.
-This theory corresponds to \emph{EUF}, 
-the (one-sorted) theory of equality and \emph{uninterpreted functions}
-(over those function symbols).
-In this theory, \ter{ite} has two ranks:
-\expr{(ite Bool Bool Bool Bool)} and \expr{(ite Bool U U U)}.
-A many-sorted version of EUF is obtained by instantiating \ter{Core}
-with more than one nullary sort symbol---and possibly additional
-function symbols over the resulting sort set. 
-
-Yet another instance is the theory with an additional unary sort symbol \ter{List}
-and an additional number of function symbols.
-This theory has infinitely many sorts:
-\ter{Bool}, \ter{(List Bool)},  \ter{(List (List Bool))}, etc.
-However, by the definition of \ter{Core},
-all those sorts and function symbols are still ``uninterpreted'' in the theory.
-In essence, 
-this theory is the same as a many-sorted version of EUF with infinitely many sorts.
-While not very interesting in isolation,
-the theory is useful in combination with a theory of lists that,
-for each sort $\sigma$, 
-interprets \expr{(List $\sigma$)} as the set of all lists over $\sigma$.
-The combined theory in that case is a theory of lists with uninterpreted
-functions.
+Concretely, every theory declaration is assumed 
+to contain implicitly the \attr{sorts} and \attr{funs} attributes 
+of the \ter{Core} theory declaration and 
+to define the symbols in those attributes in the same way as in \ter{Core}.
+The full Core theory definition is shown in Figure~\ref{fig:Core}.
+A more detailed description of this theory is provided in Section~\ref{sec:core}.
 
 
 %-------------------------------------------------------------------------------
 \subsubsection*{Integers}
 %-------------------------------------------------------------------------------
 
+\begin{figure}[t]
+  \small
+  {\color{NavyBlue}
+  \begin{verbatim}
+  (theory Ints
+   :sorts ( (Int 0) )
+   :funs ( (NUMERAL Int) 
+           (- Int Int)                 ; negation
+           (- Int Int Int :left-assoc) ; subtraction
+           (+ Int Int Int :left-assoc) 
+           (* Int Int Int :left-assoc)
+           (<= Int Int Bool :chainable)
+           (<  Int Int Bool :chainable)
+           (>= Int Int Bool :chainable)
+           (>  Int Int Bool :chainable) )
+   :definition 
+   "For every expanded signature Sigma, the instance of Ints with that
+    signature is the theory consisting of all Sigma-models that interpret 
+    - the sort Int as the set of all integers,
+    - the function symbols of Ints as expected. "
+   :values 
+   "The Int values are all the numerals and all the terms of the form (- n)
+    where n is a non-zero numeral." 
+  )
+  \end{verbatim}
+  }
+  \caption{A possible theory declaration for the integer numbers.}
+  \label{fig:Integers}
+\end{figure}
+  
 The theory declaration of Figure~\ref{fig:Integers} defines all theories
 that extend the standard theory of the (mathematical) integers with additional 
 \emph{uninterpreted} sort and function symbols.\footnote{%
@@ -1682,7 +1741,7 @@ by the constant \ter{univSet} of (the powerset) sort \expr{(Set $\sigma$)}.
 
 
 \smallskip
-\begin{remark}[Instances of parametric sorts]
+\begin{remark}[Instances of polymorphic sorts]
 For some applications, 
 the instantiation mechanism defined here for theory declarations
 will definitely over-generate.
@@ -1690,19 +1749,270 @@ For instance, it is not possible to define by instantiation of
 the \ter{ArraysEx} declaration 
 a theory of just the arrays of sort \expr{(Array Int Real)},
 without all the other nested array sorts over $\{\ter{Int},\, \ter{Real}\}$.
-This, however, is a problem neither in theory nor in practice. 
-It is not a problem in practice because,
-since a script can only use formulas with non-parametric sorts,\footnote{%
-Note that sort parameters cannot occur in a formula.
-}
-any sorts that are not used in a script are, for practical purposes,
-irrelevant. 
-It is not a problem in theory either 
+This, however, is not a problem
 because scripts refer to logics, not directly to theories.
 And the language of a logic can be always restricted to contain only
 a selected subset of the sorts in the logic's theory.
 \end{remark}
 
+
+\section{Core Theory}
+\label{sec:core}
+
+
+\begin{figure}[t]
+\small
+{\color{NavyBlue}
+\begin{verbatim}
+(theory Core
+
+ :sorts ( (Bool 0) )
+
+ :funs ( (true Bool)  (false Bool)  (not Bool Bool)
+         (=> Bool Bool Bool :right-assoc)  (and Bool Bool Bool :left-assoc)
+         (or Bool Bool Bool :left-assoc)  (xor Bool Bool Bool :left-assoc)
+         (par (A) (= A A Bool :chainable))
+         (par (A) (distinct A A Bool :pairwise))
+         (par (A) (ite Bool A A A)) )
+
+ :definition
+ "For every expanded signature Sigma, the instance of Core with that signature
+  is the theory consisting of all Sigma-models in which: 
+  - the sort Bool denotes the set {true, false} of Boolean values;
+  - for all sorts s in Sigma, 
+    - (= s s Bool) denotes the function that
+      returns true iff its two arguments are identical;
+    - (distinct s s Bool) denotes the function that
+      returns true iff its two arguments are not identical;
+    - (ite Bool s s) denotes the function that
+      returns its second argument or its third depending on whether 
+      its first argument is true or not;
+  - the other function symbols of Core denote the standard Boolean operators
+    as expected."
+  
+  :values "The set of values for the sort Bool is {true, false}." 
+)
+\end{verbatim}
+}%
+\caption{The \ter{Core} theory declaration.}
+\label{fig:Core}
+\end{figure}
+
+The core theory is a subtheory of all SMT-LIB theories.
+It introduces the basis sort and function symbols of the underlying logic,
+which are then automatically available in all theories.
+It provides the standard \ter{Bool} sort for Boolean values.
+The theory also provides the usual set of Boolean connectives for building formulas,
+as well polymorphic function symbols for equality (\ter{=}), disequality (\ter{distinct}), and
+if-then-else (\ter{ite}).
+Every theory declaration is assumed 
+to contain implicitly the \attr{sorts} and \attr{funs} attributes 
+of the \ter{Core} theory declaration and 
+to define the symbols in those attributes in the same way as in \ter{Core}.
+
+
+
+
+Note the absence of a symbol for double implication.
+Such a connective is superfluous 
+because the equality symbol \ter{=} can be used in its place. 
+Note how the attributes specified in the declarations of the various symbols
+of this theory allow one, for instance, to write expressions like 
+
+\begin{center}
+\expr{(=> x y z)}
+\qquad \expr{(and x y z)}
+\qquad \expr{(= x y z)} \\
+\expr{(distinct x y z)}
+\end{center}
+
+\noindent respectively as abbreviations for the terms
+
+\begin{center}
+\expr{(=> x (=> y z))}
+\qquad \expr{(and (and x y) z)}
+\qquad \expr{(and (= x y) (= y z))} \\
+\qquad \expr{(and (distinct x y) (distinct x z) (distinct y z))} .
+\end{center}
+
+
+The simplest instance of \ter{Core} is the theory with no additional sort
+and function symbols.
+In that theory, there is only one sort, \ter{Bool},
+and \ter{ite} has only one rank, \expr{(ite Bool Bool Bool Bool)}.
+%\footnote{%
+%That \ter{ite} operator plays the role of the \ter{if\_then\_else} connective in Version 1.2.
+%}
+In other words, this is just the theory of the Booleans with the standard Boolean operators
+plus \ter{ite} and \ter{distinct}.
+The set of values for the \ter{Bool} sort is, predictably, $\{\ter{true},\ter{false}\}$.
+
+Another instance has a single additional sort symbol \ter{U}, say, 
+of arity 0, and a (possibly infinite) set of function symbols 
+with rank in \ter{U}$\!^+$.
+This theory corresponds to \emph{EUF}, 
+the (one-sorted) theory of equality and \emph{uninterpreted functions}
+(over those function symbols).
+In this theory, \ter{ite} has two ranks:
+\expr{(ite Bool Bool Bool Bool)} and \expr{(ite Bool U U U)}.
+A many-sorted version of EUF is obtained by instantiating \ter{Core}
+with more than one nullary sort symbol---and possibly additional
+function symbols over the resulting sort set. 
+
+Yet another instance is the theory with an additional unary sort symbol \ter{List}
+and an additional number of function symbols.
+This theory has infinitely many sorts:
+\ter{Bool}, \ter{(List Bool)},  \ter{(List (List Bool))}, etc.
+However, by the definition of \ter{Core},
+all those sorts and function symbols are still ``uninterpreted'' in the theory.
+In essence, 
+this theory is the same as a many-sorted version of EUF with infinitely many sorts.
+While not very interesting in isolation,
+the theory is useful in combination with a theory of lists that,
+for each sort $\sigma$, 
+interprets \expr{(List $\sigma$)} as the set of all lists over $\sigma$.
+The combined theory in that case is a theory of lists with uninterpreted
+functions.
+
+\begin{newver} 
+
+%-------------------------------------------------------------------------------
+\section{Higher-order Core Theory}
+\label{sec:ho-core}
+%-------------------------------------------------------------------------------
+
+\begin{figure}[t]
+  \small
+  {\color{NavyBlue}
+  \begin{verbatim}
+  (theory HO-Core
+  
+   :sorts ( (-> 2 :right-assoc) )
+  
+   :funs ( (par (A B) (_ (-> A B :left-assoc) A B) ) )
+  
+   :definition
+   "For every expanded signature Sigma, the instance of HO-Core with that signature
+    is the theory consisting of all Sigma-models in which: 
+    - the sort constructor -> denotes the function space constructor;
+    - for all sorts s1, s2 in Sigma, 
+      - (_ (-> s1 s2) s1 s2) denotes the function that
+        returns the result of applying its first argument to its second."
+    
+   :values 
+   "For all sorts s1, s2, the set of values for the sort (-> s1 s2) consists of
+    - an abstract value for each function (from a countable subset of the functions)
+      of type s1 -> s2;
+    - terms of the form (lambda ((x s1)) t) where t has sort s2 when every
+      free occurrence of x in t has sort s1.
+   " 
+  )
+  \end{verbatim}
+  }%
+  \caption{The \ter{HO-Core} theory declaration.}
+  \label{fig:HO-Core}
+  \end{figure}
+  
+
+%
+% The full language of the theory \ter{SetsRelations} 
+% from Figure~\ref{fig:SetsRelations} has the same expressive power as
+% higher-order logic or, more precisely, higher-order simple predicate logic
+% with primitive types.\footnote{%
+% This is a relational version of higher-order logic, as opposed 
+% to the functional versions that are more popular in computer science. 
+% }
+% Higher-order quantification is realized by first-order quantification 
+% over sorts of the form \expr{(Set $\sigma$)}.
+% Similarly, higher-order predicate symbols can be encoded 
+% as unary first-order predicate symbols over sets.
+% In fact, because of the presence of the predicate symbol \ter{in}, 
+% no additional predicate symbols at all are needed:
+% every atomic formula of the form \expr{($p$ $t$)} 
+% can be replaced by the formula \expr{(in $t$ $p'$)}
+% where $p'$ is a constant symbol of sort 
+% \expr{(Set (Prod $\sigma_1$ $\cdots$ $\sigma_n$))}
+% if $p$ has rank \expr{((Prod $\sigma_1$ $\cdots$ $\sigma_n$) Bool)}, 
+% and of sort \expr{(Set $\sigma$)}
+% if $p$ has rank \expr{($\sigma$ Bool)}.
+
+% %-------------------------------------------------------------------------------
+% \subsubsection*{Monadic second-order logic}
+% %-------------------------------------------------------------------------------
+% This logic can be obtained by imposing restrictions on the language
+% of the \ter{SetsRelations} theory mentioned above, specifically, 
+% by disallowing the use of terms of \ter{Prod} sorts (monadic restriction) or
+% nested \ter{Set} sorts (second-order restriction) 
+% while, however, allowing additional function and predicate symbols.
+
+This version of SMT-LIB adds support for higher-order logic through the addition
+of a new theory, HO-Core, shown in Figure~\ref{fig:HO-Core}.
+The theory includes a binary sort constructor \ter{->} for sorts 
+that denote function spaces 
+(for example \expr{(-> Int Real)} for the sort of functions from \ter{Int} to \ter{Real})
+and an explicit function application operator \ter{\_}.
+
+Note that, with this addition, the language distinguishes 
+between \emph{functions} of rank $\tau_1\tau_2$
+and \emph{constants} or variables of sort \expr{(-> $\tau_1$ $\tau_2$)}.
+For instance, the latter can be passed as an argument to other functions 
+as any other datatype but the former cannot.\endnote{%
+\new{This difference will disappear in the planned Version 3 of the standard
+whose underlying logic will change from many-sorted logic 
+to a version of higher-order logic with dependent types.}
+}
+This is no real limitation because it is possible to convert from one to the other
+thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
+For instance, if \ter{f} is a function symbol of rank $\tau_1\tau_2$,
+one can define a corresponding higher-order constant with the command 
+(see~\ref{sec:new-symbols}) 
+\begin{center}
+\expr{(define-const c\_f (lambda ((x $\tau_1$)) (f x)))} .
+\end{center}
+%
+Conversely, if \ter{c} is a constant of sort \expr{(-> $\tau_1$ $\tau_2$)}
+the corresponding function can be defined by the command 
+\begin{center}
+\expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (\_ c x))} .
+\end{center}
+
+The \ter{->} sort constructor is defined as right-associative, 
+allowing for instance the syntax
+\expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)} to be used in place of the syntax
+\expr{(-> $\tau_1$ (-> $\tau_2$ $\tau_3$))}.
+Correspondingly, the application operator \ter{\_} is defined as left-associative, 
+allowing the syntax
+\expr{(\_ $t_1$ $t_2$ $t_3$)} to be used in place of the syntax
+\expr{(\_ (\_ $t_1$ $t_2$) $t_3$)}.
+Note that this also allows the \emph{partial} application \expr{(\_ g t)} 
+of a constant \ter{g} of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
+which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
+
+As an additional simplification, which does not introduce ambiguities,  
+it is possible to omit the \ter{\_} symbol altogether in applications and write
+\expr{(g t)} instead of \expr{(\_ g t)}.
+
+\begin{remark}
+Note that the SMT-LIB logic remains first-order in syntax:
+it is not possible to have a function symbol $g$ of rank $\tau_1 \cdots \tau_n$
+(with $n > 1$) as an argument to another function, as in \expr{(f g)}.
+The function $g$ has to be encapsulated into a $\lambda$-abstraction first.
+For instance, 
+if \ter{f} is a function symbol of rank \expr{(-> $\tau_1$ $\tau_2$)\,$\tau$} and
+$g$ is a function symbol of rank $\tau_1 \tau_2$,
+then the term  \expr{(f (lambda ((x $\tau_1$)) (g x)))} is well sorted, 
+and has sort $\tau$.
+
+Similarly, it is not possible to return a function of rank $\tau_1 \cdots \tau_n$
+(with $n > 1$) from another function but it is possible to return
+a constant of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.\endnote{\new{
+The difference between function symbols and constants of \ter{->} sorts
+will disappear in Version 3 where, in current terms, 
+there will be no function symbols but only constant symbols,
+possibly of sort \expr{(-> $\tau_1$ $\tau_2$)}.
+}}
+\end{remark}
+\end{newver} 
 
 
 %-------------------------------------------------------------------------------
@@ -1885,41 +2195,6 @@ for some numeral $n$,
 both of which abbreviate the expression \expr{(- (* $n$ $t$))}.
 
 
-%-------------------------------------------------------------------------------
-\subsubsection*{Higher-order logic}
-%-------------------------------------------------------------------------------
-%
-The full language of the theory \ter{SetsRelations} 
-from Figure~\ref{fig:SetsRelations} has the same expressive power as
-higher-order logic or, more precisely, higher-order simple predicate logic
-with primitive types.\footnote{%
-This is a relational version of higher-order logic, as opposed 
-to the functional versions that are more popular in computer science. 
-}
-Higher-order quantification is realized by first-order quantification 
-over sorts of the form \expr{(Set $\sigma$)}.
-Similarly, higher-order predicate symbols can be encoded 
-as unary first-order predicate symbols over sets.
-In fact, because of the presence of the predicate symbol \ter{in}, 
-no additional predicate symbols at all are needed:
-every atomic formula of the form \expr{($p$ $t$)} 
-can be replaced by the formula \expr{(in $t$ $p'$)}
-where $p'$ is a constant symbol of sort 
-\expr{(Set (Prod $\sigma_1$ $\cdots$ $\sigma_n$))}
-if $p$ has rank \expr{((Prod $\sigma_1$ $\cdots$ $\sigma_n$) Bool)}, 
-and of sort \expr{(Set $\sigma$)}
-if $p$ has rank \expr{($\sigma$ Bool)}.
-
-%-------------------------------------------------------------------------------
-\subsubsection*{Monadic second-order logic}
-%-------------------------------------------------------------------------------
-This logic can be obtained by imposing restrictions on the language
-of the \ter{SetsRelations} theory mentioned above, specifically, 
-by disallowing the use of terms of \ter{Prod} sorts (monadic restriction) or
-nested \ter{Set} sorts (second-order restriction) 
-while, however, allowing additional function and predicate symbols.
-
-
 
 \begin{figure}%[t]
 \small
@@ -2093,7 +2368,7 @@ for the following commands:
 (set-option :print-success true)
 ; success
 
-(set-info :smt-lib-version 2.6)
+(set-info :smt-lib-version 2.7)
 ; success
 
 (set-logic QF_LIA)
@@ -2151,7 +2426,7 @@ for the following commands:
 \footnotesize
 \begin{minipage}[t]{.45\linewidth}
 \begin{verbatim}
-(set-info :smt-lib-version 2.6)
+(set-info :smt-lib-version 2.7)
 ...
 (set-option :produce-models true)
 
