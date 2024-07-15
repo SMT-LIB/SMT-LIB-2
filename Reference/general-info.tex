@@ -25,7 +25,7 @@ Previous knowledge of Version 1.2 of the SMT-LIB standard~\cite{RanTin-RR-06}
 is not necessary.\footnote{%
 Version 2 and its subversions,
 while largely based on Version 1.2, 
-is \emph{not} backward compatible with it.
+are \emph{not} backward compatible with it.
 See the Version 2.0 document~\cite{BarST-RR-10} for a summary of the major differences.
 }
 
@@ -72,11 +72,11 @@ sort parameters, which can be used to assert formulas with terms
 of polymorphic sort in scripts.
 Semantically, the sort parameters are treated as implicitly universally quantified 
 sort variables in each asserted formula.
-This has the effect to allowing prenex (or rank-1) polymorphism in assertions 
+This has the effect of allowing prenex (or rank-1) polymorphism in assertions 
 but not more general forms of polymorphism.
 
 The term language is extended with a $\lambda$ binder to construct 
-function abstractions, and a symbol for function application, \ter{\_},
+function abstractions and a symbol for function application, \ter{\_},
 intentionally equal to that for the construction of indexed symbols 
 in Version 2.6.
 The semantics of the $\lambda$ binder and the application symbol are provided
@@ -90,7 +90,7 @@ keeping the underlying logic of Version 2.7 first order.\footnote{%
 This identification will occur in Version 3, which will be based 
 on higher-order logic.
 }
-Consistently with this extension, the command language is extended 
+Consistent with this extension, the command language is extended 
 with the constant definition command \ter{define-const}, 
 which can be used in particular to define constants 
 of sort \expr{(-> $\tau_1$ $\tau_2$)}.
@@ -180,7 +180,7 @@ First release of Version 2.5.
 Version 2.5 is an extension of Version 2.0 and, with two minor exceptions,
 is fully backward compatible with it.
 There is then no need to have separate support for 2.0 
-if one supports Version 2.6.
+if one supports Version 2.5.
 The following list summarizes notable differences and extensions.
 The first two items are the only non-backward compatible changes.
 
