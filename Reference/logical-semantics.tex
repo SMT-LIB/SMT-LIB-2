@@ -21,10 +21,10 @@ as well as, starting with Version 2.7, the use of functions as first-class value
 The latter is achieved by the addition of a background theory 
 of (higher-order) functions,
 which are modeled in the concrete syntax 
-as values of sort \expr{(-> $\tau_1$ $\tau_2$)},
-which are constructible with a $\lambda$-abstraction binder.
+as values of sort \expr{(-> $\tau_1$ $\tau_2$)}
+and are constructible with a $\lambda$-abstraction binder.
 New to Version 2.7 is also the addition of prenex polymorphism in user-scripts,
-achieved through the declaration of sort parameters which can then 
+achieved through the declaration of sort parameters, which can then 
 be used to make assertions containing terms of polymorphic sort.
 \end{newver}
 
@@ -33,8 +33,8 @@ logical language.
 However, while not exactly syntactic sugar, they do not change the essence 
 of SMT-LIB logic with respect to traditional many-sorted FOL.
 Quantifiers are still first-order, the sort structure is flat (no subsorts),
-the logic's type system has no function types, 
-no type quantifiers, no dependent types,
+and the logic's type system has no function types, 
+no type quantifiers, no dependent types, and
 no provisions for subsort polymorphism.
 %%CT
 %Removed because redundant with what is above now.
@@ -50,7 +50,7 @@ As a consequence, all the classical meta-theoretic results from many-sorted
 FOL apply to SMT-LIB logic when considered in its full generality, that is,
 with no restrictions on the possible models other than those imposed 
 by the \akey{Core} \new{and the \akey{HO-Core} background theories introduced 
-in Section~\ref{sec:core} and~\ref{sec:ho-core}}.
+in Sections~\ref{sec:core} and~\ref{sec:ho-core}}.
 Those results still hold with \define{recursively axiomatizable} 
 background theories, i.e., theories defined as the set of all models
 of a recursive set of closed first-order formulas (or \define{axioms}).
@@ -60,14 +60,14 @@ of a recursive set of closed first-order formulas (or \define{axioms}).
 % However, a formal treatment of this aspect is beyond the scope of this document.
 \medskip
 
-To define SMT-LIB logic and its semantics it is convenient to work 
+To define SMT-LIB logic and its semantics, it is convenient to work 
 with a more abstract syntax than the concrete S-expression-based syntax 
 of the SMT-LIB language.
 The formal semantics of concrete SMT-LIB expressions is then given by means 
 of a translation into this abstract syntax.
 A formal definition of this translation might be provided in later releases 
 of this document.
-Until then, we will appeal to the reader's intuition and on the fact that 
+Until then, we will appeal to the reader's intuition and rely on the fact that 
 the translation is defined as one would expect.
 
 The translation also maps concrete predefined symbols and keywords
@@ -110,7 +110,7 @@ containing the symbols $\eqs$, $\land$, and $\lnot$,
 the set $\st$ of \define{Unicode character strings} $w$,
 
 \item
-a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$.
+a two-element set $\bo = \{\true, \false\}$ of \define{Boolean values} $b$,
 
 \item
 the set $\na$ of \define{natural numbers} $n$,
@@ -163,7 +163,7 @@ We say that $s \in S$ has (or is of) \define{arity} $n$
 if $\ar(s) = n$.
 \begin{newver}
 A sort is \emph{polymorphic} 
-if it contains a sort parameter, it is \emph{monomorphic} otherwise.
+if it contains a sort parameter; it is \emph{monomorphic} otherwise.
 \end{newver}
 \qed
 \end{definition}
@@ -184,8 +184,8 @@ constructor for function sorts $\fconstruct$ as
 an infix, right-associative operator to improve readability.
 
 Note that function symbol declarations in theory declarations (defined later)
-use also polymorphic sorts.
-Similarly to the example above,
+also use polymorphic sorts.
+Similar to the example above,
 if $u_1, u_2$ are parameters, that is, elements of $\sop$,
 the expression
 \[
@@ -512,7 +512,7 @@ The rank of a function symbol in a signature specifies, in order,
 the expected sort of the symbol's arguments and result.
 Note that it is possible for a function symbol
 to be \define{overloaded}\index{overloaded function symbol} in a signature $\Sigma$
-by being associated to more than one rank in $\Sigma$.
+by being associated with more than one rank in $\Sigma$.
 This form of \emph{ad-hoc polymorphism} is entirely unrestricted: 
 a function symbol can have completely different ranks---even varying in arity. 
 For example,
@@ -552,14 +552,14 @@ $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 
 A function symbol $f$ can be \define{ambiguous}\index{ambiguous symbol}
 in an SMT-LIB signature $\Sigma$.
-That is the case if $f:\overline{\tau}\tau_1 \in \Sigma$ and $f:\overline{\tau}\tau_2 \in \Sigma$ 
+That is the case if $f:\overline{\tau}\tau_1 \in \Sigma$ and $f:\overline{\tau}\tau_2 \in \Sigma$, 
 where $\tau_1$ and $\tau_2$ are different sorts.
 Thanks to the requirement in Definition~\ref{def:signature} that
 variables have exactly one sort in a signature,
 in signatures with no ambiguous function symbols
 every term can have at most one sort.
 In contrast,
-with an ambiguous symbol like $f$ above
+with an ambiguous symbol like $f$ above,
 a term of the form $f\, \bar{t}$,
 where the terms $\bar t$ have sorts $\overline \tau$, can be given 
 a unique sort only if $f$ is annotated with one of the result sorts $\tau_1, \tau_2$,
@@ -617,7 +617,7 @@ denotes the signature
 that maps $x_i$ to sort $\tau_i$ for $i=1,\ldots,n$, and 
 coincides otherwise with $\Sigma$.
 %%PF Finally, $\alpha^*$ denotes a possibly empty sequence of attributes.
-The rules operate over \define{sorting judgments}
+The rules operate over \define{sorting judgments},
 which are triples of the form $\Sigma \vdash t : \tau$.
 
 \begin{definition}[Well-sorted Terms]
@@ -651,7 +651,7 @@ most one sort in a given signature $\Sigma$.\endnote{
 }
 \begin{newver}
 This means that we can define a total function $\tsort$ that associates 
-to each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
+with each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
 We can also define a function $\pars$ that associates to each well-sorted term $t$
 the set $\pars(t, \Sigma)$ of all parameters that occur in its sort or in that 
 of one of its subterms.
@@ -769,7 +769,7 @@ where the two sorts do have disjoint domains.
 }
 
 \item associates
-an element $(f{:}\sigma)^{\str A}$ of the set $\sigma^{\str A}$ to
+an element $(f{:}\sigma)^{\str A}$ of the set $\sigma^{\str A}$ with
 each (ranked function symbol) $f{:}\sigma \in \Sigma$,
 where $\sigma$ is a monomorphic sort;
 
@@ -777,7 +777,7 @@ where $\sigma$ is a monomorphic sort;
 a total function 
 $(f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}$ 
 from $\sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A}$ to
-$\sigma^{\str A}$ to each function symbol $f{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n > 0$,
+$\sigma^{\str A}$ with each function symbol $f{:}\sigma_1\cdots\sigma_n\sigma \in \Sigma$ with $n > 0$,
 where $\sigma_1, \ldots, \sigma_n, \sigma$ are monomorphic sorts.
 \end{itemize}
 
@@ -1314,13 +1314,14 @@ An abstract syntax of theory declarations is defined in
 Figure~\ref{fig:theory-declaration}.
 \begin{newver}
 The concrete syntax allows for further
-theory attributes, and sort and function declaration can also have
-attributes.  Since they have no logical meaning, similarly to term attributes,
+theory attributes, and sort and function declarations can also have
+attributes.  Since they have no logical meaning, similar to term attributes,
 these are simplified away in the abstract syntax.  Note that function symbol
 declarations define polymorphic functions
 when $\tau$ contains sort parameters.\footnote{%
 Recall that sort parameters are introduced
 in the concrete syntax with the binder \ter{par}.
+\cbrem{or with the declare-sort-parameter command?}
 }
 \end{newver}
 

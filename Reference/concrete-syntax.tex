@@ -406,7 +406,7 @@ indexed identifiers are defined more systematically
 as the application of the reserved word \verb+_+
 to a symbol and one or more \emph{indices}.
 Indices can be numerals or symbols.\endnote{
-Symbols have been added as indices in Version 2.6 for increased flexibility.
+Symbols were added as indices in Version 2.6 for increased flexibility.
 }
 \bigskip
 
@@ -436,7 +436,7 @@ in Section~\ref{sec:concrete-terms}.
 Similarly, sort variables can shadow user sort symbols,
 as described in Section~\ref{sec:new-symbols}.
 \end{remark}
-
+\cbrem{We haven't introduced the notion of a sort variable yet.}
 
 %-------------------------------------------------------------------------------
 \section{Attributes}
@@ -507,15 +507,16 @@ and \ter{Int} and \ter{Array} are sort symbols,
 then \ter{(Array Int Int)} is a monomorphic sort 
 while \ter{(Array Int Y)}, \ter{(Array X Int)}, and \ter{(Array X Y)} are
 all polymorphic sorts.
-Note that we treat monomorphic sorts as a special case of polymorphic ones,
-hence \ter{(Array Int Int)} is also a (trivially) polymorphic sort.
+Note that we treat monomorphic sorts as a special case of polymorphic ones;
+hence, \ter{(Array Int Int)} is also a (trivially) polymorphic sort.
 Contextual information is needed in general to know whether a particular symbol
 occurring in a sort is a sort parameter or not.
-Local sort parameter are introduced by a specific binder, \ter{par}.
-Global sort parameters are declared in a script by a specific command.
+Local sort parameters are introduced by a specific binder, \ter{par}.
+Global sort parameters are declared in a script by the command \ter{declare-sort-parameter}
+(see Section~\ref{sec:new-symbols}).
 
-We will say just \emph{sort} to mean a polymorphic sort, and 
-say instead \emph{monomorphic sort} when we want to emphasize 
+We will write just \emph{sort} to mean a polymorphic sort, and 
+write instead \emph{monomorphic sort} when we want to emphasize 
 that the sort has no parameters. 
 We will use $\sigma$ to denote monomorphic sorts and 
 $\tau$ to denote, more generally, polymorphic sorts.
@@ -526,7 +527,7 @@ $\tau$ to denote, more generally, polymorphic sorts.
 Each function symbol in an SMT-LIB script is associated with one or more 
 \define{ranks}, non-empty sequences of sorts.
 Intuitively, a function symbol $f$ with rank $\sigma_1\cdots\sigma_n\sigma$,
-(with sorts being monomorphic),
+(with monomorphic sorts),
 denotes a function that takes as input $n$ values of respective sorts
 $\sigma_1, \ldots, \sigma_n$,
 and returns a value of sort $\sigma$.
@@ -549,7 +550,7 @@ constant symbols in the \nter{spec\_constant} category
 \define{variables}, 
 \define{function symbols}, 
 four kinds of \define{binders} 
-(introduced by the reserved words \new{\ter{lambda},} \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
+(introduced by the reserved words \ter{\new{lambda}}, \ter{let}, \ter{forall}, \ter{exists}, and \ter{match}),
 and an annotation operator: the reserved word \ter{!}.
 In its simplest form, a term is 
 a special constant symbol,
@@ -565,7 +566,7 @@ As a consequence, contextual information is needed during parsing
 to know whether an identifier is to be treated as a variable or 
 a function symbol. 
 For variables, this information is provided by the binders 
-\ter{let}, \new{\ter{lambda}}, \ter{forall}, \ter{exists}, and \ter{match}, 
+\ter{let}, \ter{\new{lambda}}, \ter{forall}, \ter{exists}, and \ter{match}, 
 which are the only mechanism to introduce variables.
 Function symbols, in contrast, are predefined, as explained later.
 Recall that every function symbol $f$ is separately associated 
@@ -582,12 +583,12 @@ of the form \expr{(as $f$ $\tau$)}.
 
 \begin{newver}
 Terms are members of the syntactic category \nter{term}.
-Note that sort terms occur within terms with binders or qualified identifiers.
+Note that sort terms occur within terms containing binders or qualified identifiers.
 These sort terms may contain sort parameters, 
 which must be declared in a script by the command \ter{declare-sort-parameter}
 (see Section~\ref{sec:new-symbols}).
 \end{newver}
-
+  
 % We refer informally to members of \nter{pterm} as \define{polymorphic} terms.
 % We remark that although members of \nter{term} are also polymorphic terms or 
 % can occur as subterms of polymorphic terms, the opposite is not the case.\endnote{
@@ -644,7 +645,7 @@ has the same semantics as the term
   \expr{
    (lambda (($x_1$ $\tau_1$)) 
    (lambda (($x_2$ $\tau_2$)) ($\cdots$ 
-   (lambda (($x_n$ $\tau_n$)) $t$) $\cdots$)
+   (lambda (($x_n$ $\tau_n$)) $t$) $\cdots$)))
   }
   \end{equation}
   %
@@ -726,7 +727,7 @@ $p_i$ is a \define{pattern} for $\delta$, and $t_i$ a term of some sort $\tau$.
 A pattern $p$ in turn is either a variable $x$ of sort $\delta$, 
 \new{the special variable \ter{\_}},
 a nullary constructor $c$ of $\delta$, 
-or a term of the form \expr{($c$ $x_1$ $\cdots$ $x_k$)}
+or a term of the form \expr{($c$ $x_1$ $\cdots$ $x_k$)},
 where $c$ is a constructor of $\delta$ of rank
 $\tau_1\cdots\tau_k\delta$ 
 with $k > 0$, and $x_1, \ldots, x_k$ are \emph{distinct} variables 
@@ -753,9 +754,9 @@ This guarantees that the match expressions are always well defined
 (see Section~\ref{sec:models}).
 }
 \begin{newver}
-The recommended choice for a single variable pattern is \ter{\_}, the use of
-other variables will be deprecated in future versions.\endnote{This will prevent
-typos while writing a nullary constructor to be taken as a variable pattern, thus
+The recommended choice for a single variable pattern is \ter{\_}; the use of
+other variables will be deprecated in future versions.\endnote{This is to avoid
+the situation where a typo while attempting to write a nullary constructor introduces a variable pattern, thus
 changing the meaning of the match term without warning or error.}
 \end{newver}
 
@@ -920,8 +921,8 @@ $x$ occurs free in some $e_i$ ($1\le i\le n$);
 \item
 occurs free in an expression 
 \new{
-\expr{($Q$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)}
-where $Q$ is \ter{lambda}, \ter{forall}, or \ter{exists}
+\expr{($Q$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)},
+where $Q$ is \ter{lambda}, \ter{forall}, or \ter{exists},
 if it does not occur in $\{x_1, \ldots, x_n\}$ and occurs free in $t$;}
 \item
 occurs free in an expression 
@@ -957,7 +958,7 @@ in an expression has a \define{scope} defined as follows.
 \item
 In an expression 
 \expr{($Q$ (($x_1$ $\sigma_1$) ($x_2$ $\sigma_2$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)} 
-where $Q$ is either the binder \new{\ter{lambda}}, \ter{forall}, or \ter{exists}, 
+where $Q$ is either the binder \ter{\new{lambda}}, \ter{forall}, or \ter{exists}, 
 or in an expression \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)},
 the scope of each variable in $\{x_1, \ldots, x_n\}$ is the term $t$.
 \item
@@ -984,7 +985,7 @@ the scope of each variable occurring in pattern $p_i$ is the corresponding term 
 
 \paragraph{Shadowing}
 All binders follow a lexical scoping discipline, 
-consistently with the semantics of the SMT-LIB logic,
+consistent with the semantics of the SMT-LIB logic,
 as described in Section~\ref{sec:models}.
 In particular, a bound variable will shadow any variable or user-defined 
 function symbol with the same name from an enclosing scope.
@@ -1014,7 +1015,7 @@ called \expr{a}.
 Similarly, in a \ter{match} pattern like \expr{(cons x nil)},
 the symbol \ter{nil} is a variable regardless of the existence 
 of a previously defined constructor symbol \ter{nil}.\footnote{%
-Note that a pattern \expr{(cons x nil)} where \ter{nil} was a constructor
+Note that a pattern \expr{(cons x nil)}, where \ter{nil} is a constructor,
 would be nested, which is not allowed. 
 }
 
@@ -1025,7 +1026,7 @@ that is, function or sort symbols from the declaration
 of a theory included in the current logic
 (see Section~\ref{sec:logic-declarations} and Subsection~\ref{sec:restarting}).
 In other words, variables cannot have the same name 
-as a function symbol declared in the current logic, and parameters
+as a function symbol declared in the current logic, and sort parameters
 cannot have the same name as a sort symbol declared in the current logic.\endnote{
 The reason for this exception is mostly historical. 
 Many SMT solvers apply this restriction, possibly under the assumption
@@ -1033,6 +1034,8 @@ that shadowing a theory symbol is, more often than not, unintended and
 so best treated as an error.
 }
 \end{remark}
+\cbrem{It's now confusing to talk sort
+  parameters here, since we haven't yet discussed the rules for shadowing of sort parameters.}
 
 \subsection{Well-sortedness requirements} \label{well-sortedness}
 
@@ -1238,7 +1241,7 @@ In this version, there are no predefined annotations for sort declarations.
 
 The value of a \attr{funs} attribute is a non-empty sequence
 of possibly polymorphic function symbol declarations \nter{par\_fun\_symbol\_decl}.
-A (monomorphic) function symbol declaration \nter{fun\_symbol\_decl}
+A (monomorphic)\cbrem{Why monomorphic?  Couldn't it contain a global sort parameter?} function symbol declaration \nter{fun\_symbol\_decl}
 of the form \expr{($c$ $\sigma$)},
 where $c$ is an element of \nter{spec\_constant},
 declares $c$ to have sort $\sigma$.
@@ -1255,7 +1258,7 @@ A function symbol declaration of the form
 \expr{($f$ $\sigma_1\ \cdots\ \sigma_n$ $\sigma$)}
 \end{center}
 with $n \geq 0$ declares a \define{monomorphic function symbol} $f$ with rank 
-$\sigma_1\cdots\sigma_n\sigma$
+$\sigma_1\cdots\sigma_n\sigma$,
 provided that $\sigma$ and all $\sigma_i$'s are monomorphic sorts.
 
 A function symbol declaration of the form,
@@ -1289,6 +1292,7 @@ simply by a more judicious choice of parameter names.
 %In patterns like \expr{(cons x nil)} are problematic 
 }
 \end{newver}
+\cbrem{What about shadowing of global sort parameters?}
 
 As with sorts, each function symbol declaration 
 may additionally contain zero or more annotations $\alpha_1, \ldots, \alpha_n$,
@@ -1956,12 +1960,12 @@ Note that, with this addition, the language distinguishes
 between \emph{functions} of rank $\tau_1\tau_2$
 and \emph{constants} or variables of sort \expr{(-> $\tau_1$ $\tau_2$)}.
 For instance, the latter can be passed as an argument to other functions 
-as any other datatype but the former cannot.\endnote{%
+as any other variable but the former cannot.\endnote{%
 \new{This difference will disappear in the planned Version 3 of the standard
 whose underlying logic will change from many-sorted logic 
 to a version of higher-order logic with dependent types.}
 }
-This is no real limitation because it is possible to convert from one to the other
+This is no real limitation, though, because it is possible to convert from one to the other
 thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
 For instance, if \ter{f} is a function symbol of rank $\tau_1\tau_2$,
 one can define a corresponding higher-order constant with the command 
@@ -1970,7 +1974,7 @@ one can define a corresponding higher-order constant with the command
 \expr{(define-const c\_f (lambda ((x $\tau_1$)) (f x)))} .
 \end{center}
 %
-Conversely, if \ter{c} is a constant of sort \expr{(-> $\tau_1$ $\tau_2$)}
+Conversely, if \ter{c} is a constant of sort \expr{(-> $\tau_1$ $\tau_2$)},
 the corresponding function can be defined by the command 
 \begin{center}
 \expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (\_ c x))} .
@@ -2004,7 +2008,7 @@ then the term  \expr{(f (lambda ((x $\tau_1$)) (g x)))} is well sorted,
 and has sort $\tau$.
 
 Similarly, it is not possible to return a function of rank $\tau_1 \cdots \tau_n$
-(with $n > 1$) from another function but it is possible to return
+(with $n > 1$) from another function, but it is possible to return
 a constant of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.\endnote{\new{
 The difference between function symbols and constants of \ter{->} sorts
 will disappear in Version 3 where, in current terms, 
