@@ -149,7 +149,7 @@
 
     See the specification of the theory's semantics for a definition
     of the functions [[_]] and nat2bv.  Note that this convention implicitly
-    considers the numeral X as a number written in base 10.
+    considers the numeral X as a number written in decimal.
 
   - Bitwise operators
 
