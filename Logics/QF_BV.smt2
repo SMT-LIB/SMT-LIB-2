@@ -4,9 +4,10 @@
  :smt-lib-release "2017-11-24"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02"
- :last-updated "2017-06-13"
+ :last-updated "2024-07-14"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-14 Minor disambiguation
   2020-05-20 bvxnor is no longer marked as left associative, as that is
              inconsistent with its meaning as the negation of bvxor.
   2017-06-13 Added that bvxor and bvxnor are left associative

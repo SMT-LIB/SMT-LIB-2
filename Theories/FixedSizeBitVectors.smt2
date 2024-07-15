@@ -4,9 +4,10 @@
  :smt-lib-release "2017-11-24"
  :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
  :date "2010-05-02" 
- :last-updated "2017-06-13"
+ :last-updated "2024-07-14"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-14 Fixed minor typos
   2020-05-20 Fixed minor typo
   2017-06-13 Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
   2017-05-03 Updated to version 2.6; changed semantics of division and
@@ -83,7 +84,7 @@
  "
 
  :definition
- "For every expanded signature Sigma, the instance of Fixed_Size_BitVectors
+ "For every expanded signature Sigma, the instance of FixedSizeBitVectors
    with that signature is the theory consisting of all Sigma-models that 
    satisfy the constraints detailed below.
 
@@ -119,7 +120,7 @@
    - Variables
 
    If v is a variable of sort (_ BitVec m) with 0 < m, then
-   [[v]] is some element of [[0, m-1) → {0, 1}], the set of total
+   [[v]] is some element of {[0, m) → {0, 1}}, the set of total
    functions from [0, m) to {0, 1}.
 
    - Constant symbols
