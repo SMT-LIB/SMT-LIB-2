@@ -3,9 +3,10 @@
  :smt-lib-version 2.6
  :written_by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
  :date "2020-02-01"
- :last-updated "2020-08-06"
+ :last-updated "2024-14-07"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-14-07 Fixed typos and ambiguities in definitions of str.replace_re and str.replace_re_all
   2020-08-06 Fixed an example in Strings constant definition.
   2020-02-09 Layout and minor fixes.
  "
@@ -287,13 +288,15 @@
        ; left-to-right order. 
        (str.replace_all String String String String)
 
-       ; (str.replace_re s r t) is the string obtained by replacing the
-       ; shortest leftmost non-empty match of r in s, if any, by t.
-       ; Note that if t is empty, the result is to prepend t to s.
+       ; (str.replace_re s r t) is t prepended to s if r contains the empty
+       ; string. Otherwise, it the string obtained by replacing the leftmost
+       ; match of r in s (with ties broken by taking the shorter match), if any,
+       ; by t.
        (str.replace_re String RegLan String String) 
 
-       ; (str.replace_re_all s r t) is the string obtained by replacing,
-       ; left-to right, each shortest *non-empty* match of r in s by t.
+       ; (str.replace_re_all s r t) is s if r contains the empty string.
+       ; Otherwise, it is the string obtained by replacing, left to right,
+       ; each shortest match of r in s by t.
        (str.replace_re_all String RegLan String String) 
 
        ; RE complement
@@ -582,36 +585,38 @@
   * (str.replace_all String String String String)
 
     - ⟦str.replace_all⟧(w, w₁, w₂) = w      if ⟦str.contains⟧(w, w₁) = false 
-                                             or 
-                                             w₁ = ε
+                                              or 
+                                              w₁ = ε
 
     - ⟦str.replace_all⟧(w, w₁, w₂) = u₁w₂⟦str.replace_all⟧(u₂, w₁, w₂)
       where u₁ is the shortest word such that 
             w = u₁w₁u₂
-                                          if ⟦str.contains⟧(w, w₁) = true
-                                            and 
-                                            w₁ ≠ ε
+                                            if ⟦str.contains⟧(w, w₁) = true
+                                              and 
+                                              w₁ ≠ ε
 
-  * (str.replace_re String String String String)
+  * (str.replace_re String RegLan String String)
 
     - ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
+
+    - ⟦str.replace_re⟧(w, L, w₂) = w₂w      if ε is in L
 
     - ⟦str.replace_re⟧(w, L, w₂) = u₁w₂u₂ 
       where u₁, w₁ are the shortest words such that 
             - w = u₁w₁u₂
             - w₁ ∈ L
-                                            if some substring of w is in L
+                                            if some non-empty substring of w is in L
 
-  * (str.replace_re_all String String String String)
+  * (str.replace_re_all String RegLan String String)
 
-    - ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
+    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no substring of w is in L or ε is in L
 
-    - ⟦str.replace_re⟧(w, L, w₂) = u₁w₂⟦str.replace_re⟧(u₂, L, w₂)
+    - ⟦str.replace_re_all⟧(w, L, w₂) = u₁w₂⟦str.replace_re_all⟧(u₂, L, w₂)
       where u₁, w₁ are the shortest words such that 
             - w = u₁w₁u₂
             - w₁ ∈ L
             - w₁ ≠ ε
-                                          if some substring of w is in L
+                                            if some non-empty substring of w is in L
 
   * (re.comp RegLan RegLan)
 

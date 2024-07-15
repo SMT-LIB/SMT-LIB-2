@@ -2,11 +2,13 @@
 
  :smt-lib-version 2.6
  :smt-lib-release "2017-11-24"
- :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
+ :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02" 
- :last-updated "2017-06-13"
+ :last-updated "2024-07-14"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-14 Fixed minor typos
+  2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo
   2020-05-20 Fixed minor typo
   2017-06-13 Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
   2017-05-03 Updated to version 2.6; changed semantics of division and
@@ -83,7 +85,7 @@
  "
 
  :definition
- "For every expanded signature Sigma, the instance of Fixed_Size_BitVectors
+ "For every expanded signature Sigma, the instance of FixedSizeBitVectors
    with that signature is the theory consisting of all Sigma-models that 
    satisfy the constraints detailed below.
 
@@ -101,11 +103,20 @@
      remainder when x is divided by y.  Note that we always have the following
      equivalence for y > 0: (x div y) * y + (x rem y) = x.
 
+   o (_ bv0 m), with 0 < m, which takes a non-negative integer
+     n and returns the bitvector b: [0, m) → {0}
+
    o bv2nat, which takes a bitvector b: [0, m) → {0, 1}
      with 0 < m, and returns an integer in the range [0, 2^m),
      and is defined as follows:
 
        bv2nat(b) := b(m-1)*2^{m-1} + b(m-2)*2^{m-2} + ⋯ + b(0)*2^0
+
+   o bv2int, which takes a bitvector b: [0, m) → {0, 1}
+     with 0 < m, and returns an integer in the range [- 2^(m - 1), 2^(m - 1)),
+     and is defined as follows:
+
+       bv2int(b) := if b(m-1) = 0 then bv2nat(b) else bv2nat(b) - 2^m
 
    o nat2bv[m], with 0 < m, which takes a non-negative integer
      n and returns the (unique) bitvector b: [0, m) → {0, 1}
@@ -119,7 +130,7 @@
    - Variables
 
    If v is a variable of sort (_ BitVec m) with 0 < m, then
-   [[v]] is some element of [[0, m-1) → {0, 1}], the set of total
+   [[v]] is some element of {[0, m) → {0, 1}}, the set of total
    functions from [0, m) to {0, 1}.
 
    - Constant symbols
@@ -180,6 +191,20 @@
    [[(bvurem s t)]] := if bv2nat([[t]]) = 0
                        then [[s]]
                        else nat2bv[m](bv2nat([[s]]) rem bv2nat([[t]]))
+
+   We also define the following predicates
+
+   [[(bvnego s)]] := bv2int([[s]]) == -2^(m - 1)
+
+   [[(bvuaddo s t)]] := (bv2nat([[s]]) + bv2nat([[t]])) >= 2^m
+
+   [[(bvsaddo s t)]] := (bv2int([[s]]) + bv2int([[t]])) >= 2^(m - 1) or
+                        (bv2int([[s]]) + bv2int([[t]])) < -2^(m - 1)
+
+   [[(bvumulo s t)]] := (bv2nat([[s]]) * bv2nat([[t]])) >= 2^m
+
+   [[(bvsmulo s t)]] := (bv2int([[s]]) * bv2int([[t]])) >= 2^(m - 1) or
+                        (bv2int([[s]]) * bv2int([[t]])) < -2^(m - 1)
 
    - Shift operations
 

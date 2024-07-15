@@ -2,11 +2,13 @@
 
  :smt-lib-version 2.6
  :smt-lib-release "2017-11-24"
- :written-by "Silvio Ranise, Cesare Tinelli, and Clark Barrett"
+ :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02"
- :last-updated "2017-06-13"
+ :last-updated "2024-07-14"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-14 Minor disambiguation
+  2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo bvusubo bvssubo bvsdivo
   2020-05-20 bvxnor is no longer marked as left associative, as that is
              inconsistent with its meaning as the negation of bvxor.
   2017-06-13 Added that bvxor and bvxnor are left associative
@@ -75,6 +77,16 @@
         the value of the second argument)
     (bvult (_ BitVec m) (_ BitVec m) Bool)
       - binary predicate for unsigned less-than
+    (bvnego (_ BitVec m) Bool)
+      - overflow predicate for 2's complement unary minus
+    (bvuaddo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for unsigned addition modulo 2^m
+    (bvsaddo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for signed addition on m-bit 2's complement
+    (bvumulo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for unsigned multiplication modulo 2^m
+    (bvsmulo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for signed multiplication on m-bit 2's complement
 
   Defined below:
 
@@ -102,6 +114,12 @@
       - Arithmetic shift right, like logical shift right except that the most
         significant bits of the result always copy the most significant
         bit of the first argument.
+    (bvusubo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for unsigned subtraction modulo 2^m
+    (bvssubo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for signed 2's complement m-bit subtraction
+    (bvsdivo (_ BitVec m) (_ BitVec m) Bool)
+      - overflow predicate for 2's complement signed division
 
     The following symbols are parameterized by the numeral i, where i >= 1.
 
@@ -149,7 +167,7 @@
 
     See the specification of the theory's semantics for a definition
     of the functions [[_]] and nat2bv.  Note that this convention implicitly
-    considers the numeral X as a number written in base 10.
+    considers the numeral X as a number written in decimal.
 
   - Bitwise operators
 
@@ -222,6 +240,9 @@
                (bvule s t)))
     (bvsgt s t) abbreviates (bvslt t s)
     (bvsge s t) abbreviates (bvsle t s)
+    (bvusubo s t) stands for (bvult s t)
+    (bvssubo s t) abbreviates (ite (bvnego t) (bvsge s (_ bv0 m)) (bvsaddo s (bvneg t)))
+    (bvsdivo s t) abbreviates (and (bvnego s) (= t (bvnot (_ bv0 m))))
 
   - Other operations
 
