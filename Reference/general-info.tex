@@ -97,6 +97,11 @@ of sort \expr{(-> $\tau_1$ $\tau_2$)}.
 
 The symbol \ter{\_} can now also be used (unambiguously) as a wildcard symbol 
 in \ter{match} patterns.
+
+The functionality of \expr{check-sat-assuming} has been extended to allow
+arbitrary Boolean terms to be passed as assumptions.  The semantics of
+\expr{get-unsat-assumptions} and \expr{get-unsat-core} have been
+correspondingly generalized and clarified.
 \end{newver}
 
 %-------------------------------------------------------------------------------
