@@ -422,7 +422,7 @@ plus    +       <=    Real   |John Brown|
 We refer to identifiers from \nter{symbol} as \define{simple} identifiers
 and to the others as \define{indexed} identifiers.
 Since identifiers are used as the names of function symbols, sort symbols,
-\new{sort variables, sort parameters, (term) variables} and commands, 
+\new{sort parameters, (term) variables} and commands, 
 we often refer to them informally as \define{names} in this document.
   
 \begin{remark}[Namespaces and shadowing of identifiers]
@@ -433,7 +433,7 @@ because each namespace can always be identified syntactically.
 Within the term namespace, bound variables can shadow one another as well as
 function symbols in accordance with a lexical scoping discipline described 
 in Section~\ref{sec:concrete-terms}. 
-Similarly, sort variables can shadow user sort symbols,
+Similarly, sort parameters can shadow user sort symbols,
 as described in Section~\ref{sec:new-symbols}.
 \end{remark}
 %\cbrem{We haven't introduced the notion of a sort variable yet.}
@@ -1030,6 +1030,7 @@ of a theory included in the current logic
 (see Section~\ref{sec:logic-declarations} and Subsection~\ref{sec:restarting}).
 In other words, variables cannot have the same name 
 as a function symbol declared in the current logic, and sort parameters
+(see Section~\ref{sec:new-symbols})
 cannot have the same name as a sort symbol declared in the current logic.\endnote{
 The reason for this exception is mostly historical. 
 Many SMT solvers apply this restriction, possibly under the assumption
@@ -1037,8 +1038,9 @@ that shadowing a theory symbol is, more often than not, unintended and
 so best treated as an error.
 }
 \end{remark}
-\cbrem{It's now confusing to talk sort
-  parameters here, since we haven't yet discussed the rules for shadowing of sort parameters.}
+%CT Address
+%\cbrem{It's now confusing to talk sort
+%  parameters here, since we haven't yet discussed the rules for shadowing of sort parameters.}
 
 \subsection{Well-sortedness requirements} \label{well-sortedness}
 
@@ -1244,7 +1246,10 @@ In this version, there are no predefined annotations for sort declarations.
 
 The value of a \attr{funs} attribute is a non-empty sequence
 of possibly polymorphic function symbol declarations \nter{par\_fun\_symbol\_decl}.
-A (monomorphic)\cbrem{Why monomorphic?  Couldn't it contain a global sort parameter?} function symbol declaration \nter{fun\_symbol\_decl}
+A (monomorphic)
+%CT addressed
+%\cbrem{Why monomorphic?  Couldn't it contain a global sort parameter?} 
+function symbol declaration \nter{fun\_symbol\_decl}
 of the form \expr{($c$ $\sigma$)},
 where $c$ is an element of \nter{spec\_constant},
 declares $c$ to have sort $\sigma$.
@@ -1271,7 +1276,7 @@ A function symbol declaration of the form,
 with $k > 0$, $n \geq 0$ and $u_1, \ldots, u_k$ all distinct,
 declares a \define{polymorphic function symbol} $f$ with rank $\tau_1\cdots\tau_n\tau$
 provided that $\tau$ and all $\tau_i$'s are polymorphic sorts over 
-the parameters $u_1, \ldots, u_k$, where \ter{par} is a binder for
+the (local) parameters $u_1, \ldots, u_k$, where \ter{par} is a binder for
 these parameters.
 This effectively declares a \emph{class} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 

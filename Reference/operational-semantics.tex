@@ -881,17 +881,18 @@ whether the option \attr{global-declarations} is set to \ter{true} or not.
 %
 \item[\expr{(declare-sort-parameter $s$)}]
 \new{
-adds sort parameter $s$ to the current signature.
-The command reports an error if $s$ is a sort symbol or parameter already present 
-in the current signature.
-}\endnote{%
-\new{
-In SMT-LIB 2.7, the \expr{par} construct, short for \emph{parameter}, is a misnomer,
-as \expr{par} actually introduces sort \emph{variables} rather than sort \emph{parameters}.
-We have adopted a pragmatic approach to this issue, 
-deciding not to rename the \expr{par} construct for backward compatibility.
+adds \emph{global} sort parameter $s$ to the current signature.
+The command reports an error if $s$ is a sort symbol, sort parameter, 
+or theory symbol already present in the current signature.%
 }
-}
+%\endnote{%
+%\new{
+%In SMT-LIB 2.7, the \expr{par} construct, short for \emph{parameter}, is a misnomer,
+%as \expr{par} actually introduces sort \emph{variables} rather than sort \emph{parameters}.
+%We have adopted a pragmatic approach to this issue, 
+%deciding not to rename the \expr{par} construct for backward compatibility.
+%}
+%}
 \smallskip
 
 %%% declare-sort %%%
@@ -906,8 +907,8 @@ in the current signature.
 %
 \item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
 adds sort symbol $s$ with arity $n$ and associates it with sort $\tau$,
-where the $u_i$'s are symbols used as \define{sort variables}, and $\tau$ may contain sort
-variables $u_1$, \dots, $u_n$\new{, but no previously declared sort parameters}.
+where the $u_i$'s are (local) sort parameters, and $\tau$ may contain 
+any of $u_1$, \dots, $u_n$\new{, but no global sort parameters}.
 
 % (define-sort set-of-pairs (u v) (set (pair (u v))))
 % (define-sort set-of-pairs () (set (pair (u v))))
@@ -928,16 +929,17 @@ theory sort symbols and previously declared sort symbols.
 The command reports an error
 if $s$ is a sort symbol or parameter already present in the current signature or
 if $\tau$ is not a well-defined (polymorphic) sort 
-with respect to the current signature extended with sort variables 
+with respect to the current signature extended with sort parameters 
 $u_1$, \dots, $u_n$.
 This restriction prohibits (meaningless) circular definitions
 where $\tau$ contains $s$.
 \begin{newver}
-The $u_i$ sort variables shadow any previously user-declared sort symbol
+The $u_i$ sort parameters shadow any previously user-declared sort symbol
 or parameter with the same name.
 However, they do not shadow theory sort symbols (just as bound variables are
-not permitted to shadow declared theory symbols).  The command reports an error if a theory sort
-symbol is used as a sort variable $u_i$.
+not permitted to shadow declared theory symbols).
+The command reports an error if a theory sort
+symbol is used as a sort parameter $u_i$.
 \end{newver}
 
 \smallskip
@@ -962,7 +964,7 @@ In that case $f$ is polymorphic.
 has the same effect as the command \expr{(declare-fun $f$ () $\tau$)}.
 \smallskip
 
-%\pfrem{sort variables in datatypes must come from the par list.}
+%\pfrem{sort parameters in datatypes must come from the par list.}
 
 %\pfrem{using declared sort parameters only make sense in assertions.
 %  We need order elsewhere.}
@@ -976,17 +978,16 @@ with respective arities $k_1,\dots,k_n$ and declarations $d_1,\dots,d_n$.
 Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
 If $k >0$ then $d$ is an expression of the form 
 \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
-where $u_1, \ldots, u_k$ are sort variables;
-\endnote{
+where $u_1, \ldots, u_k$ are sort parameters;\endnote{
 \new{
-Using sort variables as opposed to globally declared sort parameters
+Using local sort parameters as opposed to globally declared sort parameters
 is necessary because their order is meaningful, as arguments of the sort constructor.
 }
 }
 % The u_1, u_k correspond to the k arguments of the sort constructor.  
 % (Pair Int Real) is not the same of (Pair Real Int), and the relation to the pair
 % constructor and the order of arguments in the pair constructor is set through
-% the order of the sort variables in par
+% the order of the sort parameters in par
 otherwise, it is just $l$. 
 In either case, $l$ is a (parenthesis-delimited) list of \emph{one or more} 
 expressions of the form
