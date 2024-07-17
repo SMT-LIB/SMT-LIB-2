@@ -1362,17 +1362,16 @@ instructs the solver to check whether the conjunction of all the formulas
 in the current context \emph{and} the \define{assumptions} $a_1, \cdots, a_n$
 is satisfiable in the extension of the current logic with all the current 
 user-declared and user-defined symbols.
-The assumptions $a_1, \ldots, a_n$ can only have the form $p$ or \expr{(not $p$)} 
-where $p$ is a user-declared/defined Boolean constant, i.e., 
-a nullary function symbol of sort \ter{Bool}.\endnote{
+The assumptions $a_1, \ldots, a_n$ must be formulas, i.e., terms of sort
+\ter{Bool}.\endnote{
 The motivation for having this command is that it corresponds to 
 a common usage pattern with SMT solvers which can be implemented 
 considerably more efficiently than the general stack-based mechanism needed 
 to support \ter{push} and \ter{pop} commands.
-The restriction of assumptions to Boolean constants or negated constants only 
-is also motivated by efficiency concerns since user-defined constants are 
-associated with formulas that have already been internally simplified 
-at definition time. 
+%The restriction of assumptions to Boolean constants or negated constants only 
+%is also motivated by efficiency concerns since user-defined constants are 
+%associated with formulas that have already been internally simplified 
+%at definition time. 
 }
 
 Conceptually, this command asks the solver to search for a model of the logic 
@@ -1416,7 +1415,7 @@ a different set of assumptions from the previous one.
 %-------------------------------------------------------------------------------
 
 The next three commands can be issued only when the solver is 
-in \mode{sat} mode, and provide information related 
+in \mode{sat} mode and provide information related 
 to the most recent check command.
 In that case, the solver will have identified a model $\str A$ 
 (as defined in Section~\ref{sec:models}) of the current logic,
@@ -1692,12 +1691,13 @@ check command (which produced an \ter{unsat} response).
 %%% get-unsat-assumptions %%%
 %
 \item[\expr{(get-unsat-assumptions)}]
-returns a subset $a_1, \ldots,a_n$ of the assumptions in the most recent \\
+returns a subset $(a_1 \cdots a_n)$ of the assumptions in the most recent
 \ter{check-sat-assuming} command.
-These assumptions are such that issuing the command \\
+These assumptions are such that issuing the command
 \expr{(check-sat-assuming ($a_1$ $\cdots$ $a_n$))}
 instead would have still produced an \ter{unsat} response.
-The returned sequence is not required to be minimal.\endnote{
+The returned set is a space-delimited list of assumptions surrounded by
+parentheses and is not required to be minimal.\endnote{
 The lax requirement is justified by the fact that 
 the minimization problem alone is NP-hard in general.
 On the other hand, it allows a solver to be compliant by just returning
@@ -1732,27 +1732,43 @@ which is set to \ter{false} by default, is set to \ter{true}
 %%% get-unsat-core %%%
 %
 \item[\expr{(get-unsat-core)}]
-asks the solver to identify an \define{unsatisfiable core}, a subset of all 
-the formulas in the current context that is unsatisfiable by itself.
-The command can be issued only if the most recent check command had an empty set 
-of assumptions.
-The solver selects from the unsatisfiable core only those formulas
-that have been asserted with a command of the form
-\expr{(\ter{assert} (!~$t$ \attr{named} $f$))}, and returns a sequence
-\expr{($f_1$ $\cdots$ $f_n$)} of those labels.
-Unlabeled formulas in the unsatisfiable core are simply not reported.\endnote{
+Let $A$ be the set of assertions in the context and $B$ the set of assumptions
+in the most recent call to  \expr{check-sat} or \expr{check-sat-assuming}.
+Let $A$ be further partitioned into $A_n$ and $A_u$, where
+$A_n$ contains assertions that were asserted with a command of the form
+\expr{(\ter{assert} (!~$t$ \attr{named} $f$))} and $A_u = A \setminus A_n$.
+The names $f$ are called \define{labels}, and we call $A_n$ the set of
+\define{labeled assertions} and $A_u$ the set of \define{unlabeled assertions}.
+The result of this command is a sequence \expr{($f_1$ $\cdots$ $f_n$)} of
+labels from the labeled assertions such that the corresponding subset
+$A'_n$ of $A_n$ has the property that $A'_n \cup A_u \cup B$ is, by itself,
+unsatisfiable.
+Furthermore, we require that if $B'$ is the result of any call to
+\expr{get-unsat-assumptions} in the same solver state, then $A'_n \cup A_u \cup
+B'$ is also unsatisfiable.
+
+Note that assumptions and unlabeled formulas are never included in the result
+of \expr{get-unsat-core}.  However, it is possible to get a full set
+of unsatisfiable assertions by labeling all assertions and combining the result
+of \expr{get-unsat-core} with the result of \expr{get-unsat-assumptions}.
+In practice, not labeling
+assertions is useful for unsat core detection purposes when the
+user is sure that the set of all unlabeled assertions is satisfiable.%
+\endnote{
 Unsatisfiable cores are useful for applications because they circumscribe
 the source of unsatisfiability in the asserted set.  
-The labeling mechanism allows users to track only selected asserted formulas 
-when they already know that the rest of the asserted formulas are jointly
-satisfiable.  
 }
 
-The semantics of this command's output is that the reported assertions
-\emph{together with all} the unlabeled ones in the set of all
-assertions are jointly unsatisfiable.  In practice then, not labeling
-assertions is useful for unsat core detection purposes only when the
-user is sure that the set of all unlabeled assertions is satisfiable.
+%An unsatisfiable core is any subset $A \cup B$
+%that is unsatisfiable by itself.
+%The command can be issued only if the most recent check command had an empty set 
+%of assumptions.
+%, and returns a sequence
+%\expr{($f_1$ $\cdots$ $f_n$)} of those labels.
+
+%The semantics of this command's output is that the reported assertions
+%\emph{together with all} the unlabeled ones in the set of all
+%assertions are jointly unsatisfiable.
 
 The command can be issued only if the \attr{produce-unsat-cores} option,
 which is set to \ter{false} by default, is set to \ter{true} 
