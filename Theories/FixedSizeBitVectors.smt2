@@ -4,9 +4,10 @@
  :smt-lib-release "2017-11-24"
  :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02" 
- :last-updated "2024-07-14"
+ :last-updated "2024-07-16"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-16 Added conversion operators between bitvectors and integers
   2024-07-14 Fixed minor typos
   2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo
   2020-05-20 Fixed minor typo
@@ -96,15 +97,18 @@
    To define some of the semantics below, we need the following additional
    functions :
 
-   o _ div _,  which takes an integer x ≥ 0 and an integer y > 0 and returns
-     the integer part of x divided by y (i.e., truncated integer division).
+   o div and mod, binary infix functions on integers defined as the
+     interpretations of the corresponding operators in the Ints theory,
+     i.e., the operators satisfying:
 
-   o _ rem _, which takes an integer x ≥ 0 and y > 0 and returns the
-     remainder when x is divided by y.  Note that we always have the following
-     equivalence for y > 0: (x div y) * y + (x rem y) = x.
+     (forall ((m Int) (n Int))
+       (=> (distinct n 0)
+           (let ((q (div m n)) (r (mod m n)))
+             (and (= m (+ (* n q) r))
+                  (<= 0 r (- (abs n) 1))))))
 
-   o (_ bv0 m), with 0 < m, which takes a non-negative integer
-     n and returns the bitvector b: [0, m) → {0}
+     Note that an important consequence of the above definition is that
+     for n > 0, m mod n is always in the range [0, n).
 
    o bv2nat, which takes a bitvector b: [0, m) → {0, 1}
      with 0 < m, and returns an integer in the range [0, 2^m),
@@ -118,11 +122,15 @@
 
        bv2int(b) := if b(m-1) = 0 then bv2nat(b) else bv2nat(b) - 2^m
 
-   o nat2bv[m], with 0 < m, which takes a non-negative integer
-     n and returns the (unique) bitvector b: [0, m) → {0, 1}
-     such that
+   o nat2bv[m], which takes an integer n and returns the (unique) bitvector
+     b: [0, m) -> {0, 1} such that:
 
-       b(m-1)*2^{m-1} + ⋯ + b(0)*2^0 = n rem 2^m
+       b(m-1)*2^{m-1} + ⋯ + b(0)*2^0 = n mod 2^m
+ 
+   o int2bv[m], which takes an integer n and returns the (unique) bitvector
+     b: [0, m) -> {0, 1} such that:
+
+       b(m-1)*2^{m-1} + ⋯ + b(0)*2^0 = (n + 2^m) mod 2^m
 
    The semantic interpretation [[_]] of well-sorted BitVec-terms is
    inductively defined as follows.
@@ -190,7 +198,7 @@
 
    [[(bvurem s t)]] := if bv2nat([[t]]) = 0
                        then [[s]]
-                       else nat2bv[m](bv2nat([[s]]) rem bv2nat([[t]]))
+                       else nat2bv[m](bv2nat([[s]]) mod bv2nat([[t]]))
 
    We also define the following predicates
 
@@ -218,6 +226,18 @@
    Finally, we can define bvult:
 
    [[bvult s t]] := true iff bv2nat([[s]]) < bv2nat([[t]])
+
+   If the Ints theory is also present, let [[_]] be extended to additionally
+   interpret terms of sort Int.  For operations in that theory, [[_]]
+   interprets them according to the semantics defined there.  We further define:
+
+   [[(bv2nat b)]] := bv2nat([[b]])
+   [[(bv2int b)]] := bv2int([[b]])
+
+   [[(_ nat2bv M) N]] := nat2bv[[[M]]] [[N]]
+   [[(_ int2bv M) N]] := int2bv[[[M]]] [[N]],
+
+   where M and N are terms of sort Int.
  "
 
 :values

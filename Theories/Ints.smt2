@@ -54,7 +54,7 @@
   - div and mod according to Boute's Euclidean definition [1], that is,
     so as to satify the formula
 
-    (for all ((m Int) (n Int))
+    (forall ((m Int) (n Int))
       (=> (distinct n 0)
           (let ((q (div m n)) (r (mod m n)))
             (and (= m (+ (* n q) r))

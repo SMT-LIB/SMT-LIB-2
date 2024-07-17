@@ -4,9 +4,10 @@
  :smt-lib-release "2017-11-24"
  :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02"
- :last-updated "2024-07-14"
+ :last-updated "2024-07-15"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-15 Added bv2nat, bv2int, nat2bv, int2bv
   2024-07-14 Minor disambiguation
   2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo bvusubo bvssubo bvsdivo
   2020-05-20 bvxnor is no longer marked as left associative, as that is
@@ -87,6 +88,14 @@
       - overflow predicate for unsigned multiplication modulo 2^m
     (bvsmulo (_ BitVec m) (_ BitVec m) Bool)
       - overflow predicate for signed multiplication on m-bit 2's complement
+    (bv2nat (_ BitVec m) Int)
+      - convert bitvector, interpreted as unsigned, to its integer value
+    (bv2int (_ BitVec m) Int)
+      - convert a bitvector, interpreted as signed, to integer value
+    ((_ nat2bv m) (Int) (_ BitVec m))
+      - convert an Integer into an unsigned bitvector
+    ((_ int2bv m) (Int) (_ BitVec m))
+      - convert an Integer into a signed bitvector
 
   Defined below:
 
@@ -167,7 +176,8 @@
 
     See the specification of the theory's semantics for a definition
     of the functions [[_]] and nat2bv.  Note that this convention implicitly
-    considers the numeral X as a number written in decimal.
+    considers the numeral X as a number written in decimal.  It is
+    an error to write (_ bvX n) with X >= 2^n.
 
   - Bitwise operators
 
