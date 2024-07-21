@@ -1,12 +1,13 @@
 (theory FixedSizeBitVectors
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02" 
- :last-updated "2024-07-16"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7
   2024-07-16 Added conversion operators between bitvectors and integers
   2024-07-14 Fixed minor typos
   2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo

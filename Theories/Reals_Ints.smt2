@@ -1,12 +1,13 @@
 (theory Reals_Ints
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written_by "Cesare Tinelli"
  :date "2010-04-17"
- :last-updated "2017-11-24"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7
   2017-11-24 Added abstract values for irrational numbers to set of Real values,
              consistently with the Reals theory (the omission of such values
              was an oversight).

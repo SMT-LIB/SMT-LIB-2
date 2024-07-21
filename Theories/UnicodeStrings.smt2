@@ -1,11 +1,12 @@
 (theory Strings
 
- :smt-lib-version 2.6
+ :smt-lib-version 2.7
  :written_by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
  :date "2020-02-01"
- :last-updated "2024-14-07"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7
   2024-14-07 Fixed typos and ambiguities in definitions of str.replace_re and str.replace_re_all
   2020-08-06 Fixed an example in Strings constant definition.
   2020-02-09 Layout and minor fixes.
