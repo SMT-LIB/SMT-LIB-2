@@ -1735,6 +1735,7 @@ which is set to \ter{false} by default, is set to \ter{true}
 \item[\expr{(get-unsat-core)}]
 Let $A$ be the set of assertions in the context and $B$ the set of assumptions
 in the most recent call to  \expr{check-sat} or \expr{check-sat-assuming}.
+% PF in the  most recent call to \expr{check-sat-assuming} if \expr{check-sat} has not been called more recently, or $B$ is the empty set otherwise.
 Let $A$ be further partitioned into $A_n$ and $A_u$, where
 $A_n$ contains assertions that were asserted with a command of the form
 \expr{(\ter{assert} (!~$t$ \attr{named} $f$))} and $A_u = A \setminus A_n$.
@@ -1755,6 +1756,7 @@ of \expr{get-unsat-core} with the result of \expr{get-unsat-assumptions}.
 In practice, not labeling
 assertions is useful for unsat core detection purposes when the
 user is sure that the set of all unlabeled assertions is satisfiable.%
+% PF I find the above sentence to be puzzling.  It seems to say that those assertions will not play a role in an unsat core anyway.
 \endnote{
 Unsatisfiable cores are useful for applications because they circumscribe
 the source of unsatisfiability in the asserted set.  
