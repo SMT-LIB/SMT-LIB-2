@@ -235,8 +235,8 @@
    [[(bv2nat b)]] := bv2nat([[b]])
    [[(bv2int b)]] := bv2int([[b]])
 
-   [[(_ nat2bv M) N]] := nat2bv[[[M]]] [[N]]
-   [[(_ int2bv M) N]] := int2bv[[[M]]] [[N]],
+   [[(_ nat2bv M) N]] := nat2bv[[[M]]]([[N]])
+   [[(_ int2bv M) N]] := int2bv[[[M]]]([[N]]),
 
    where M and N are terms of sort Int.
  "
