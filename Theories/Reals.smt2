@@ -7,7 +7,7 @@
  :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
-  2024-07-21 Updated to Version 2.7
+  2024-07-21 Updated to Version 2.7.
   2017-05-08 Fixed error in note on intepretation of (/t 0). 
   2016-04-20 Minor formatting of notes fields.
   2015-04-25 Updated to Version 2.5.

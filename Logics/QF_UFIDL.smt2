@@ -1,12 +1,13 @@
 (logic QF_UFIDL
 
- :smt-lib-version 2.6
- :smt-lib-release "2017-11-24"
+ :smt-lib-version 2.7
+ :smt-lib-release "2024-07-21"
  :written-by "Clark Barrett, Cesare Tinelli"
  :date "2010-05-12"
- :last-updated "2015-04-25"
+ :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2024-07-21 Updated to Version 2.7.
   2015-04-25 Updated to Version 2.5.
   2011-06-03 Added :note field."
 

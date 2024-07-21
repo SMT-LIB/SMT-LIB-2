@@ -7,7 +7,7 @@
  :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
-  2024-07-21 Updated to Version 2.7
+  2024-07-21 Updated to Version 2.7.
   2024-07-16 Added conversion operators between bitvectors and integers
   2024-07-14 Fixed minor typos
   2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo

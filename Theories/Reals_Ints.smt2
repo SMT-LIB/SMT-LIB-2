@@ -7,7 +7,7 @@
  :last-updated "2024-07-21"
  :update-history
  "Note: history only accounts for content changes, not release changes.
-  2024-07-21 Updated to Version 2.7
+  2024-07-21 Updated to Version 2.7.
   2017-11-24 Added abstract values for irrational numbers to set of Real values,
              consistently with the Reals theory (the omission of such values
              was an oversight).
