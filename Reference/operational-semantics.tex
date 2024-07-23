@@ -1734,7 +1734,9 @@ which is set to \ter{false} by default, is set to \ter{true}
 %
 \item[\expr{(get-unsat-core)}]
 Let $A$ be the set of assertions in the context and $B$ the set of assumptions
-in the most recent call to  \expr{check-sat} or \expr{check-sat-assuming}.
+in the most recent call to  \expr{check-sat-assuming}
+(where, as defined above, a call to \expr{check-sat} is considered a call to \epxr{check-sat-assuming}
+with no assumptions).
 % PF in the  most recent call to \expr{check-sat-assuming} if \expr{check-sat} has not been called more recently, or $B$ is the empty set otherwise.
 Let $A$ be further partitioned into $A_n$ and $A_u$, where
 $A_n$ contains assertions that were asserted with a command of the form
@@ -1754,13 +1756,21 @@ of \expr{get-unsat-core}.  However, it is possible to get a full set
 of unsatisfiable assertions by labeling all assertions and combining the result
 of \expr{get-unsat-core} with the result of \expr{get-unsat-assumptions}.
 In practice, not labeling
-assertions is useful for unsat core detection purposes when the
-user is sure that the set of all unlabeled assertions is satisfiable.%
-% PF I find the above sentence to be puzzling.  It seems to say that those assertions will not play a role in an unsat core anyway.
-\endnote{
-Unsatisfiable cores are useful for applications because they circumscribe
-the source of unsatisfiability in the asserted set.  
-}
+assertions may be useful for unsat core detection purposes when the
+user is sure that the set of all unlabeled assertions is satisfiable.  In such
+cases, users are often only interested in the part of the unsat core coming
+from additional assertions on top of this satisfiable base.
+%
+% PF I find the above sentence to be puzzling.  It seems to say that those
+% assertions will not play a role in an unsat core anyway.
+% CB I tried to clarify.  Note that this sentence was present before - I believe
+% it was added by Cesare.
+%\endnote{
+%Unsatisfiable cores are useful for applications because they circumscribe
+%the source of unsatisfiability in the asserted set.
+%}
+% CB I also felt that this endnote was not adding anything useful, so I have
+% removed it.
 
 %An unsatisfiable core is any subset $A \cup B$
 %that is unsatisfiable by itself.
