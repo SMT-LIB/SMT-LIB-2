@@ -600,17 +600,20 @@
 
     - ⟦str.replace_re⟧(w, L, w₂) = w        if no substring of w is in L
 
-    - ⟦str.replace_re⟧(w, L, w₂) = w₂w      if ε is in L
-
     - ⟦str.replace_re⟧(w, L, w₂) = u₁w₂u₂ 
-      where u₁, w₁ are the shortest words such that 
+      where u₁, w₁ are the shortest words such that
             - w = u₁w₁u₂
             - w₁ ∈ L
                                             if some non-empty substring of w is in L
 
+    Note that in the second case, the priority goes to minimizing the length of u₁.
+    That is, we must first choose the smallest possible u₁, and then, for that u₁,
+    we must choose the smallest possible w₁.  In particular, if ε ∈ L, then both
+    u₁ and w₁ must be ε, so the result is just w₂w.
+
   * (str.replace_re_all String RegLan String String)
 
-    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no substring of w is in L or ε is in L
+    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no substring of w is in L or ε ∈ L
 
     - ⟦str.replace_re_all⟧(w, L, w₂) = u₁w₂⟦str.replace_re_all⟧(u₂, L, w₂)
       where u₁, w₁ are the shortest words such that 
@@ -618,6 +621,10 @@
             - w₁ ∈ L
             - w₁ ≠ ε
                                             if some non-empty substring of w is in L
+
+    Note that in the second case, the priority goes to minimizing the length of u₁.
+    That is, we must first choose the smallest possible u₁, and then, for that u₁,
+    we must choose the smallest possible w₁.
 
   * (re.comp RegLan RegLan)
 
