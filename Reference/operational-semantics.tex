@@ -1529,6 +1529,8 @@ which is set to \ter{false} by default, is set to \ter{true}
 (see Section~\ref{sec:options}).  
 \smallskip
 
+\newpage
+
 %%% get-model %%%
 %
 \item[\expr{(get-model)}]
@@ -1612,6 +1614,11 @@ is well-sorted and satisfied by $\str A$.
 
 \end{itemize}
 
+\new{
+A function symbol can occur in the terms $t$, $t_1$,\dots $t_p$ above
+only if it was been previously defined in the model or is one of the symbols
+being recursively defined.}
+
 Similarly to the response of \ter{get-value}, 
 the terms $t,t_1,\ldots,t_m$ above are allowed to contain symbols
 not in the current signature only if they are abstract values.
@@ -1670,6 +1677,8 @@ say, would determine a unique function over the whole set of integers.
 The command can be issued only if the \attr{produce-models} option,
 which is set to \ter{false} by default, is set to \ter{true} 
 (see Section~\ref{sec:options}).
+
+\newpage
 
 \end{description}
 
@@ -1735,7 +1744,7 @@ which is set to \ter{false} by default, is set to \ter{true}
 \item[\expr{(get-unsat-core)}]
 Let $A$ be the set of assertions in the context and $B$ the set of assumptions
 in the most recent call to  \expr{check-sat-assuming}
-(where, as defined above, a call to \expr{check-sat} is considered a call to \epxr{check-sat-assuming}
+(where, as defined above, a call to \expr{check-sat} is considered a call to \expr{check-sat-assuming}
 with no assumptions).
 Let $A$ be further partitioned into $A_n$ and $A_u$, where
 $A_n$ contains assertions that were asserted with a command of the form
