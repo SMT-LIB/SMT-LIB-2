@@ -102,13 +102,16 @@ The functionality of \expr{check-sat-assuming} has been extended to allow
 arbitrary Boolean terms to be passed as assumptions.  The semantics of
 \expr{get-unsat-assumptions} and \expr{get-unsat-core} have been
 correspondingly generalized and clarified.
+
+The format of answers to the \expr{get-model} command has been further restricted
+to prevent forward references in models.
 \end{newver}
 
 %-------------------------------------------------------------------------------
 \subsection{Change log for Version 2.6}
 %-------------------------------------------------------------------------------
 
-\paragraph{Release: ???}
+\paragraph{Release: 2024-09-20}
 \begin{itemize}
 \item    Changed verbosity to have no standard default value
 \item    Changed default for print-success to be false

@@ -1067,11 +1067,16 @@ The same requirement applies to occurrences of solver-generated constants
 within terms output by the solver---as the type of these constants is unknown
 to the user.
 
-\begin{lstlisting}[linewidth=32em]
+The example below illustrates the need and use of \ter{as} for typical functions
+associated with lists or arrays, such as the empty list constructor and the
+ constant array constructor.
+
+\begin{lstlisting}[linewidth=35.5em]
+; Considering cons and nil as list constructors
 (cons "abc" (as nil (List String)))
 
-; const-array takes a value v and
-; returns an array storing v at all positions
+; Considering a const-array function, taking a value v and
+; returning an array storing v at all positions
 (= a ((as const-array (Array Int Real)) 0.0))
 
 (select (as @a1 (Array Int Int)) 3)
