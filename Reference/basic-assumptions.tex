@@ -106,12 +106,17 @@ analogous to constructs with the same name
 found in functional programming languages.
 
 \begin{newver}
-Version 2.7 extends the logic of Version 2.6 with a $\lambda$ binder
-for function abstraction, creating terms with a sort the form
-\expr{(-> $\tau_1$ $\tau_2$)}, and an explicit application operator 
-for values of such sort. 
+Version 2.7 introduces a new core theory of maps, 
+values with a sort of the form \expr{(-> $\tau_1$ $\tau_2$)}, and 
+extends the language of Version 2.6 with a $\lambda$ binder
+for map abstraction,
+as well as an explicit application operator \ter{\_}
+for values of sort \expr{(-> $\tau_1$ $\tau_2$)}. 
 This allows, in effect, the use of higher-order functions,
-while keeping the underlying logic nominally first order.
+while keeping the underlying logic nominally first order.\footnote{
+Version 3 of the standard, which will be based on a higher-order logic,
+will identify maps and functions.
+}
 \end{newver}
 
 SMT-LIB's underlying logic,

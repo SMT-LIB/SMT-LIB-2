@@ -1911,14 +1911,14 @@ functions.
    :definition
    "For every expanded signature Sigma, the instance of HO-Core with that signature
     is the theory consisting of all Sigma-models in which: 
-    - the sort constructor -> denotes the function space constructor;
+    - the sort constructor -> denotes the map sort constructor;
     - for all sorts s1, s2 in Sigma, 
       - (_ (-> s1 s2) s1 s2) denotes the function that
         returns the result of applying its first argument to its second."
     
    :values 
    "For all sorts s1, s2, the set of values for the sort (-> s1 s2) consists of
-    - an abstract value for each function (from a countable subset of the functions)
+    - an abstract value for each map (from a countable subset of the maps)
       of type s1 -> s2;
     - terms of the form (lambda ((x s1)) t) where t has sort s2 when every
       free occurrence of x in t has sort s1.
@@ -1963,15 +1963,22 @@ functions.
 % while, however, allowing additional function and predicate symbols.
 
 This version of SMT-LIB adds support for higher-order logic through the addition
-of a new theory, HO-Core, shown in Figure~\ref{fig:HO-Core}.
+of a new theory, HO-Core of maps, shown in Figure~\ref{fig:HO-Core},
+where maps can be understood as total functional relations.\endnote{
+We call them \emph{maps} instead of \emph{functions} to distinguish them
+from SMT-LIB functions since the two are treated differently in the syntax.
+For instance, maps can be passed as arguments while functions cannot. 
+}
+
+
 The theory includes a binary sort constructor \ter{->} for sorts 
-that denote function spaces 
-(for example \expr{(-> Int Real)} for the sort of functions from \ter{Int} to \ter{Real})
-and an explicit function application operator \ter{\_}.
+that denote sets of maps 
+(for example \expr{(-> Int Real)} for the sort of maps from \ter{Int} to \ter{Real})
+and an explicit map application operator \ter{\_}.
 
 Note that, with this addition, the language distinguishes 
-between \emph{functions} of rank $\tau_1\tau_2$
-and \emph{constants} or variables of sort \expr{(-> $\tau_1$ $\tau_2$)}.
+between unary \emph{functions} denoted by symbols of rank $\tau_1\tau_2$,
+and \emph{maps} denoted by constant symbols or variables of sort \expr{(-> $\tau_1$ $\tau_2$)}.
 For instance, the latter can be passed as an argument to other functions 
 as any other variable but the former cannot.\endnote{%
 \new{This difference will disappear in the planned Version 3 of the standard
@@ -1981,16 +1988,16 @@ to a version of higher-order logic with dependent types.}
 This is no real limitation, though, because it is possible to convert from one to the other
 thanks to the apply operator \ter{\_} and the abstraction binder \ter{lambda}.
 For instance, if \ter{f} is a function symbol of rank $\tau_1\tau_2$,
-one can define a corresponding higher-order constant with the command 
+one can define a corresponding map with the command 
 (see~\ref{sec:new-symbols}) 
 \begin{center}
 \expr{(define-const c\_f (lambda ((x $\tau_1$)) (f x)))} .
 \end{center}
 %
-Conversely, if \ter{c} is a constant of sort \expr{(-> $\tau_1$ $\tau_2$)},
+Conversely, if \ter{e} is any expression of sort \expr{(-> $\tau_1$ $\tau_2$)},
 the corresponding function can be defined by the command 
 \begin{center}
-\expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (\_ c x))} .
+\expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (\_ e x))} .
 \end{center}
 
 The \ter{->} sort constructor is defined as right-associative, 
@@ -2022,8 +2029,8 @@ and has sort $\tau$.
 
 Similarly, it is not possible to return a function of rank $\tau_1 \cdots \tau_n$
 (with $n > 1$) from another function, but it is possible to return
-a constant of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.\endnote{\new{
-The difference between function symbols and constants of \ter{->} sorts
+a value of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.\endnote{\new{
+The difference between functions and maps
 will disappear in Version 3 where, in current terms, 
 there will be no function symbols but only constant symbols,
 possibly of sort \expr{(-> $\tau_1$ $\tau_2$)}.
