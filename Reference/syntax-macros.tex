@@ -511,16 +511,6 @@ f \in \mathcal{F}, & \text{the set of function symbols}
   \end{tabular}
   \bigskip
   
-  %% lambda
-\begin{tabular}{ll}
-  \derives{
-  \Sigma[x:\tau_1] \vdash t_2:\tau_2
-  }
-  {\Sigma \vdash (\lambda (x {:} \tau_1)\; t_2) : \fconstructa{\tau_1}{\tau_2}}
-  &
-  \end{tabular}
-  \bigskip
-  
   %% annotated function application
 \begin{tabular}{ll}
   \derives{
@@ -531,6 +521,16 @@ f \in \mathcal{F}, & \text{the set of function symbols}
   &
   if 
   $f{:}\tau_1 \cdots \tau_k\tau \in \Sigma$
+  \end{tabular}
+  \bigskip
+  
+  %% lambda
+\begin{tabular}{ll}
+  \derives{
+  \Sigma[x:\tau_1] \vdash t_2:\tau_2
+  }
+  {\Sigma \vdash (\lambda x {:} \tau_1\; t_2) : \fconstructa{\tau_1}{\tau_2}}
+  &
   \end{tabular}
   \bigskip
   

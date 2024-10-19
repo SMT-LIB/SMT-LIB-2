@@ -12,18 +12,16 @@
 The underlying logic of the SMT-LIB language is a variant of many-sorted 
 first-order logic (FOL) with equality~\cite{Man-MSL-93,Gal-86,Hen-01},
 although it incorporates some syntactic \new{and semantic} features 
-of higher-order logics:
-in particular, the identification of formulas with terms 
-of a distinguished Boolean sort, and the use of sort symbols of arity 
+of higher-order logics, in particular: 
+the identification of formulas with terms of a distinguished Boolean sort;
+the use of sort symbols of arity greater than 0;
 \begin{newver}
-greater than 0,
-as well as, starting with Version 2.7, the use of functions as first-class values.
-The latter is achieved by the addition of a background theory 
-of (higher-order) functions,
-which are modeled in the concrete syntax 
-as values of sort \expr{(-> $\tau_1$ $\tau_2$)}
+and starting with Version 2.7, the use of functions as first-class values.
+The latter is achieved by the addition of a background theory of (higher-order) maps,
+which are modeled in the concrete syntax as values 
+of sort \expr{(-> $\tau_1$ $\tau_2$)}
 and are constructible with a $\lambda$-abstraction binder.
-New to Version 2.7 is also the addition of prenex polymorphism in user-scripts,
+New to Version 2.7 is also the addition of prenex polymorphism in user scripts,
 achieved through the declaration of sort parameters, which can then 
 be used to make assertions containing terms of polymorphic sort.
 \end{newver}
@@ -85,7 +83,7 @@ an infinite set $\so$ of \define{sort symbols} $s$
 containing the symbol $\bool$,
 
 \item
-an infinite set $\sop$ of \define{sort parameters} $u$,
+\new{an infinite set $\sop$ of \define{sort parameters} $u$,}
 
 \item
 an infinite set $\va$ of \define{variables}\index{variable} $x$,
@@ -179,8 +177,7 @@ then the expression
   (\akey{List}\ \akey{Real})))}
 \] 
 and all of its subexpressions are monomorphic sorts.  
-We are using the
-constructor for function sorts $\fconstruct$ as 
+We are using the constructor $\fconstruct$ for map sorts as 
 an infix, right-associative operator to improve readability.
 
 Note that function symbol declarations in theory declarations (defined later)
@@ -194,12 +191,14 @@ the expression
 and all of its subexpressions are polymorphic sorts.
 \end{newver}
 
-An abstract syntax for monomorphic sorts $\sigma$ and polymorphic sorts $\tau$,
+An abstract syntax for monomorphic sorts $\sigma$ \new{and polymorphic sorts $\tau$},
 which ignores arity constraints for simplicity, 
 is provided in Figure~\ref{fig:abstract-sorts}.
+\begin{newver}
 Note that every monomorphic sort is a polymorphic sort, but not vice versa.
 In the following, we just use ``sort'' to refer to possibly polymorphic sorts
 and we use ``monorphic sort'' for the more restricted case as needed.
+\end{newver}
 
 %
 %\trem{More}
@@ -245,7 +244,7 @@ distinct variables $x, x_1, \ldots, x_n \in \va$ and sort $\tau$,
 \new{
 the prefix construct
 \ $\lambda\,x{:}\tau\ \vartextvisiblespace$ \ is 
-a \define{function abstraction binder}\index{binder!lambda binder}
+a \define{map abstraction binder}\index{binder!lambda binder}
 for $x$;}
 
 \item
@@ -447,7 +446,7 @@ monorphic sorts in $\sortt{\Sigma, \sop}$.
 \begin{definition}[Sort substitution and instance]
 A \define{sort substitution} $\theta$
 maps each sort parameter $u$ in $\sop$ to a sort $\theta(u)$ in $\sortt{\Sigma,\sop}$.
-A \define{monomorphic substitution} is a sort substitution that maps every parameter
+A \define{monomorphic sort substitution} is a sort substitution that maps every parameter
 to a monomorphic sort.
 A \define{sort instance of a polymorphic sort} $\tau$ is a sort $\theta(\tau)$ obtained
 by sort substitution, i.e.,
@@ -469,14 +468,17 @@ given a signature $\Sigma$,
 a \define{sorted variable} is 
 a pair $(x,\tau)$ in $\va \times \sortt{\Sigma, \sop}$,
 which we write as $x{:}\tau$.
-We write $x{:}\tau \in \Sigma$
-to denote that $x$ has sort $\tau$ in $\Sigma$.
 A \define{ranked function symbol} is 
 a pair $(f, \tau_1\cdots\tau_n\tau)$ in $\fu \times \sortt{\Sigma, \sop}^+$,
 which we write as $f{:}\tau_1\cdots\tau_n\tau$.
+
+\begin{notation}
+We write $x{:}\tau \in \Sigma$
+to denote that variable $x$ has sort $\tau$ in $\Sigma$.
 \new{We write  $f{:}\tau_1\cdots\tau_n\tau \in \Sigma$
-if $f$ has some rank $\hat\tau_1\cdots\hat\tau_n\hat\tau$ in $\Sigma$, and
+to denote that function $f$ has some rank $\hat\tau_1\cdots\hat\tau_n\hat\tau$ in $\Sigma$, and
 $\tau_1\cdots\tau_n\tau$ is an instance of $\hat\tau_1\cdots\hat\tau_n\hat\tau$}.
+\end{notation}
 
 We will also consider signatures that differ from a given signature $\Sigma$
 only by the sort they assign to variables,
@@ -524,6 +526,23 @@ $\akey{Real}\:\akey{Real}\:\akey{Real}$ (for binary subtraction over the reals),
 and
 $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 
+\begin{newver}
+\begin{remark}
+Even polymorphic function symbols, that is, 
+function symbols of polymorphic rank, should be understood as overloaded symbols
+(as opposed to \emph{parametric} or \emph{generic}).  
+The reason is that, while each such symbol stands for a family of monomorphic symbols 
+whose ranks are all instances of the same polymorphic rank,
+the interpretations of different instances need not be related.
+For example, if $\Sigma$ is a signature containing a symbol $f:uu$ 
+where $u$ is a sort parameter,
+it is possible for a $\Sigma$-structure (see Definition~\ref{def:basic:structure}) 
+to interpret
+$f:\ter{Int}\,\ter{Int}$ as the identity function over the integers and 
+$f:\ter{Bool}\,\ter{Bool}$ as the Boolean negation function. 
+\end{remark}
+\end{newver}
+
 % Together with the mechanisms used 
 % to declare theories (described in Section~\ref{sec:theories})
 % and algebraic datatypes (described in Section~\ref{sec:new-symbols}),
@@ -564,8 +583,9 @@ a term of the form $f\, \bar{t}$,
 where the terms $\bar t$ have sorts $\overline \tau$, can be given 
 a unique sort only if $f$ is annotated with one of the result sorts $\tau_1, \tau_2$,
 that is, only if it is written as $f^{\tau_1}\bar{t}$ or $f^{\tau_2}\bar{t}$. 
-As a consequence, from now on \emph{we will assume 
-that all ambiguous symbols are annotated as  described above}.
+%%CT Removed because not needed anymore
+%As a consequence, from now on \emph{we will assume 
+%that all ambiguous symbols are annotated as  described above}.
 
 % \pfrem{Maybe add an end-note on this non-issue: there might be
 % two identical instances from two ranks:
@@ -632,17 +652,17 @@ we say that \define{$t$ has, or is of, sort $\tau$}.
 \qed
 \end{definition}
 
-With this definition, it is possible to show that every term has at
-most one sort in a given signature $\Sigma$.\endnote{
+With this definition, it is possible to show that every \new{closed} term has 
+at most one sort in a given signature $\Sigma$.\endnote{
   It would have been reasonable to adopt an
   alternative version of the rule for well-sortedness of terms
   $(f^\tau\; t_1\; \cdots\; t_k)$ with annotated function
-  symbols $f^\tau$, without the second conjunct of the rule's side
-  condition.  This would allow formation of terms with annotated
+  symbols $f^\tau$, without the second conjunct of the rule's side condition.  
+  This would allow formation of terms with annotated
   function symbols $f^\tau$, even when $f$ lacked two ranks of the
   forms $\tau_1 \cdots \tau_k\tau$ and $\tau_1 \cdots
-  \tau_k\tau'$, for distinct $\tau$ and $\tau'$.  The
-  rationale for keeping this second conjunct is that with it, function
+  \tau_k\tau'$, for distinct $\tau$ and $\tau'$.
+  The rationale for keeping this second conjunct is that with it, function
   symbols are annotated when used iff they are overloaded in this way.
   This means that it is clear from the use of the function symbol,
   whether or not the annotation is required.  This in turn should help
@@ -744,7 +764,7 @@ relying on a similar notion of \emph{$\Sigma$-structure}.
 %TODO, same thing for functions
 
 \begin{definition}[$\Sigma$-structure]
-%\label{def:structure}
+\label{def:basic:structure}
 Let $\Sigma$ be a signature.
 A \define{$\Sigma$-structure} $\str A$ is a pair consisting of 
 a sufficently large set $A$,  the \define{universe} of $\str A$, and 
@@ -832,7 +852,7 @@ with an empty set of generators.
 \medskip
 
 \begin{newver}
-For interpreting functional sorts, we will use the notion of a \define{map}, i.e., a functional binary relation.
+For interpreting $\fconstruct$ sorts, we will use the notion of a \define{map}, i.e., a functional binary relation.
 We will denote a map as a set of pairs of the form $a\mapsto b$.
 \end{newver}
 
@@ -1021,8 +1041,8 @@ and
 let $\inter{I}$ be a $\Sigma$-interpretation.
 For every well-sorted term $t$ of sort $\tau$ with respect to $\Sigma$,
 $\mea{\inter I}{t}$ is defined recursively as follows,
-\new{where Rule~\ref{ruleI} applies to polymorphic terms
-and the rest of the rules apply only to monomorphic terms}.
+\new{where Case~\ref{ruleI} applies to polymorphic terms
+and the other cases apply only to monomorphic terms}.
 
 \begin{enumerate}
 \item \new{\label{ruleI}
@@ -1047,7 +1067,7 @@ $\mea{\inter I}{x} = v(x{:}\sigma)$
 
 \item
 $\mea{\inter I}{\hat{f}\;t_1\;\ldots\;t_n} = 
- (f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}(a_1,\ldots,a_n)
+ (f{:}\sigma_1\cdots\sigma_n\sigma)^{\str A}(\mea{\inter I}{t_1},\ldots,\mea{\inter I}{t_n})
 $ 
 \quad if \  
 \(
@@ -1084,7 +1104,7 @@ for some $\inter I'$
 \begin{cases}
  \inter{I}'= {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n],\\
  (a_1,\ldots,a_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A},\\
- \inter I = (\str A, v),\\
+ \inter I = (\str A, v)
 \end{cases}
 \)
 
@@ -1098,7 +1118,7 @@ for all $\inter I'$
 \begin{cases}
  \inter{I}'= {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n],\\
  (a_1,\ldots,a_n) \in \sigma_1^{\str A} \times \cdots \times \sigma_n^{\str A},\\
- \inter I = (\str A, v),\\
+ \inter I = (\str A, v)
 \end{cases}
 \)
 
