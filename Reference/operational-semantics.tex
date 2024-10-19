@@ -953,8 +953,7 @@ The command reports an error if a function symbol with name $f$
 is already present in the current signature.
 \new{
 Note that 
-$\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters.
-In that case $f$ is polymorphic.
+making $f$ polymorphic.
 }
 \smallskip
 
@@ -1223,8 +1222,9 @@ and
 $(x_{i,1}:\tau_{i,1}),\; \ldots,\; (x_{i,n_i}:\tau_{i,n_i})$.
 
 \new{
-Note that, for each $i$, $\tau_{i,1}$ $\cdots$ $\tau_{i,n_i}$, and $\tau_i$ may contain sort parameters.
-In that case $f_i$ is polymorphic. }
+Note that, as for \ter{declare-fun}, 
+for each $i$, $\tau_{i,1}, \ldots, \tau_{i,n_i}$, $\tau_i$ may contain sort parameters.
+}
 
 \smallskip
 
@@ -1252,11 +1252,33 @@ where $t$ is a well-sorted formula
 (i.e., a well-sorted element of \nter{term} of sort \ter{Bool}),
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
-\new{If any subterm of $t$ has a polymorphic sort $\tau$ over sort parameters
-$u_1$,\ldots, $u_n$, then the sort parameters are implicitely
-universally quantified in the assertion.  That is, when a later check command is
-issued, the assertion will hold for all instances of $u_1$,\ldots, $u_n$
-with ground sorts in the signature at that time.}
+
+\begin{newver}
+If any subterm of $t$ has a polymorphic sort
+and $u_1$,\ldots, $u_n$ lists all the sort parameters in the sorts of such terms 
+then, at the time a later \ter{check-sat} command is executed,
+the assertion stands for all the (possibly infinitely-many) assertions of the form 
+\expr{(assert $t'$)} where $t'$ is obtained from $t$ by instantiating
+$u_1$,\ldots, $u_n$ with \emph{all and only} the monomorphic sorts 
+in the signature at that time.
+For example, consider the following script.
+
+\begin{lstlisting}
+...
+(declare-sort-parameter A)
+(declare-sort-parameter B)
+(declare-fun is-const ((Array A B)) Bool)
+(assert (forall ((a (Array A B))) 
+  (= (is-cont a) 
+     (forall ((i A) (j A)) (= (select a i) (select a j))))))
+...
+(check-sat)
+\end{lstlisting}
+When \ter{check-sat} is executed, 
+the set of asserted formulas will include all instantiations of the assertion above 
+where the parameters \ter{A} and \ter{B} 
+have been replaced by the monomorphic sorts available at that point.
+\end{newver}
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 
@@ -1265,30 +1287,68 @@ by the commands \ter{get-assignment} and \ter{get-unsat-core}, as explained late
 
 \begin{newver}
 \begin{remark}
-Notice that the commands
+Consider the commands
+\begin{lstlisting}
+(declare-sort-parameter A)
+(assert (forall ((x A) (y A) (z A)) (or (= x y) (= x z))))
+\end{lstlisting}
+%
+The assertion states that the domain of every sort has cardinality at most two.
+Based on the definition of \ter{assert} given above, the satisfiability 
+of the asserted formula depends on the set of theory sorts available at the time 
+the \ter{check-sat} is executed.
+For example, 
+the formula is satisfiable if the only available sort is \ter{Bool} 
+but it is unsatisfiable if the available sorts include theory sorts, 
+such as \ter{Int}, denoting sets of larger cardinality.
+Note that this semantic is \emph{not} aligned with that of other logics
+with type polymorphism, where sort/type parameters are interpreted as subsets 
+of a large universe of individuals.\footnote{\new{
+In such logics, the formula above would always be unsatisfiable, independently 
+of the signature.
+}}
+In contrast, sort parameters in SMT-LIB are effectively \emph{schematic} variables 
+standing for monomorphic sorts.\endnote{\new{
+The decision to adopt this semantics is mostly a pragmatic one as it easier 
+for SMT solvers to support sort parameters that range over sorts.
+Note that because of the syntactic restriction to rank-1 polymorphis
+(all sort parameters are implicitly universal quantified),
+the SMT-LIB semantics is sound with respect to those where type parameters 
+range over sets: every formula unsatisfiable under the former semantics is 
+unsatisfiable under the latter as well. 
+}}
+\end{remark}
+
+\begin{remark}
+Consider the commands below, stating that every sort has a domain of size one.
 \begin{lstlisting}
 (declare-sort-parameter A)
 (assert (forall ((x A) (y A)) (= x y)))
 \end{lstlisting}
-have the effect of stating that every sort has a domain of size one.
-Consider the negation of this assertion.  It should state that at least one sort has a
-domain of size at least two.
-However, the commands
+%
+Note that asserting the negation of the formula above \emph{does not} have 
+the effect of stating that there is a sort whose domain that cardinality 
+greater than one.\footnote{
+All sorts have non-empty domains in SMT-LIB.  
+}
 \begin{lstlisting}
 (declare-sort-parameter A)
 (assert (not (forall ((x A) (y A)) (= x y))))
 \end{lstlisting}
-have instead the effect of stating that \emph{every} sort has a domain of size 
-at least two.
-Properly negating the original assertion can instead be done by introducing
-a fresh sort symbol, as in
+
+Instead, the two commands above state that 
+\emph{every} sort has a domain of cardinality greater than one.
+Properly negating the original assertion can be done 
+by using a fresh sort \emph{constant}, as in
+
 \begin{lstlisting}
 (declare-sort U 0)
 (assert (not (forall ((x U) (y U)) (= x y))))
 \end{lstlisting}
+
 In general, this means that, when polymorphic sorts are involved,
-special care must be taken to ensure that the formula asserted matches the
-intent.  This is especially true when checking, for example, the validity 
+special care must be taken to ensure that the formula asserted matches the intent.
+This is especially true when checking, for example, the validity 
 of an implication \expr{(=> $p$ $q$)} 
 by asserting $p$ and \expr{(not $q$)}, and then checking for satisfiability.
 \end{remark}
@@ -1450,8 +1510,9 @@ that its partial model can be indeed extended as needed.
 %%% get-value %%%
 %
 \item[\expr{(get-value ($t_1$ $\cdots$ $t_n$))}]
-where $n > 0$ and each $t_i$ is a well-sorted closed quantifier-free
-term, returns for each $t_i$ a value term $v_i$\footnote{%
+where $n > 0$ and each $t_i$ is a well-sorted closed quantifier-free term
+\new{of monomorphic sort}, 
+returns for each $t_i$ a value term $v_i$\footnote{%
 Recall that value terms are particular ground terms defined in a logic 
 for each sort (see Subsection~\ref{sec:logic-decl}).  
 } 
@@ -1519,7 +1580,6 @@ The command returns a sequence of the form
 A pair \expr{($f_i$ $b_i$)} is in the returned sequence if and only if
 $f_i$ is the label of a (sub)term of the form 
 \expr{(!~$t_i$ \attr{named} $f_i$)} in the context, 
-with $t_i$ a closed term of sort \ter{Bool},
 and 
 $b_i$ is the value (\ter{true} or \ter{false}) 
 that $t_i$ has in the current model $\str A$.
@@ -1534,8 +1594,6 @@ which is set to \ter{false} by default, is set to \ter{true}
 %%% get-model %%%
 %
 \item[\expr{(get-model)}]
-returns a list \expr{($d_1$ $\cdots$ $d_k$)} of definitions specifying \emph{all} and only the current user-declared 
-function symbols $\{g_1, \ldots, g_m\}$ in the current model $\str A$.
 The interpretation of each symbol is provided in exactly one of the definition 
 $d_1$,\dots $d_k$.  The define commands $d_1$,\dots $d_k$ have one of the following forms:\endnote{
 The rationale for providing the interpretation of a function symbol

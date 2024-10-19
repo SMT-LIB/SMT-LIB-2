@@ -480,7 +480,7 @@ that is, each is associated with a (unique) \define{sort}.
 The set of sorts consists itself of \define{sort terms}.
 In essence, a sort is 
 a \define{sort symbol},
-a \define{sort parameter}, 
+a \define{\new{sort parameter}}, 
 or a sort symbol applied to a sequence of sort terms.
 
 Syntactically, a sort symbol can be either the distinguished symbol \ter{Bool}
@@ -518,6 +518,14 @@ Local sort parameters are introduced by a specific binder, \ter{par}.
 Global sort parameters are declared in a script by the command \ter{declare-sort-parameter}
 (see Section~\ref{sec:new-symbols}).
 
+We say that a sort is \define{over} a set of sort constructors and parameters
+if it is built exclusively with symbols from from that set.
+Intuitively, for a given set $C$ of sort constructors and parameters,
+a sort $\tau$ over $C$ stands for any monomorphic sort $\sigma$ obtained 
+by replacing the sort parameters of $\tau$ (if any)
+with monomorphic sorts over $C$.
+We call $\sigma$ an \define{instance} of $\tau$.
+
 We will write just \emph{sort} to mean a polymorphic sort, and 
 write instead \emph{monomorphic sort} when we want to emphasize 
 that the sort has no parameters. 
@@ -535,12 +543,27 @@ denotes a function that takes as input $n$ values of respective sorts
 $\sigma_1, \ldots, \sigma_n$,
 and returns a value of sort $\sigma$.
 
+\begin{newver}
 In contrast, a function symbol $f$ with rank $\tau_1\cdots\tau_n\tau$,
 where each sort may contain sort parameters,
-actually stands for a whole \emph{class} of function symbols, 
+actually stands for a whole \emph{family} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
-of a sort parameter with a monomorphic sort.
+of a sort parameter with a monomorphic sort (over a given set of sort constructors).
+We refer to $f$ as \define{polymorphic function symbol}.
+
+\begin{remark}
+Note that, contrary to other logic or programming languages,
+SMT-LIB does not insist that members of a polymorphic function family
+be defined uniformly.
+In other words, it is possible, for example, for the family of functions
+associated to a function symbol $f$ of rank $\alpha\alpha$ 
+to contain a function symbol $f$ of rank \ter{Int}\,\ter{Int}, say, 
+that behaves like the identity function and 
+a function of rank \ter{Bool}\,\ter{Bool} that does not.
+\end{remark}
+
+\end{newver}
 
 
 %-------------------------------------------------------------------------------
