@@ -953,6 +953,7 @@ The command reports an error if a function symbol with name $f$
 is already present in the current signature.
 \new{
 Note that 
+$\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters,
 making $f$ polymorphic.
 }
 \smallskip
@@ -1580,6 +1581,7 @@ The command returns a sequence of the form
 A pair \expr{($f_i$ $b_i$)} is in the returned sequence if and only if
 $f_i$ is the label of a (sub)term of the form 
 \expr{(!~$t_i$ \attr{named} $f_i$)} in the context, 
+with $t_i$ a closed quantifier-free term of sort \ter{Bool},
 and 
 $b_i$ is the value (\ter{true} or \ter{false}) 
 that $t_i$ has in the current model $\str A$.
@@ -1594,6 +1596,14 @@ which is set to \ter{false} by default, is set to \ter{true}
 %%% get-model %%%
 %
 \item[\expr{(get-model)}]
+\ctrem{We may need to add \ter{declare-sort-parameter}.
+For this reason,
+we may as well allow the declaration of abstract (sort and function) symbols with \ter{declare-sort} and \ter{declare-fun}.
+} 
+returns a \define{model}, 
+a list \expr{($d_1$ $\cdots$ $d_k$)} of definitions specifying \emph{all} and only the current user-declared 
+function symbols $\{g_1, \ldots, g_m\}$ in the current model $\str A$
+\ctrem{We should allow also declarations of abstract symbols}.
 The interpretation of each symbol is provided in exactly one of the definition 
 $d_1$,\dots $d_k$.  The define commands $d_1$,\dots $d_k$ have one of the following forms:\endnote{
 The rationale for providing the interpretation of a function symbol
