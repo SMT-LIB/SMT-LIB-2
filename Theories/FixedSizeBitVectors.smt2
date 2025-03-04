@@ -4,14 +4,15 @@
  :smt-lib-release "2024-07-21"
  :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02" 
- :last-updated "2024-07-21"
+ :last-updated "2025-02-25"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2025-02-25 Renamed and updated conversion operators to/from integers.
   2024-07-21 Updated to Version 2.7.
-  2024-07-16 Added conversion operators between bitvectors and integers
-  2024-07-14 Fixed minor typos
-  2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo
-  2020-05-20 Fixed minor typo
+  2024-07-16 Added conversion operators between bitvectors and integers.
+  2024-07-14 Fixed minor typos.
+  2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo.
+  2020-05-20 Fixed minor typo.
   2017-06-13 Added :left-assoc attribute to bvand, bvor, bvadd, bvmul
   2017-05-03 Updated to version 2.6; changed semantics of division and
              remainder operators.
@@ -86,6 +87,23 @@
     - m is a numeral greater than 0
  "
 
+ :funs_description "
+   If the Ints theory is also present, all function symbols with declarations of the form
+
+       (ubv_to_int (_ BitVec m) Int)
+    or
+       (sbv_to_int (_ BitVec m) Int)
+    or
+       ((_ int_to_bv m) Int (_ BitVec m))
+
+    where
+    - m is a numeral greater than 0.
+
+    Note that only a single operator for conversions from integers to bitvectors is needed,
+    as the semantics are the same whether the intention is to convert to a signed or
+    unsigned bitvector.  See the definition for more details.
+"
+
  :definition
  "For every expanded signature Sigma, the instance of FixedSizeBitVectors
    with that signature is the theory consisting of all Sigma-models that 
@@ -117,21 +135,10 @@
 
        bv2nat(b) := b(m-1)*2^{m-1} + b(m-2)*2^{m-2} + ⋯ + b(0)*2^0
 
-   o bv2int, which takes a bitvector b: [0, m) → {0, 1}
-     with 0 < m, and returns an integer in the range [- 2^(m - 1), 2^(m - 1)),
-     and is defined as follows:
+   o nat2bv[m], with 0 < m, which takes a non-negative integer n and returns
+     the (unique) bitvector b: [0, m) -> {0, 1} such that:
 
-       bv2int(b) := if b(m-1) = 0 then bv2nat(b) else bv2nat(b) - 2^m
-
-   o nat2bv[m], with 0 < m, which takes a non-negative integer and returns the (unique) bitvector
-     b: [0, m) -> {0, 1} such that:
-
-       b(m-1)*2^{m-1} + ⋯ + b(0)*2^0 = n mod 2^m
- 
-   o int2bv[m], with 0 < m, which takes an integer n and returns the (unique) bitvector
-     b: [0, m) -> {0, 1} such that:
-
-       b(m-1)*2^{m-1} + ⋯ + b(0)*2^0 = (n + 2^m) mod 2^m
+       bv2nat(b) = n mod 2^m
 
    The semantic interpretation [[_]] of well-sorted BitVec-terms is
    inductively defined as follows.
@@ -230,15 +237,27 @@
 
    If the Ints theory is also present, let [[_]] be extended to additionally
    interpret terms of sort Int.  For operations in that theory, [[_]]
-   interprets them according to the semantics defined there.  We further define:
+   interprets them according to the semantics defined there.  We further
+   define:
 
-   [[(bv2nat b)]] := bv2nat([[b]])
-   [[(bv2int b)]] := bv2int([[b]])
+   [[(ubv_to_int s)]] := bv2nat([[s]])
 
-   [[(_ nat2bv M) N]] := nat2bv[[[M]]]([[N]])
-   [[(_ int2bv M) N]] := int2bv[[[M]]]([[N]]),
+   [[(sbv_to_int s)]] := if [[s]](m-1) = 0 then bv2nat([[s]])
+                                           else bv2nat([[s]]) - 2^m
 
-   where M and N are terms of sort Int.
+   where s is of sort (_ BitVec m) and 0 < m.  We also define:
+
+   [[((_ int_to_bv N) x)]] := nat2bv[[[N]]]([[x]] mod 2^[[N]])
+
+   where N is a numeral greater than 0 and x is a term of sort Int.
+
+   Notice that the semantics are correct regardless of whether the intended
+   target is a signed or unsigned bitvector.  For example:
+
+     [[((_ int_to_bv 4) -7)]] = [[((_ int_to_bv 4) 9)]] = 1001.
+
+   In both cases, the mod operation (as defined above to always return a
+   nonnegative value) leads to the correct result.
  "
 
 :values

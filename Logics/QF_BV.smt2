@@ -4,12 +4,13 @@
  :smt-lib-release "2024-07-21"
  :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02"
- :last-updated "2024-07-21"
+ :last-updated "2025-02-25"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2025-02-25 Renamed and updated conversion operators to/from integers.
   2024-07-21 Updated to Version 2.7.
-  2024-07-15 Added bv2nat, bv2int, nat2bv, int2bv
-  2024-07-14 Minor disambiguation
+  2024-07-15 Added conversion operators between bitvectors and integers.
+  2024-07-14 Minor disambiguation.
   2023-11-29 Added bvnego bvuaddo bvsaddo bvumulo bvsmulo bvusubo bvssubo bvsdivo
   2020-05-20 bvxnor is no longer marked as left associative, as that is
              inconsistent with its meaning as the negation of bvxor.
@@ -89,14 +90,12 @@
       - overflow predicate for unsigned multiplication modulo 2^m
     (bvsmulo (_ BitVec m) (_ BitVec m) Bool)
       - overflow predicate for signed multiplication on m-bit 2's complement
-    (bv2nat (_ BitVec m) Int)
+    (ubv_to_int (_ BitVec m) Int)
       - convert bitvector, interpreted as unsigned, to its integer value
-    (bv2int (_ BitVec m) Int)
-      - convert a bitvector, interpreted as signed, to integer value
-    ((_ nat2bv m) (Int) (_ BitVec m))
-      - convert an Integer into an unsigned bitvector
-    ((_ int2bv m) (Int) (_ BitVec m))
-      - convert an Integer into a signed bitvector
+    (sbv_to_int (_ BitVec m) Int)
+      - convert a bitvector, interpreted as signed, to its integer value
+    ((_ int_to_bv m) (Int) (_ BitVec m))
+      - convert an Integer to a bitvector
 
   Defined below:
 
