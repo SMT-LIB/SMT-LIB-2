@@ -67,7 +67,7 @@
                                the characters} \\
                &     & \ter{+ - / * = \% ?~!~.~\$ \_ \~{} \& \^{} $<$ $>$ @}
                        \textit{that does not start} \\
-               &     & \textit{with a digit}
+               &     & \textit{with a digit and is not a reserved word}
  \\[1ex]
  \nter{symbol} & ::= & \nter{simple\_symbol} \\
                &\alt & \textit{a sequence of whitespace and printable characters that }\\
@@ -130,10 +130,11 @@
  \\[1ex]
  \nter{sorted\_var} & ::= & \ter{(} \nter{symbol} \nter{sort} \ter{)}
  \\[1ex]
- \nter{pattern} & ::= & \nter{symbol} % \\
+ \nter{symbol\_} & ::= & \nter{symbol} \alt\ \ter{\_}\\[1ex]
+ \nter{pattern} & ::= & \nter{symbol\_} % \\
 %                & \alt\ & \nter{qual\_constructor} \\
 %                & \alt\ & \ter{(} \nter{qual\_constructor} \nter[+]{symbol} \ter{)}
-                 \alt\ \ter{(} \nter{symbol} \nter[+]{symbol} \ter{)}
+                 \alt\ \ter{(} \nter{symbol} \nter[+]{symbol\_} \ter{)}
  \\[1ex]
  \nter{match\_case} & ::= & \ter{(} \nter{pattern} \nter{term} \ter{)}
  \\[1ex]

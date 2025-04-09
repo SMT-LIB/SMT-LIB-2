@@ -57,7 +57,7 @@ enclosed in parentheses.
 \subsection{Change log for Version 2.7}
 %-------------------------------------------------------------------------------
 
-\paragraph{Release: 2025-04-08}
+\paragraph{Release: 2025-04-09}
 \begin{itemize}
 \item Replaced \ter{\_} with \ter{@} as the map application operator in theory HO-Core.
 \end{itemize}
@@ -80,7 +80,7 @@ This has the effect of allowing prenex (or rank-1) polymorphism in assertions
 but not more general forms of polymorphism.
 
 The term language is extended with a $\lambda$ binder to construct 
-function abstractions and a symbol for function application, \ter{\_},
+function abstractions and a symbol for function application, \ter{@},
 intentionally equal to that for the construction of indexed symbols 
 in Version 2.6.
 The semantics of the $\lambda$ binder and the application symbol are provided
@@ -99,8 +99,7 @@ with the constant definition command \ter{define-const},
 which can be used in particular to define constants 
 of sort \expr{(-> $\tau_1$ $\tau_2$)}.
 
-The symbol \ter{\_} can now also be used (unambiguously) as a wildcard symbol 
-in \ter{match} patterns.
+The reserved word \ter{\_} can now also be used (unambiguously) as a wildcard symbol in \ter{match} patterns.
 
 The functionality of \expr{check-sat-assuming} has been extended to allow
 arbitrary Boolean terms to be passed as assumptions.  The semantics of
