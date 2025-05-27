@@ -209,7 +209,7 @@ These channels may be set with the \nter{set-option} command
 By default they are the standard output and standard error channels, 
 respectively.
 
-Generally, once a solver completes its processing in response to a command, 
+For most commands, once a solver completes its processing, 
 it should print to its regular output channel a \nter{general\_response}:
 
 \begin{center}
@@ -218,8 +218,8 @@ it should print to its regular output channel a \nter{general\_response}:
  \end{tabular}
 \end{center}
 
-\noindent 
-The value \ter{success} is the default response for a successful execution
+\noindent
+When the \attr{print-success} option is set to \ter{true}; the value \ter{success} is the default response for a successful execution
 of a supported command.  
 A number of commands have a more detailed response in place of \ter{success}, 
 discussed in Section~\ref{sec:commands} for each of them.
@@ -265,7 +265,7 @@ more burdensome to support the semantics of leaving the state unmodified
 by the erroneous command.
 }
 
-The predefined \attr{error-behavior} attribute can be used 
+The standard \attr{error-behavior} flag can be used 
 with the $\ter{get-info}$ command to check which error behavior 
 the tool supports (see Section~\ref{sec:get-info} below).
 
@@ -447,11 +447,8 @@ labels have an additional, dedicated use in the commands
 \subsection{Solver options} \label{sec:options}
 %------------------------------------------------------------------------
 
-Solver options may be set using the \ter{set-option} command, and
-their current values can be obtained using the \ter{get-option} command.  
-If a solver does not support the setting of a particular option,
-for either command it should output \ter{unsupported}.  
-
+Solver options may be set using the \ter{set-option} command, and their current
+values can be obtained using the \ter{get-option} command.
 Solver-specific option names are allowed and indeed expected.  
 A set of standard options is presented in this subsection;
 refer to Figure~\ref{fig:command-options} for their format. 
@@ -459,9 +456,14 @@ refer to Figure~\ref{fig:command-options} for their format.
 %in a standard way only to a few of them, the rest are optional.
 We discuss each option below, specifying also their default values and 
 whether or not compliant solvers are required to support them. 
-It is understood that if a solver does not support one of the optional 
+It is understood that if a solver does not support one of the non-required 
 standard options below, it behaves as if that option was permanently
-set to its default value. 
+set to its default value.
+Specifically, the output of the \ter{get-option} command for a non-required
+standard option should be the default value, whereas the output of
+the \ter{set-option} command for that option should be \ter{unsupported}.
+For unsupported non-standard options, the output of both \ter{get-option}
+and \ter{set-option} should be \ter{unsupported}.
 
 Some options can be set only when the solver is in \mode{start} mode.
 We list the mode when that is the case.
@@ -788,11 +790,11 @@ the \define{current logic}.
 %
 \item[\expr{(set-option $o$ $v$)}]
 sets a solver's option $o$ to a specific value $v$.
-More details on predefined options and required behavior are provided 
+More details on standard options and required behavior are provided 
 in Section~\ref{sec:options}.  
 In general, if a solver does not support the setting of a particular option,
 its response to this command should be \ter{unsupported}.
-If the option is one of the predefined ones it should also leave it unchanged 
+If the option is one of the standard ones it should also leave it unchanged 
 from its default value.  
 The effect of setting a supported option is immediate.
 In particular, for options that affect the solver's output, such as 
@@ -1270,7 +1272,7 @@ For example, consider the following script.
 (declare-sort-parameter B)
 (declare-fun is-const ((Array A B)) Bool)
 (assert (forall ((a (Array A B))) 
-  (= (is-cont a) 
+  (= (is-const a) 
      (forall ((i A) (j A)) (= (select a i) (select a j))))))
 ...
 (check-sat)
@@ -1362,9 +1364,12 @@ by asserting $p$ and \expr{(not $q$)}, and then checking for satisfiability.
 \item[\expr{(get-assertions)}]
 causes the solver to print the current set of all asserted formulas
 as a sequence of the form \expr{($f_1$ $\cdots$ $f_n$)}.
-Each $f_i$ is a formula syntactically identical, modulo whitespace, 
+Each $f_i$ is a formula syntactically identical, including occurrences
+of annotations with the \attr{named} and \attr{pattern} attributes,
 to one of the formulas entered with an \ter{assert} command and 
 currently in the context.
+The printed formulas may differ in the use of whitespace.
+Annotations besides \attr{named} and \attr{pattern} need not be included.
 Solvers are not allowed to print formulas equivalent to or derived from 
 the asserted formulas.\endnote{
 The motivation is to enable interactive users to see easily (exactly)
@@ -1899,7 +1904,7 @@ More details on standard options and required behavior are provided
 in Section~\ref{sec:options}.  
 If a solver does not support the setting of a standard option $o$,
 the command outputs the option's default value.
-For an unsupported non-predefined option the command outputs \ter{unsupported}.  
+For an unsupported non-standard option the command outputs \ter{unsupported}.  
 \end{description}
 
 
@@ -1934,9 +1939,9 @@ Typically then, a solver will just parse the command and do nothing with it,
 except for printing a response (\ter{success} or an error, for instance,
 if the argument is not an element of \nter{attribute}).
 
-There is only a small number of predefined \ter{set-info} attributes,
+There is only a small number of standard \ter{set-info} flags,
 which are described below together with their possible values.
-These attributes are used in particular in the official SMT-LIB benchmarks
+These flags are used in particular in the official SMT-LIB benchmarks
 at \href{http://www.smt-lib.org/benchmarks.shtml}{www.smt-lib.org}.
 
 \begin{description}
@@ -1984,8 +1989,7 @@ indicates that the next check command in the script
 is expected to return \ter{sat} (respectively, \ter{unsat}).
 More precisely, the expected value of a check command in a script is 
 the one indicated by the most recent command of the form 
-\expr{(set-info :status $v$)} in the script.
-The value \ter{unknown} is used when the expected value is not known.\endnote{
+\expr{(set-info :status $v$)} in the script, if $v$ is either \ter{sat} or \ter{unsat}.  If $v$ is unknown, there is no expectation on the value of the check command.\endnote{
 Having an explicit \ter{unknown} value is useful for comparative evaluation 
 of solvers, for example in the SMT-COMP competition.
 }

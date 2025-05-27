@@ -804,7 +804,7 @@ The scope of those variables is the term $t_i$.
   (= (length l)
      (match l (
        (nil 0)
-       ((cons _ t) (length t))))))
+       ((cons _ t) (+ 1 (length t)))))))
 \end{lstlisting}
 
 \begin{remark}[No nested patterns]
@@ -842,7 +842,7 @@ each of them is replaced by a fresh variable.
 \item
 Suppose that for all $i=1,\ldots, m + 1$, the pattern $p_i$ has the form
 \expr{($c_i$ $x_{i,1}$ $\cdots$ $x_{i,k_i}$)} with $k_i>0$;
-$q_i$ is the associate tester for that constructor; and
+$q_i$ is the associated tester for that constructor; and
 $s_{i,1}, \ldots, s_{i,k_i}$ are the selectors associated, in order,
 with the constructor's arguments.
 Then, match expression (\ref{eq:match}) has the same meaning as 
@@ -925,7 +925,7 @@ occurs free in an expression
 \new{
 \expr{($Q$ (($x_1$ $\sigma_1$) $\cdots$ ($x_n$ $\sigma_n$)) $t$)},
 where $Q$ is \ter{lambda}, \ter{forall}, or \ter{exists},
-if it does not occur in $\{x_1, \ldots, x_n\}$ and occurs free in $t$;}
+if it does not occur in $x_1, \ldots, x_n$ and occurs free in $t$;}
 \item
 occurs free in an expression 
 \expr{(let (($x_1$ $t_1$) $\cdots$ ($x_n$ $t_n$)) $t$)} if 
@@ -1054,7 +1054,7 @@ having more than one possible output sort
 for the same sequence of input sorts (see Subsection~\ref{sec:signature}).
 This is necessarily the case for \emph{every} non-monomorphic constant symbol.
 More generally, it is true for all non-monomorphic function symbols
-whose output sort contains a sort parameter that occurs in none of its input sort.
+whose output sort contains a sort parameter that occurs in none of its input sorts.
 \end{newver}
 
 Except for patterns in \ter{match} expressions,
@@ -1117,6 +1117,9 @@ as the type of these constants is unknown to the user.
 (select (as @a1 (Array Int Int)) 3)
 \end{lstlisting}
 
+\begin{remark}
+  A term of the form \expr{(as $f$ $\tau$)} is allowed even if the symbol $f$ is non-ambiguous, as long as $\tau$ matches the return sort of $f$.
+\end{remark}
 
 %-------------------------------------------------------------------------------
 \subsection{Annotations}
@@ -1164,7 +1167,7 @@ so that the resulting annotated formula has the form
 \end{tabular}
 \end{center}
 where each $p_{i,j}$ is a binder-free term with no annotations and
-the same well-sortedness requirements as the formula's body.\endnote{
+the same well-sortedness requirements as the formula's body.  Empty patterns ($n_j = 0$) are allowed.\endnote{
 The reason patterns annotate the \emph{body} of a formula they refer to
 as opposed to the formula itself, is that, this way, they can use
 the body's free variables as pattern variables.
@@ -1347,7 +1350,7 @@ simply by a more judicious choice of parameter names.
 As with sorts, each function symbol declaration 
 may additionally contain zero or more annotations $\alpha_1, \ldots, \alpha_n$,
 each in the form of an \nter{attribute}.
-In this version, there are only 4 predefined function symbol annotations,
+In this version, there are only four, mutually exclusive, predefined function symbol annotations,
 all attributes with no value:
 \attr{chainable}, 
 \attr{left-assoc},
@@ -1380,9 +1383,8 @@ to function symbol declarations of the form
 \begin{center}
 \expr{($f$ $\sigma$ $\sigma$ Bool)}
 \ or \ 
-\expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau$ $\tau$ Bool))}
+\expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau$ $\tau$ Bool))}.
 \end{center}
-and are mutually exclusive.
 With the first annotation, 
 \expr{($f$ $t_1\ \cdots\ t_n$)} with $n > 2$ is syntactic sugar for
 \expr{(and ($f$ $t_1$ $t_2$) ($f$ $t_2$ $t_3$) $\cdots$  ($f$ $t_{n-1}$ $t_n$))}
@@ -1528,8 +1530,8 @@ Which makes those attributes non-optional.
 and any number of occurrences of other attributes.
 
 \item
-Each sort symbol used in a \attr{funs} attribute is 
-previously declared in some \attr{sorts} attribute.
+Each sort symbol mentioned in a \attr{funs} or \attr{funs-description} attribute is 
+previously declared in some \attr{sorts} or \attr{sorts-description} attribute.
 In each polymorphic function symbol declaration
 \expr{(par ($u_1\ \cdots\ u_k$) ($f$ $\tau_1\ \cdots\ \tau_n$ $\tau$))},
 any symbol other than $f$ that is not a previously declared sort symbol
@@ -1554,6 +1556,7 @@ Note that the \attr{funs} attribute is optional in a theory declaration
 because a theory might lack function symbols (although 
 such a theory would not be not very interesting).
 
+There might be several occurrences of \attr{funs} and \attr{sorts} attributes in a theory.  Such a theory could equivalently be described merging all  \attr{sorts} attributes into a single one, and similarly for \attr{funs}.
 
 %-------------------------------------------------------------------------------
 \subsection{Theory Declaration Examples} \label{sec:theory-examples}
@@ -2309,7 +2312,7 @@ Additional, solver-specific options are also allowed.
 The command \ter{get-info} takes as argument 
 expressions of the syntactic category \nter{info\_flag}
 which are flags with the same form as keywords.
-The predefined flags listed in Figure~\ref{fig:info-flags} have 
+The standard flags listed in Figure~\ref{fig:info-flags} have 
 a prescribed usage and semantics.
 Additional, solver-specific flags are also allowed.
 Examples of the latter might be, for instance, flags such as
@@ -2369,13 +2372,14 @@ for solver-defined \emph{abstract values}.
 \label{fig:command-responses}
 \end{figure}
 
-The possible responses that a solver can produce in response to commands are
+The possible outputs that a solver can produce in response to commands are
 shown in Figure~\ref{fig:command-responses}.
-Every response must be an instance of \nter{general\_response} which specifies
-generic response possibilities as well as command-specific responses
-for certain commands (specified by \nter{specific\_success\_response}).  In
-addition, with the \attr{print-success} option set to \ter{true}, a solver
-returns \ter{success} after a successful command.
+Every response, if any, must be an instance of \nter{general\_response} which specifies generic response possibilities as well as command-specific responses
+for certain commands (specified by \nter{specific\_success\_response}).
+When the \attr{print-success} option is set to \ter{true}, every command that
+does not produce a more specific response should print \ter{success} after its
+successful execution, with the exception of the \ter{exit} command which prints
+\ter{success} before actually terminating the solver.
 
 Regular output, including error messages, is printed 
 on the \define{regular output channel}.
@@ -2458,8 +2462,10 @@ for the following commands:
 \begin{minipage}[t]{.5\linewidth}
 \begin{verbatim}
 (push 1)
+; success
 
 (assert (> z x))
+; success
 
 (check-sat)
 ; unsat
@@ -2468,13 +2474,16 @@ for the following commands:
 ; (:time 0.01 :memory 0.2)
 
 (pop 1)
+; success
 
 (push 1)
+; success
 
 (check-sat)
 ; sat
 
 (exit)
+; success
 \end{verbatim}
 \end{minipage}
 \medskip
@@ -2536,7 +2545,7 @@ for the following commands:
 \medskip
 
 \caption{\label{fig:eg2}
-Another example script (excerpt), with expected solver responses in comments.
+Another example script (excerpt), with expected solver responses in comments, assuming that the \attr{print-success} option is not set to \ter{true}.
 }
 \end{figure}
 
@@ -2575,11 +2584,10 @@ the attributes below as follows:
 \attr{status} must be set as many times as needed so that each occurrence 
 of the command \ter{check-sat-assuming} or \ter{check-sat} 
 in the benchmark is preceded (not necessarily immediately)
-by a corresponding \attr{status} info.\footnote{%
-The same call to \ter{set-info} can be used to provide the status 
+by a \ter{set-info} command specifying its expected satisfiability status.
+Note that the same call to \ter{set-info} can be used to provide the status 
 for more than one call to \ter{check-sat-assuming} or \ter{check-sat},
 if that status is the same.
-}
 \end{itemize}
 %
 Moreover, the set \ter{set-info} call for attribute \attr{smt-lib-version} must be the very first command in the benchmark.

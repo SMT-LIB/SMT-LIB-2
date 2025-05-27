@@ -57,6 +57,13 @@ enclosed in parentheses.
 \subsection{Change log for Version 2.7}
 %-------------------------------------------------------------------------------
 
+\paragraph{Release: 2025-05-??}
+\begin{itemize}
+\item Clarified that quantifier patterns of the form \expr{:pattern ()} are allowed.
+\item Clarified the interactions between the \attr{:print-success} option, the \expr{exit} command, and commands returning values.
+\item Clarified that every formula returned by the \expr{get-assertions} command must include \attr{named} and \attr{pattern} annotations, if present in the initially asserted formula.
+\end{itemize}
+
 \paragraph{Release: 2025-04-09}
 \begin{itemize}
 \item Replaced \ter{\_} with \ter{@} as the map application operator in theory HO-Core.
@@ -103,7 +110,7 @@ The reserved word \ter{\_} can now also be used (unambiguously) as a wildcard sy
 
 The functionality of \expr{check-sat-assuming} has been extended to allow
 arbitrary Boolean terms to be passed as assumptions.  The semantics of
-\expr{get-unsat-assumptions} and \expr{get-unsat-core} have been
+the commands \expr{get-unsat-assumptions} and \expr{get-unsat-core} has been
 correspondingly generalized and clarified.
 
 The format of answers to the \expr{get-model} command has been further restricted
@@ -203,7 +210,7 @@ It consists of a single sequence, \ter{""}, used to represent the double quote
 character within the literal.
 
 \item
-The predefined option \attr{expand-definitions} has been removed
+The standard option \attr{expand-definitions} has been removed
 because there are now no cases in which it applies. 
 
 \item
@@ -323,8 +330,7 @@ in BNF.
 Also, as usual, the meta-operators $\_^*$ and $\_^+$ denote zero, respectively, 
 one, or more repetitions of their argument.
 We use $\_^n$ and $\_^{n+1}$ instead of $\_^*$ and $\_^+$ 
-when we want to indicate that multiple occurrences to the latter operators 
-have the same number of repetitions.
+when we want to relate the number of repetitions in several occurrences of the latter operators.
 %We refer to input characters by their decimal or hexadecimal code 
 %in the Extended ASCII character set.
 We use the notation \dec{$d$} (resp., \hex{$e$}) to represent 
