@@ -1323,6 +1323,20 @@ unsatisfiable under the latter as well.
 \end{remark}
 
 \begin{remark}
+  Notice the difference between a sort parameter, as in this example:
+\begin{lstlisting}
+(declare-sort-parameter A)
+(assert (forall ((x A) (y A)) (= x y)))
+\end{lstlisting}
+and an uninterpreted sort, as in the following script:
+\begin{lstlisting}
+(declare-sort U 0)
+(assert (forall ((x U) (y U)) (= x y)))
+\end{lstlisting}
+In the first case, the second command assert that \emph{all sorts} constructible with the available sort constructors have a singleton domain.  In the second case though, the assertion restricts only sort \ter{U} to have a singleton domain.
+\end{remark}
+
+\begin{remark}
 Consider the commands below, stating that every sort has a domain of size one.
 \begin{lstlisting}
 (declare-sort-parameter A)
