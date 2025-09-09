@@ -4,9 +4,10 @@
  :smt-lib-release "2024-07-21"
  :written-by "Clark Barrett, Pascal Fontaine, Silvio Ranise, and Cesare Tinelli"
  :date "2010-05-02" 
- :last-updated "2025-02-25"
+ :last-updated "2025-09-09"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2025-09-09 Restored semantic definition of bv2int used by overflow operators.
   2025-02-25 Renamed and updated conversion operators to/from integers.
   2024-07-21 Updated to Version 2.7.
   2024-07-16 Added conversion operators between bitvectors and integers.
@@ -135,6 +136,11 @@
 
        bv2nat(b) := b(m-1)*2^{m-1} + b(m-2)*2^{m-2} + ⋯ + b(0)*2^0
 
+   o bv2int, which takes a bitvector b: [0, m) → {0, 1}
+     with 0 < m, and returns an integer in the range [-2^(m-1),2^(m-1))
+
+       bv2int(b) := if b(m-1) = 0 then bv2nat(b) else bv2nat(b) - 2^m
+
    o nat2bv[m], with 0 < m, which takes a non-negative integer n and returns
      the (unique) bitvector b: [0, m) -> {0, 1} such that:
 
@@ -242,8 +248,7 @@
 
    [[(ubv_to_int s)]] := bv2nat([[s]])
 
-   [[(sbv_to_int s)]] := if [[s]](m-1) = 0 then bv2nat([[s]])
-                                           else bv2nat([[s]]) - 2^m
+   [[(sbv_to_int s)]] := bv2int([[s]])
 
    where s is of sort (_ BitVec m) and 0 < m.  We also define:
 
