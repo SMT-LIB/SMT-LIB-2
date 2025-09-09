@@ -30,19 +30,19 @@
    as the usual logical and arithmetic operations are overloaded.
  "
 
- :sorts_description "
+ :sorts-description "
     All sort symbols of the form (_ BitVec m)
     where m is a numeral greater than 0.
  "
 
  ; Bitvector literals
- :funs_description "
+ :funs-description "
     All binaries #bX of sort (_ BitVec m) where m is the number of digits in X.
     All hexadeximals #xX of sort (_ BitVec m) where m is 4 times the number of
    digits in X.    
  "
 
- :funs_description "
+ :funs-description "
     All function symbols with declaration of the form
 
       (concat (_ BitVec i) (_ BitVec j) (_ BitVec m))
@@ -53,7 +53,7 @@
     - i + j = m
  "
 
- :funs_description "
+ :funs-description "
     All function symbols with declaration of the form
 
       ((_ extract i j) (_ BitVec m) (_ BitVec n))
@@ -64,7 +64,7 @@
     - n = i - j + 1
  "
 
- :funs_description "
+ :funs-description "
     All function symbols with declaration of the form
 
        (op1 (_ BitVec m) (_ BitVec m))
@@ -79,7 +79,7 @@
     The operators in {bvand, bvor, bvadd, bvmul} have the :left-assoc attribute.
  "
 
- :funs_description "
+ :funs-description "
     All function symbols with declaration of the form
 
        (bvult (_ BitVec m) (_ BitVec m) Bool)
@@ -88,7 +88,7 @@
     - m is a numeral greater than 0
  "
 
- :funs_description "
+ :funs-description "
    If the Ints theory is also present, all function symbols with declarations of the form
 
        (ubv_to_int (_ BitVec m) Int)

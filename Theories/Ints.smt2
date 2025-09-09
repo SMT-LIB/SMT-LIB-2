@@ -27,7 +27,7 @@
         (>  Int Int Bool :chainable)
        )
 
- :funs_description
+ :funs-description
  "All ranked function symbols of the form
     ((_ divisible n) Int Bool)
   where n is a positive numeral.

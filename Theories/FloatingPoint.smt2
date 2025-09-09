@@ -52,13 +52,13 @@
  :sorts ((RoundingMode 0) (Real 0))
 
  ; Bit vector sorts, indexed by vector size
- :sorts_description "All sort symbols of the form
+ :sorts-description "All sort symbols of the form
     (_ BitVec m)
   where m is a numeral greater than 0."
 
  ; Floating point sort, indexed by the length of the exponent and significand
  ; components of the number
- :sorts_description "All nullary sort symbols of the form 
+ :sorts-description "All nullary sort symbols of the form 
  
     (_ FloatingPoint eb sb),
 
@@ -98,7 +98,7 @@
 ;--------------------
 
  ; Bitvector literals
- :funs_description "
+ :funs-description "
     All binaries #bX of sort (_ BitVec m) where m is the number of digits in X.
     All hexadecimals #xX of sort (_ BitVec m) where m is 4 times the number of
     digits in X.    
@@ -106,14 +106,14 @@
 
  ; FP literals as bit string triples, with the leading bit for the significand
  ; not represented (hidden bit)
- :funs_description "All function symbols with declaration of the form
+ :funs-description "All function symbols with declaration of the form
 
    (fp (_ BitVec 1) (_ BitVec eb) (_ BitVec i) (_ FloatingPoint eb sb))
 
    where eb and sb are numerals greater than 1 and i = sb - 1."
 
  ; Plus and minus infinity
- :funs_description "All function symbols with declaration of the form 
+ :funs-description "All function symbols with declaration of the form 
  
    ((_ +oo eb sb) (_ FloatingPoint eb sb))
    ((_ -oo eb sb) (_ FloatingPoint eb sb))
@@ -130,7 +130,7 @@
  "
  
  ; Plus and minus zero
- :funs_description "All function symbols with declaration of the form 
+ :funs-description "All function symbols with declaration of the form 
  
    ((_ +zero eb sb) (_ FloatingPoint eb sb))
    ((_ -zero eb sb) (_ FloatingPoint eb sb))
@@ -144,7 +144,7 @@
  "
 
  ; Non-numbers
- :funs_description "All function symbols with declaration of the form
+ :funs-description "All function symbols with declaration of the form
 
    ((_ NaN eb sb) (_ FloatingPoint eb sb))
  
@@ -164,7 +164,7 @@
 ; Operators
 ;-----------
 
- :funs_description "All function symbols with declarations of the form below
+ :funs-description "All function symbols with declarations of the form below
    where eb and sb are numerals greater than 1.
 
    ; absolute value 
@@ -237,7 +237,7 @@
 ; Conversions from other sorts
 ;------------------------------
 
- :funs_description "All function symbols with declarations of the form below
+ :funs-description "All function symbols with declarations of the form below
    where m is a numerals greater than 0 and eb, sb, mb and nb are numerals
    greater than 1.
 
@@ -263,7 +263,7 @@
 ; Conversions to other sorts
 ;----------------------------
 
- :funs_description "All function symbols with declarations of the form below
+ :funs-description "All function symbols with declarations of the form below
    where m is a numeral greater than 0 and  eb and sb are numerals greater than 1.
 
    ; to unsigned machine integer, represented as a bit vector
