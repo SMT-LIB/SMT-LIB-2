@@ -100,7 +100,7 @@ on how each compliant solver is to execute each command.
   yshift=2cm, 		% move 2cm in y
   right of=ASSERT, 	% Position is to the right of ASSERT
   node distance=6.5cm, 	% distance to ASSERT
-  anchor=center] (SAT) 	% posistion relative to the center of the 'box'
+  anchor=center] (SAT) 	% position relative to the center of the 'box'
  {\textbf{Sat mode}};
  
  % STATE UNSAT
@@ -204,8 +204,7 @@ Regular output, including responses \emph{and errors}, produced
 by compliant solvers should be written to the \define{regular} output channel.
 Diagnostic output, including warnings, debugging, tracing, 
 or progress information, should be written to the \define{diagnostic} output channel.
-These channels may be set with the \nter{set-option} command 
-(see Section~\ref{sec:options} below).  
+These channels may be set with the \ter{set-option} command (see Section~\ref{sec:options} below).  
 By default they are the standard output and standard error channels, 
 respectively.
 
@@ -219,8 +218,9 @@ it should print to its regular output channel a \nter{general\_response}:
 \end{center}
 
 \noindent
-When the \attr{print-success} option is set to \ter{true}; the value \ter{success} is the default response for a successful execution
-of a supported command.  
+By default, the \attr{print-success} option is set to \ter{false}.
+When the \attr{print-success} option is set to \ter{true}, the value \ter{success} is the default
+response for a successful execution of a supported command.  
 A number of commands have a more detailed response in place of \ter{success}, 
 discussed in Section~\ref{sec:commands} for each of them.
 The value \ter{unsupported} should be returned if the command 
@@ -234,7 +234,7 @@ Returning the empty string is allowed but discouraged
 because of its uninformative content.
 }
 
-Any response which is not double-quoted and not parenthesized must be followed 
+Any response which is not double-quoted and not parenthesized must be followed
 by at least one whitespace character (for example, a new line character).\endnote{
 This enables applications reading a compliant solver's response to know 
 when an identifier (like \ter{success}) has been completely printed and,
