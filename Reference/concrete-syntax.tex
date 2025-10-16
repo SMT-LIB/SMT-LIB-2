@@ -1075,14 +1075,17 @@ are not explicitly assigned a sort.
 For example, let \ter{A} and \ter{B} be two sort parameters.
 Consider the usual \ter{nil} and \ter{cons} list constructors,
 of respective rank \expr{(List A)} and \expr{A\,(List A)\,(List A)}.
-Then consider function symbol \ter{select} of rank \expr{(Array A B)\,A\,B},
+Similarly, consider a user-declared array \ter{a} 
+of rank \expr{(Array A B)}. 
+%
+Then consider function symbol \ter{select} of rank \expr{(Array A B) A B},
 denoting the array access function, and
-the \ter{const-array} function symbol of rank \expr{B\,(Array A B)}, 
+the \ter{const-array} function symbol of rank \expr{B (Array A B)}, 
 denoting the constant array function\footnote{
 Taking a value $v$ of sort \ter{B} and 
 returning an array storing $v$ at all positions.
 }.
-The symbols \ter{nil} and \ter{const-array} are ambiguous, 
+The symbols \ter{nil}, \ter{a} and \ter{const-array} are ambiguous, 
 while the symbols \ter{cons} and \ter{select} are not.
 This means that none of the following terms is well sorted:
 
@@ -1090,19 +1093,20 @@ This means that none of the following terms is well sorted:
 ; ill-sorted terms
 (cons "abc" nil)
 (cons b nil)
-(select (const-array 0.0) i)
+(select a 0)
+(select (const-array 0.0) 1)
 \end{lstlisting}
 
 In contrast, if 
 \ter{"abc"} is a constant of sort \ter{String},
-\ter{b} is a constant of sort \expr{(List B)}, and 
-\ter{i} is a constant of sort \ter{A},
+\ter{b} is a constant of sort \expr{B}, and 
 all the following terms are well sorted:
 
 \begin{lstlisting}[linewidth=35.5em]
 (cons "abc" (as nil (List String)))
-(cons b (as nil (List (List B))))
-(select ((as const-array (Array A Real)) 0.0) i)
+(cons (as b B) (as nil (List B)))
+(select (as a (Array Int B)) 0)
+(select ((as const-array (Array B Real)) 0.0) (as b B))
 \end{lstlisting}
 \end{newver}
 
