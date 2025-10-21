@@ -712,6 +712,53 @@ Its effect is achieved by nesting lets, as in
 \qed
 \end{remark}
 
+\newpage
+
+\begin{remark}[No let polymorphism]
+\ctrem{To be completed}
+Contrary to many functional programming languages,
+\ter{let} binders do not introduce polymorphic constants.
+This is exemplified by the following script excerpt 
+where the globally declared constant \ter{a} is a polymorphic constant 
+of sort \expr{(Array A A)}.
+In other words, \ter{a} stands for a family of constants of sort 
+\expr{(Array $\sigma$ $\sigma$)} for each monomorphic sort $\sigma$.
+
+On the other end,
+the locally declared constant \ter{b} is not polymorphic 
+despite having type \expr{(Array A A)}.
+\ter{b} is a single constant of type \expr{(Array $\sigma$ $\sigma$)}
+for a \emph{specific} sort $\sigma$.
+
+
+This is better understood by looking at how the two constants are treated
+in assertions.
+In the first assertion below, 
+
+
+
+\begin{lstlisting}[linewidth = 38em]
+(declare-sort-parameter A)
+
+
+(declare-const a (Array A A))
+
+(assert (> (select (as a (Array Int Int)) 3) 0))
+
+(assert (= (select (as a (Array String String)) "in") "out"))
+
+(assert 
+  (let ((b (as a (Array A A))))
+ 
+    (< (select (as b (Array Int Int)) 3) 0) ; ill sorted
+  )
+)
+\end{lstlisting}
+
+
+\qed
+\end{remark}
+
 \paragraph{Match.}
 Similarly to pattern matching statements in functional programming languages
 or in certain interactive theorem provers,
