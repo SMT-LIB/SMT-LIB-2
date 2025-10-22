@@ -516,16 +516,25 @@ denotes a function that takes as input $n$ values of respective sorts
 $\sigma_1, \ldots, \sigma_n$,
 and returns a value of sort $\sigma$.
 
-\begin{newver}
 In contrast, a function symbol $f$ with rank $\tau_1\cdots\tau_n\tau$,
 where each sort may contain sort parameters,
-actually stands for a whole \emph{family} of function symbols, 
+may stand for a whole \emph{family} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
 of a sort parameter with a monomorphic sort (over a given set of sort constructors).
-We refer to $f$ as \define{polymorphic function symbol}.
+This is the case, however, only for \emph{global} function symbols, that is, 
+symbols introduced with a \ter{declare-fun} or related commands.
 
-\begin{remark}
+%In contrast, a function symbol $f$ \emph{declared} 
+%to have rank $\tau_1\cdots\tau_n\tau$,
+%where each sort may contain sort parameters,
+%actually stands for a whole \emph{family} of function symbols, 
+%all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
+%by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
+%of a sort parameter with a monomorphic sort (over a given set of sort constructors).
+%We refer to $f$ as \define{polymorphic function symbol}.
+
+\begin{remark}[No parametric polymorphism]
 Note that, contrary to other logic or programming languages,
 SMT-LIB does not insist that members of a polymorphic function family
 be defined uniformly, as in \emph{parametric} polymorphism.
@@ -539,7 +548,6 @@ that behaves like the identity function and
 a function of rank \ter{Bool}\,\ter{Bool} that does not.
 \end{remark}
 
-\end{newver}
 
 
 %-------------------------------------------------------------------------------
@@ -688,6 +696,7 @@ of same variable in the list are shadowed by the last occurrence---making
 those earlier occurrences useless.
 The same argument applies to the \ter{exists} binder.
 
+\newpage
 \paragraph{Let.}
 The \ter{let} binder introduces and defines 
 one or more local variables \emph{in parallel}.
@@ -705,6 +714,57 @@ to avoid capturing any variables in $t_1, \ldots, t_n$.
 Because of the parallel semantics, 
 \emph{the variables $x_1, \ldots, x_n$ in (\ref{eq:let}) must be pairwise distinct}.
 
+
+\ctrem{To be reviewed}
+Contrary to many functional programming languages,
+constants introduced with the \ter{let} binder do not stand 
+for a family of constants, even if their rank contains sort parameters.
+%
+This is exemplified by the following script.
+
+\begin{lstlisting}[linewidth = 38em]
+(declare-sort-parameter X)
+
+(declare-const a (Array X X))
+
+(assert 
+  (and (> (select (as a (Array Int Int)) 3) 0))
+       (= (select (as a (Array String String)) "in") "out"))
+
+(assert (= (as a (Array Int X)) (as a (Array Int X))))
+
+(assert 
+  ; ill sorted!
+  (let ((b (as a (Array X X))))
+    (< (select (as b (Array Int Int)) 3) 0)))
+    
+(assert 
+  ; ill sorted!
+  (let ((id (lambda ((x X)) x)))
+    (= 1 (id 1))))
+
+\end{lstlisting}
+
+\noindent
+The global declaration of constant \ter{a}, with rank \expr{(Array X X)},
+does stand for a family of declarations of constants of sort 
+\expr{(Array $\sigma$ $\sigma$)}, for each monomorphic sort $\sigma$.
+Correspondingly, the formula in the first \ter{assert} command is well sorted,
+as each of its conjuncts uses a different instance of \ter{a}.
+%
+The formula in the second \ter{assert} command is also well sorted
+because the assertion stands for a family of assertions 
+for each possible monomorphic instance of \ter{X}.
+%
+On the other hand,
+the formula in the third \ter{assert} command is ill sorted.
+The reason is that the assertion again stands for a family of assertions 
+for each possible monomorphic instance of \ter{X},
+in particular, one in which \ter{X} is replaced by \ter{Bool},
+giving \ter{b} rank \expr{(Array Bool Bool)}.
+%
+The formula is in the fourth \ter{assert} command is ill sorted for similar reasons.
+
 \begin{remark}[No sequential version of \ter{let}]
 The language does not have a sequential version of \ter{let}.
 Its effect is achieved by nesting lets, as in 
@@ -712,52 +772,7 @@ Its effect is achieved by nesting lets, as in
 \qed
 \end{remark}
 
-\newpage
 
-\begin{remark}[No let polymorphism]
-\ctrem{To be completed}
-Contrary to many functional programming languages,
-\ter{let} binders do not introduce polymorphic constants.
-This is exemplified by the following script excerpt 
-where the globally declared constant \ter{a} is a polymorphic constant 
-of sort \expr{(Array A A)}.
-In other words, \ter{a} stands for a family of constants of sort 
-\expr{(Array $\sigma$ $\sigma$)} for each monomorphic sort $\sigma$.
-
-On the other end,
-the locally declared constant \ter{b} is not polymorphic 
-despite having type \expr{(Array A A)}.
-\ter{b} is a single constant of type \expr{(Array $\sigma$ $\sigma$)}
-for a \emph{specific} sort $\sigma$.
-
-
-This is better understood by looking at how the two constants are treated
-in assertions.
-In the first assertion below, 
-
-
-
-\begin{lstlisting}[linewidth = 38em]
-(declare-sort-parameter A)
-
-
-(declare-const a (Array A A))
-
-(assert (> (select (as a (Array Int Int)) 3) 0))
-
-(assert (= (select (as a (Array String String)) "in") "out"))
-
-(assert 
-  (let ((b (as a (Array A A))))
- 
-    (< (select (as b (Array Int Int)) 3) 0) ; ill sorted
-  )
-)
-\end{lstlisting}
-
-
-\qed
-\end{remark}
 
 \paragraph{Match.}
 Similarly to pattern matching statements in functional programming languages
