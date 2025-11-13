@@ -725,17 +725,17 @@ This is exemplified by the following script.
 \begin{lstlisting}[linewidth = 38em]
 (declare-sort-parameter X)
 
-(declare-const a (Array X X))
+(declare-const a (Array Int X))
 
 (assert 
   (and (> (select (as a (Array Int Int)) 3) 0))
-       (= (select (as a (Array String String)) "in") "out"))
+       (= (select (as a (Array Int String)) 3) "out"))
 
 (assert (= (as a (Array Int X)) (as a (Array Int X))))
 
 (assert 
   ; ill sorted!
-  (let ((b (as a (Array X X))))
+  (let ((b (as a (Array Int X))))
     (< (select (as b (Array Int Int)) 3) 0)))
     
 (assert 
@@ -746,9 +746,9 @@ This is exemplified by the following script.
 \end{lstlisting}
 
 \noindent
-The global declaration of constant \ter{a}, with rank \expr{(Array X X)},
-does stand for a family of declarations of constants of sort 
-\expr{(Array $\sigma$ $\sigma$)}, for each monomorphic sort $\sigma$.
+The global declaration of constant \ter{a}, with rank \expr{(Array Int X)},
+indeed stands for a family of declarations of constants of sort 
+\expr{(Array Int $\sigma$)}, for each monomorphic sort $\sigma$.
 Correspondingly, the formula in the first \ter{assert} command is well sorted,
 as each of its conjuncts uses a different instance of \ter{a}.
 %
@@ -761,9 +761,12 @@ the formula in the third \ter{assert} command is ill sorted.
 The reason is that the assertion again stands for a family of assertions 
 for each possible monomorphic instance of \ter{X},
 in particular, one in which \ter{X} is replaced by \ter{Bool},
-giving \ter{b} rank \expr{(Array Bool Bool)}.
+giving \ter{b} rank \expr{(Array Int Bool)}.
 %
-The formula is in the fourth \ter{assert} command is ill sorted for similar reasons.
+The formula in the fourth \ter{assert} command
+(see the higher-order core theory in Section~\ref{sec:ho-core}),
+where \ter{id} is of sort \expr{(-> X X)},
+is ill sorted for similar reasons.
 
 \begin{remark}[No sequential version of \ter{let}]
 The language does not have a sequential version of \ter{let}.
