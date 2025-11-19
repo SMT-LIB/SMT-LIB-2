@@ -715,10 +715,10 @@ Because of the parallel semantics,
 \emph{the variables $x_1, \ldots, x_n$ in (\ref{eq:let}) must be pairwise distinct}.
 
 
-\ctrem{To be reviewed}
 Contrary to many functional programming languages,
 constants introduced with the \ter{let} binder do not stand 
 for a family of constants, even if their rank contains sort parameters.
+In other words, sort parameters do not have local scope in let declarations.
 %
 This is exemplified by the following script.
 
@@ -756,8 +756,7 @@ The formula in the second \ter{assert} command is also well sorted
 because the assertion stands for a family of assertions 
 for each possible monomorphic instance of \ter{X}.
 %
-On the other hand,
-the formula in the third \ter{assert} command is ill sorted.
+In contrast, the formula in the third \ter{assert} command is ill sorted.
 The reason is that the assertion again stands for a family of assertions 
 for each possible monomorphic instance of \ter{X},
 in particular, one in which \ter{X} is replaced by \ter{Bool},

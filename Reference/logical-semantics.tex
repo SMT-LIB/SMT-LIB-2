@@ -611,6 +611,10 @@ that is, only if it is written as $f^{\tau_1}\bar{t}$ or $f^{\tau_2}\bar{t}$.
 \label{fig:well-sorted-terms}
 \end{figure}
 
+\ctrem{We should check that this type system assigns a unique sort to a well-sorted term. 
+And it is consistent with global quantification of sort parameters.
+}
+
 Figure~\ref{fig:well-sorted-terms} provides a set of rules defining 
 well-sorted terms with respect to an SMT-LIB signature $\Sigma$.
 Strictly speaking then, and similarly to more conventional logics,
@@ -655,7 +659,9 @@ we say that \define{$t$ has, or is of, sort $\tau$}.
 \end{definition}
 
 With this definition, it is possible to show that every \new{closed} term has 
-at most one sort in a given signature $\Sigma$.\endnote{
+at most one sort in a given signature $\Sigma$
+\ctrem{Should we prove this?}.
+\endnote{
   It would have been reasonable to adopt an
   alternative version of the rule for well-sortedness of terms
   $(f^\tau\; t_1\; \cdots\; t_k)$ with annotated function
@@ -675,8 +681,9 @@ at most one sort in a given signature $\Sigma$.\endnote{
 This means that we can define a total function $\tsort$ that associates 
 with each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
 We can also define a function $\pars$ that associates to each well-sorted term $t$
-the set $\pars(t, \Sigma)$ of all parameters that occur in its sort or in that 
-of one of its subterms.
+the set $\pars(t, \Sigma)$ of all parameters that occur
+in its sort, in that of one of its subterms, or in the sort of a variable in $t$.
+We call a term \define{polymorphic} if $\pars(t, \Sigma)$ is non-empty.
 \end{newver}
 
 \begin{remark}[Match rules]
