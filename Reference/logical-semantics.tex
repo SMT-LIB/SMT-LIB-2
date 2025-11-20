@@ -15,7 +15,6 @@ although it incorporates some syntactic \new{and semantic} features
 of higher-order logics, in particular: 
 the identification of formulas with terms of a distinguished Boolean sort;
 the use of sort symbols of arity greater than 0;
-\begin{newver}
 and starting with Version 2.7, the ability to use of functions as first-class values.
 The latter is achieved by the addition of a background theory of (higher-order) maps,
 which are modeled in the concrete syntax as values 
@@ -26,7 +25,6 @@ achieved through the declaration of sort parameters, which can then
 be used to make assertions containing terms of polymorphic sort.\footnote{
 The semantics of polymorphism in Version 2.7 is analogous to that of TFF1, the TPTP Typed First-Order Form with Rank-1 Polymorphism~\cite{BlanchetteP13}.
 }
-\end{newver}
 
 These features make for a more flexible and syntactically more uniform 
 logical language.
@@ -161,14 +159,11 @@ $s\,\tau_1\,\cdots\,\tau_n\:$ is a sort.
 \end{enumerate}
 We say that $s \in S$ has (or is of) \define{arity} $n$ 
 if $\ar(s) = n$.
-\begin{newver}
 A sort is \emph{polymorphic} 
 if it contains a sort parameter; it is \emph{monomorphic} otherwise.
-\end{newver}
 \qed
 \end{definition}
 
-\begin{newver}
 As an example of a sort,
 if $\akey{Int}$ and $\akey{Real}$ are sort symbols of arity 0, 
 $\akey{List}$ is a sort symbol of arity 1, and
@@ -191,16 +186,13 @@ the expression
   \fconstructa{u_1}{\fconstructa{u_2}{(\akey{List}\ (\akey{Array}\ u_1\ (\akey{List}\ u_2)))}}
 \]
 and all of its subexpressions are polymorphic sorts.
-\end{newver}
 
 An abstract syntax for monomorphic sorts $\sigma$ \new{and polymorphic sorts $\tau$},
 which ignores arity constraints for simplicity, 
 is provided in Figure~\ref{fig:abstract-sorts}.
-\begin{newver}
 Note that every monomorphic sort is a polymorphic sort, but not vice versa.
 In the following, we just use ``sort'' to refer to possibly polymorphic sorts
 and we use ``monorphic sort'' for the more restricted case as needed.
-\end{newver}
 
 %
 %\trem{More}
@@ -438,7 +430,6 @@ the signature defined by an SMT-LIB script is in fact a signature
 in the sense of Definition~\ref{def:signature}.
 \end{remark}
 
-\begin{newver}
 \begin{notation}
 In the following, we will write $\sortt{\Sigma, \sop}$ as an abbreviation 
 of $\sortt{\sorts \Sigma, \sop}$, and $\sortt{\Sigma}$ as the subset of all 
@@ -461,7 +452,6 @@ $\theta$.
 We will use the syntax $\{u_1 \mapsto \tau_1, \cdots u_n \mapsto \tau_n \}$
 to denote a sort substitution that maps $u_i$ to $\tau_i$ for each $i=1,\dots n$
 and maps every other sort parameter to itself.
-\end{newver}
 
 We will work with \emph{ranked} function symbols and \emph{sorted} variables
 in a signature.
@@ -528,7 +518,6 @@ $\akey{Real}\:\akey{Real}\:\akey{Real}$ (for binary subtraction over the reals),
 and
 $\akey{Int}\:\akey{Int}\:\akey{Int}$ (for binary subtraction over the integers).
 
-\begin{newver}
 \begin{remark}
 Even polymorphic function symbols, that is, 
 function symbols of polymorphic rank, should be understood as overloaded symbols
@@ -543,7 +532,6 @@ to interpret
 $f:\ter{Int}\,\ter{Int}$ as the identity function over the integers and 
 $f:\ter{Bool}\,\ter{Bool}$ as the Boolean negation function. 
 \end{remark}
-\end{newver}
 
 % Together with the mechanisms used 
 % to declare theories (described in Section~\ref{sec:theories})
@@ -854,10 +842,8 @@ For instance, no structure without constant symbols can be absolutely free
 with an empty set of generators.
 \medskip
 
-\begin{newver}
 For interpreting $\fconstruct$ sorts, we will use the notion of a \define{map}, i.e., a functional binary relation.
 We will denote a map as a set of pairs of the form $a\mapsto b$.
-\end{newver}
 
 \medskip
 The SMT-LIB logic considers only structures that interpret in a special way 
@@ -1190,13 +1176,11 @@ where $\inter I = (\str A, v)$}
 \end{enumerate}
 \end{definition}
 
-\begin{newver}
 \begin{remark}
   There is no rule above for higher-order function application
   \expr{\_}, since \expr{\_} is a normal (interpreted) function symbol
   defined in the HO-Core theory (see Figure~\ref{fig:HO-Core}).
 \end{remark}
-\end{newver}
 
 \noindent 
 One can show that $\mea{\inter I}{ \cdot }$ is well-defined, and hence total, over
@@ -1333,7 +1317,6 @@ In SMT-LIB, basic theories are obtained as instances of theory declarations.
 (In contrast, combined theories are defined in logic declarations.)
 An abstract syntax of theory declarations is defined in 
 Figure~\ref{fig:theory-declaration}.
-\begin{newver}
 The concrete syntax allows for further
 theory attributes, and sort and function declarations can also have
 attributes.  Since they have no logical meaning, similar to term attributes,
@@ -1345,7 +1328,6 @@ in the concrete syntax of theory declarations with the binder \ter{par}.
 %CT addressed
 %\cbrem{or with the declare-sort-parameter command?}
 }
-\end{newver}
 
 To simplify the meta-notation let $T$ denote 
 a theory declaration with theory name $T$.
@@ -1476,14 +1458,12 @@ Contrary to the theory declarations,
 a logic declaration specifies a \emph{single} logic, 
 not a class of them,
 so we call the logic $L$ too.
-\begin{newver}  
 Again, the concrete syntax allows additional logic attributes
 that do not impact the semantics and can be ignored here.
 Logics allow extensions, defining further function symbols.
 For the sake of simplicity, we only 
 consider here logics without extensions, since those additional
 symbols could be considered to be defined in the logic's theories.
-\end{newver}
 
 Let $L$ be a logic declaration whose \akey{theories} attribute has value
 $T_1, \ldots, T_n$.
