@@ -935,14 +935,12 @@ with respect to the current signature extended with sort parameters
 $u_1$, \dots, $u_n$.
 This restriction prohibits (meaningless) circular definitions
 where $\tau$ contains $s$.
-\begin{newver}
 The $u_i$ sort parameters shadow any previously user-declared sort symbol
 or parameter with the same name.
 However, they do not shadow theory sort symbols (just as bound variables are
 not permitted to shadow declared theory symbols).
 The command reports an error if a theory sort
 symbol is used as a sort parameter $u_i$.
-\end{newver}
 
 \smallskip
 
@@ -1256,7 +1254,6 @@ where $t$ is a well-sorted formula
 adds $t$ to the current assertion level.
 The well-sortedness requirement is with respect to the current signature.
 
-\begin{newver}
 If any subterm of $t$ has a polymorphic sort
 and $u_1$,\ldots, $u_n$ lists all the sort parameters in the sorts of such terms 
 then, at the time a later \ter{check-sat} command is executed,
@@ -1281,14 +1278,12 @@ When \ter{check-sat} is executed,
 the set of asserted formulas will include all instantiations of the assertion above 
 where the parameters \ter{A} and \ter{B} 
 have been replaced by the monomorphic sorts available at that point.
-\end{newver}
 
 Instances of this command of the form \expr{(assert (!~$t$ \attr{named} $f$))}, 
 where the asserted formula $t$ is given a label $f$, 
 have the additional effect of adding $t$ to the formulas tracked 
 by the commands \ter{get-assignment} and \ter{get-unsat-core}, as explained later.
 
-\begin{newver}
 \begin{remark}
 Consider the commands
 \begin{lstlisting}
@@ -1369,7 +1364,6 @@ This is especially true when checking, for example, the validity
 of an implication \expr{(=> $p$ $q$)} 
 by asserting $p$ and \expr{(not $q$)}, and then checking for satisfiability.
 \end{remark}
-\end{newver}
 
 \smallskip
 
@@ -1701,11 +1695,9 @@ is well-sorted and satisfied by $\str A$.
 
 \end{itemize}
 
-\begin{newver}
 A user-declared or user-defined function symbol can occur in the terms $t$, $t_1$,\dots $t_p$
 above only if it has been previously defined in the model or is one of the symbols
 being recursively defined.
-\end{newver}
 
 Similarly to the response of \ter{get-value}, 
 the terms $t,t_1,\ldots,t_p$ above are allowed to contain symbols
@@ -1766,7 +1758,6 @@ The command can be issued only if the \attr{produce-models} option,
 which is set to \ter{false} by default, is set to \ter{true} 
 (see Section~\ref{sec:options}).
 
-\begin{newver}
 \begin{remark}
 With the given syntax, all functions definable in a model are necessarily monomorphic.
 This means that in scripts with polymorphic function symbols, 
@@ -1774,7 +1765,6 @@ the returned model will be necessarily partial
 whenever the rank of a user-declared or user-defined function has infinitely many instances.
 This restriction will be addressed as needed in later releases of this document.
 \end{remark}
-\end{newver}
 
 \end{description}
 
