@@ -584,7 +584,7 @@
                                             if ⟦str.contains⟧(w, w₁) = true
 
   * (str.replace_all String String String String)
- 
+
     - ⟦str.replace_all⟧(w, w₁, w₂) = w      if ⟦str.contains⟧(w, w₁) = false 
                                               or 
                                               w₁ = ε
