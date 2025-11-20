@@ -696,7 +696,6 @@ of same variable in the list are shadowed by the last occurrence---making
 those earlier occurrences useless.
 The same argument applies to the \ter{exists} binder.
 
-\newpage
 \paragraph{Let.}
 The \ter{let} binder introduces and defines 
 one or more local variables \emph{in parallel}.
@@ -2146,8 +2145,23 @@ a value of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.
 \end{remark}
 
 \begin{remark}
-TODO: Here discuss polymorphism, lambdas, and quantifiers over types
-  
+Maps can be declared or defined to be polymorphic, as in the examples below. 
+
+\begin{lstlisting}[linewidth=35.5em]
+(declare-sort-parameter A)
+(declare-sort-parameter B)
+(declare-sort-parameter C)
+(declare-const m (-> A B))
+(define-const id (lambda ((a A)) a))
+(define-const compose 
+  (lambda ((f (-> A B)) (g (-> B C)))
+    (lambda ((a A)) (@ g (@ f a)))))
+\end{lstlisting}
+
+\noindent
+The sorting discipline is the same as for any other polymorphic constants,
+as discussed for the \ter{let} binder in Section~\ref{sec:binders}.
+
 \end{remark}
 
 \end{newver} 
