@@ -584,7 +584,7 @@
                                             if ⟦str.contains⟧(w, w₁) = true
 
   * (str.replace_all String String String String)
-
+ 
     - ⟦str.replace_all⟧(w, w₁, w₂) = w      if ⟦str.contains⟧(w, w₁) = false 
                                               or 
                                               w₁ = ε
@@ -613,8 +613,7 @@
 
   * (str.replace_re_all String RegLan String String)
 
-    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no substring of w is in L or ε ∈ L
-
+    - ⟦str.replace_re_all⟧(w, L, w₂) = w    if no non-empty substring of w is in L
     - ⟦str.replace_re_all⟧(w, L, w₂) = u₁w₂⟦str.replace_re_all⟧(u₂, L, w₂)
       where u₁, w₁ are the shortest words such that 
             - w = u₁w₁u₂
