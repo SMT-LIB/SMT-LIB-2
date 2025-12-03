@@ -3,11 +3,12 @@
  :smt-lib-version 2.7
  :written-by "Cesare Tinelli, Clark Barrett, and Pascal Fontaine"
  :date "2020-02-01"
- :last-updated "2024-07-21"
+ :last-updated "2025-12-03"
  :update-history
  "Note: history only accounts for content changes, not release changes.
+  2025-12-03 Fixed typos in definitions of str.replace_re, str.replace_re_all, re.comp and re.diff.
   2024-07-21 Updated to Version 2.7.
-  2024-14-07 Fixed typos and ambiguities in definitions of str.replace_re and str.replace_re_all
+  2024-07-14 Fixed typos and ambiguities in definitions of str.replace_re and str.replace_re_all.
   2022-12-07 Fixed comment providing the description of str.replace_re.
   2020-08-06 Fixed an example in Strings constant definition.
   2020-02-09 Layout and minor fixes.
@@ -26,8 +27,9 @@
   that helped shape the current version of the theory (with our apologies for any, 
   unintentional, omissions):
   Kshitij Bansal, Murphy Berzish, Nikolaj Bjørner, David Cok, Levent Erkok, 
-  Andrew Gacek, Vijay Ganesh, Alberto Griggio, Joxan Jaffar, Anthony Lin, Andres 
-  Nötzli, Andrew Reynolds, Philipp Rümmer, Margus Veanes, and Tjark Weber.
+  Andrew Gacek, Vijay Ganesh, Alberto Griggio, Joxan Jaffar, Jibiana Jakpor,
+  Anthony Lin, Andres Nötzli, Andrew Reynolds, Philipp Rümmer, Margus Veanes,
+  and Tjark Weber.
  "
 
 ;-------
@@ -604,7 +606,7 @@
       where u₁, w₁ are the shortest words such that
             - w = u₁w₁u₂
             - w₁ ∈ L
-                                            if some non-empty substring of w is in L
+                                            if some substring of w is in L
 
     Note that in the second case, the priority goes to minimizing the length of u₁.
     That is, we must first choose the smallest possible u₁, and then, for that u₁,
@@ -627,11 +629,11 @@
 
   * (re.comp RegLan RegLan)
 
-    ⟦str.comp⟧(L) = UC* \ L
+    ⟦re.comp⟧(L) = UC* \ L
 
   * (re.diff RegLan RegLan RegLan :left-assoc)
 
-    ⟦str.diff⟧(L₁, L₂) = L₁ \ L₂
+    ⟦re.diff⟧(L₁, L₂) = L₁ \ L₂
 
   * (re.+ RegLan RegLan)
 
