@@ -2107,9 +2107,11 @@ Note that this also allows the \emph{partial} application \expr{(@ g t)}
 of a constant \ter{g} of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
 which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
 
-As an additional simplification, which does not introduce ambiguities,  
-it is possible to omit the \ter{@} symbol altogether in applications and write
+\begin{newver}
+As an additional simplification which does not introduce ambiguities, when
+\ter{g} has a monomorphic sort,\footnote{And therefore it does not need to be annotated with \ter{as}.} it is possible to omit the \ter{@} symbol altogether in applications and write
 \expr{(g t)} instead of \expr{(@ g t)}.
+\end{newver}
 
 \begin{remark}
 Note that the SMT-LIB logic remains first-order in syntax:

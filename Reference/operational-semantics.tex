@@ -1435,7 +1435,7 @@ and $a_1, \cdots, a_n$ are terms of sort \ter{Bool},
 %
 instructs the solver to check whether the conjunction of all the formulas 
 in the current context \emph{and} the \define{assumptions} $a_1, \cdots, a_n$
-is satisfiable in the extension of the current logic with all the current 
+is satisfiable in the extension of the current context with all the current 
 user-declared and user-defined symbols.
 The assumptions $a_1, \ldots, a_n$ must be formulas, i.e., terms of sort
 \ter{Bool}.\endnote{
@@ -1702,7 +1702,7 @@ being recursively defined.
 Similarly to the response of \ter{get-value}, 
 the terms $t,t_1,\ldots,t_p$ above are allowed to contain symbols
 not in the current signature only if they are abstract values.
-Morevever, each occurrence of an abstract value  $a$ of sort $\sigma$ 
+Moreover, each occurrence of an abstract value  $a$ of sort $\sigma$ 
 in $t,t_1,\ldots,t_p$ has to be contained in a term of the form 
 \expr{(as $a$ $\sigma$)}.
 
