@@ -520,10 +520,9 @@ where each sort may contain sort parameters,
 may stand for a whole \emph{family} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
-of a sort parameter with a monomorphic sort (over a given set of sort constructors).
-\pfrem{TODO: this is not too clear which sort constructors to use here.  I.e., all the constructors at the time of satisfiability checking.}
+of a sort parameter with a monomorphic sort built from the \emph{current} set of sort constructors.\footnote{This sets consists of the constructors in the context when checking the satisfiability.}
 This is the case, however, only for \emph{global} function symbols, that is, 
-symbols introduced with a \ter{declare-fun} or related commands.
+symbols introduced with \ter{declare-fun} or related commands.
 \end{newver}
 
 %In contrast, a function symbol $f$ \emph{declared} 
@@ -1122,8 +1121,6 @@ there sort inference is needed anyway since pattern variables
 are not explicitly assigned a sort.
 }
 
-\pfrem{const-array might confuse people, that would believe it belongs to the theory.  Or add to theory.}
-
 For example, let \ter{A} and \ter{B} be two sort parameters.
 Consider the usual \ter{nil} and \ter{cons} list constructors,
 of respective rank \expr{(List A)} and \expr{A\,(List A)\,(List A)}.
@@ -1133,12 +1130,8 @@ of rank \expr{(Array A B)}.
 %
 Then consider function symbol \ter{select} of rank \expr{(Array A B) A B},
 denoting the array access function, and
-the \ter{const-array} function symbol of rank \expr{B (Array A B)}, 
-denoting the constant array function.\footnote{
-Taking a value $v$ of sort \ter{B} and 
-returning an array storing $v$ at all positions.
-}
-The symbols \ter{nil}, \ter{a} and \ter{const-array} are ambiguous, 
+a user-declared function symbol \ter{g} of rank \expr{B (Array A B)}.
+The symbols \ter{nil}, \ter{a} and \ter{g} are ambiguous, 
 while the symbols \ter{cons} and \ter{select} are not.
 This means that none of the following terms is well sorted:
 
@@ -1147,10 +1140,10 @@ This means that none of the following terms is well sorted:
 (cons "abc" nil)
 (cons b nil)
 (select a 0)
-(select (const-array 0.0) 1)
+(select (g 0.0) 1)
 \end{lstlisting}
 
-In contrast, if 
+\noindent In contrast, if 
 \ter{"abc"} is a constant of sort \ter{String},
 \ter{b} is a constant of sort \expr{B}, and 
 all the following terms are well sorted:
@@ -1159,7 +1152,7 @@ all the following terms are well sorted:
 (cons "abc" (as nil (List String)))
 (cons (as b B) (as nil (List B)))
 (select (as a (Array Int B)) 0)
-(select ((as const-array (Array B Real)) 0.0) (as b B))
+(select ((as g (Array B Real)) 0.0) (as b B))
 \end{lstlisting}
 \end{newver}
 
@@ -2116,6 +2109,16 @@ As an additional simplification which does not introduce ambiguities, when
 \end{newver}
 
 \begin{remark}
+  Equality over maps is extensional, that is, two maps are equal if and only if they agree on all inputs.  In other words, for all sorts $\tau_1$ and $\tau_2$, the following formula holds:
+  \begin{center}
+    \begin{tabular}{l}
+      \expr{(forall ((f (-> $\tau_1$ $\tau_2$)) (g (-> $\tau_1$ $\tau_2$)))}\\
+      \quad\quad \expr{(= (= f g) (forall ((x $\tau_1$)) (= (f x) (g x)))))} .
+    \end{tabular}
+  \end{center}
+\end{remark}
+
+\begin{remark}
 Note that the SMT-LIB logic remains first-order in syntax:
 it is not possible to have a function symbol $g$ of rank $\tau_1 \cdots \tau_n$
 (with $n > 1$) as an argument to another function, as in \expr{(f g)}.
@@ -2152,8 +2155,6 @@ as discussed for the \ter{let} binder in Section~\ref{sec:binders}.
 
 \end{remark}
 \end{newver}
-
-\pfrem{We should make a note that equality over maps is extensional.}
 
 %-------------------------------------------------------------------------------
 \section{Logic Declarations} \label{sec:logic-declarations}

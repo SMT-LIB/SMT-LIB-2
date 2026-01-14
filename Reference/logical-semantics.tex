@@ -448,6 +448,22 @@ $\theta(u)$ in $\sortt{\Sigma,\sop}$.
 A \define{sort instance of a polymorphic rank} $\tau_1\cdots\tau_n \tau$ is a rank
 $\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau)$ for some sort substitution
 $\theta$.
+
+A sort substitution $\theta$ can be applied to a term, where all sorts either in the annotation of a function $f^\tau$ or in the type of a bound variable $(x:\tau)$ are subject to the substitution.
+
+\pfrem{Revise}
+The application of a sort substitution $\theta$ to a term $t$ is defined inductively as follows, based on the grammar in Fig~\ref{TODO 5.2}
+\begin{itemize}
+\item $\theta(x)=x$
+\item $\theta(f\ t_1 \cdots t_n) = f\ \theta(t_1) \cdots \theta(t_n)$
+\item $\theta(f^\tau t_1 \cdots t_n) = f^{\theta(\tau)}\ \theta(t_1) \cdots \theta(t_n)$
+\item $\theta(Q\, (x{:}\tau)\ t) = Q\, (x{:} \theta(\tau))\  \theta(t)$, for $Q\in \{\lambda, \exists, \forall\}$
+\item $\theta(\akey{let}\ (x_1 = t_1) \cdots (x_n = t_n)\ \akey{in}\ t) = 
+\akey{let}\ (x_1 = \theta(t_1)) \cdots (x_n = \theta(t_n))\ \akey{in}\ \theta(t)$
+\item $\theta(\akey{match}\ t\ \akey{with}\ (p_1 \to t_1) \cdots (p_n \to t_n)) =$\\
+  $\quad \quad \akey{match}\ \theta(t)\ \akey{with}\ (p_1 \to \theta(t_1) \cdots (p_n \to \theta(t_n))^+$
+\end{itemize}
+
 \end{definition}
 We will use the syntax $\{u_1 \mapsto \tau_1, \cdots u_n \mapsto \tau_n \}$
 to denote a sort substitution that maps $u_i$ to $\tau_i$ for each $i=1,\dots n$
@@ -660,17 +676,10 @@ at most one sort in a given signature $\Sigma$.\endnote{
   function symbols. 
 }
 \begin{newver}
-This means that we can define a total function $\tsort$ that associates 
-with each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
-We can also define a function $\pars$ that associates to each well-sorted term $t$
-the set $\pars(t, \Sigma)$ of all sort parameters that occur
+This means that we can define a total function that associates 
+with each well-sorted term $t$ a unique sort.
+We can also define a function $\pars$ that associates to each well-sorted term $t$ the set $\pars(t, \Sigma)$ of all sort parameters that occur
 in its sort, in that of one of its subterms, or in the sort of a variable in $t$.
-We call a term $t$ \define{polymorphic} if $\pars(t, \Sigma)$ is non-empty.
-
-\pfrem{Be clearer that the symbol in an ``as'' construct is not a subterm.
-  ``Theorem'' for the uniqueness of typing.
-  Maybe we can clean everything by removing the notation ``polymorphic term'', and relying on the ``pars'' side condition to sufficiently explain what to do.
-}
 \end{newver}
 
 \begin{remark}[Match rules]
@@ -1036,7 +1045,8 @@ let $\inter{I}$ be a $\Sigma$-interpretation.
 For every well-sorted term $t$ of sort $\tau$ with respect to $\Sigma$,
 $\mea{\inter I}{t}$ is defined recursively as follows,
 \new{where Case~\ref{ruleI} applies to polymorphic terms
-and the other cases apply only to monomorphic terms}.
+  and the other cases apply only to monomorphic terms}.
+\pfrem{FIX}
 
 \begin{enumerate}
 \item \new{\label{ruleI}
