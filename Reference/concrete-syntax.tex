@@ -521,6 +521,7 @@ may stand for a whole \emph{family} of function symbols,
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
 of a sort parameter with a monomorphic sort (over a given set of sort constructors).
+\pfrem{TODO: this is not too clear which sort constructors to use here.  I.e., all the constructors at the time of satisfiability checking.}
 This is the case, however, only for \emph{global} function symbols, that is, 
 symbols introduced with a \ter{declare-fun} or related commands.
 \end{newver}
@@ -1121,6 +1122,7 @@ there sort inference is needed anyway since pattern variables
 are not explicitly assigned a sort.
 }
 
+\pfrem{const-array might confuse people, that would believe it belongs to the theory.  Or add to theory.}
 
 For example, let \ter{A} and \ter{B} be two sort parameters.
 Consider the usual \ter{nil} and \ter{cons} list constructors,
@@ -1132,10 +1134,10 @@ of rank \expr{(Array A B)}.
 Then consider function symbol \ter{select} of rank \expr{(Array A B) A B},
 denoting the array access function, and
 the \ter{const-array} function symbol of rank \expr{B (Array A B)}, 
-denoting the constant array function\footnote{
+denoting the constant array function.\footnote{
 Taking a value $v$ of sort \ter{B} and 
 returning an array storing $v$ at all positions.
-}.
+}
 The symbols \ter{nil}, \ter{a} and \ter{const-array} are ambiguous, 
 while the symbols \ter{cons} and \ter{select} are not.
 This means that none of the following terms is well sorted:
@@ -2150,6 +2152,8 @@ as discussed for the \ter{let} binder in Section~\ref{sec:binders}.
 
 \end{remark}
 \end{newver}
+
+\pfrem{We should make a note that equality over maps is extensional.}
 
 %-------------------------------------------------------------------------------
 \section{Logic Declarations} \label{sec:logic-declarations}

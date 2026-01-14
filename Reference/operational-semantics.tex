@@ -1741,7 +1741,7 @@ where a user-declared function symbol $f$ denotes the factorial function
 over the non-negative integers.
 In that case, a definition like
 \begin{center}
-\expr{(define-fun-rec f ((x Int)) Int (ite (= x 0) 1 (* x (f (- x 1)))))}
+  \expr{(define-fun-rec f ((x Int)) Int (ite (< x 0) (f x) (ite (= x 0) 1 (* x (f (- x 1))))))}
 \end{center}
 would not have a unique interpretation because it does not uniquely determine
 the behavior of $f$ over the negative integers.

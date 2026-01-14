@@ -663,9 +663,14 @@ at most one sort in a given signature $\Sigma$.\endnote{
 This means that we can define a total function $\tsort$ that associates 
 with each well-sorted term $t$ its sort $\tsort(t, \Sigma)$.
 We can also define a function $\pars$ that associates to each well-sorted term $t$
-the set $\pars(t, \Sigma)$ of all parameters that occur
+the set $\pars(t, \Sigma)$ of all sort parameters that occur
 in its sort, in that of one of its subterms, or in the sort of a variable in $t$.
-We call a term \define{polymorphic} if $\pars(t, \Sigma)$ is non-empty.
+We call a term $t$ \define{polymorphic} if $\pars(t, \Sigma)$ is non-empty.
+
+\pfrem{Be clearer that the symbol in an ``as'' construct is not a subterm.
+  ``Theorem'' for the uniqueness of typing.
+  Maybe we can clean everything by removing the notation ``polymorphic term'', and relying on the ``pars'' side condition to sufficiently explain what to do.
+}
 \end{newver}
 
 \begin{remark}[Match rules]
