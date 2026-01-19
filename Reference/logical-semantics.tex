@@ -448,11 +448,9 @@ $\theta(u)$ in $\sortt{\Sigma,\sop}$.
 A \define{sort instance of a polymorphic rank} $\tau_1\cdots\tau_n \tau$ is a rank
 $\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau)$ for some sort substitution
 $\theta$.
+\end{definition}
 
-A sort substitution $\theta$ can be applied to a term, where all sorts either in the annotation of a function $f^\tau$ or in the type of a bound variable $(x:\tau)$ are subject to the substitution.
-
-\pfrem{Revise}
-The application of a sort substitution $\theta$ to a term $t$ is defined inductively as follows, based on the grammar in Fig~\ref{TODO 5.2}
+A sort substitution $\theta$ can be applied to a term, where all sorts either in the annotation of a function $f^\tau$ or in the type of a bound variable $(x:\tau)$ are subject to the substitution.  More precisely, the application $\theta(t)$ of a sort substitution $\theta$ to a term $t$ is defined inductively as follows, based on the grammar in Fig~\ref{fig:abstract-sorts}:
 \begin{itemize}
 \item $\theta(x)=x$
 \item $\theta(f\ t_1 \cdots t_n) = f\ \theta(t_1) \cdots \theta(t_n)$
@@ -463,11 +461,11 @@ The application of a sort substitution $\theta$ to a term $t$ is defined inducti
 \item $\theta(\akey{match}\ t\ \akey{with}\ (p_1 \to t_1) \cdots (p_n \to t_n)) =$\\
   $\quad \quad \akey{match}\ \theta(t)\ \akey{with}\ (p_1 \to \theta(t_1) \cdots (p_n \to \theta(t_n))^+$
 \end{itemize}
-
-\end{definition}
 We will use the syntax $\{u_1 \mapsto \tau_1, \cdots u_n \mapsto \tau_n \}$
 to denote a sort substitution that maps $u_i$ to $\tau_i$ for each $i=1,\dots n$
 and maps every other sort parameter to itself.
+
+\pfrem{We should prove that $\theta(t)$ is well-typed if $t$ is.}
 
 We will work with \emph{ranked} function symbols and \emph{sorted} variables
 in a signature.
@@ -678,8 +676,8 @@ at most one sort in a given signature $\Sigma$.\endnote{
 \begin{newver}
 This means that we can define a total function that associates 
 with each well-sorted term $t$ a unique sort.
-We can also define a function $\pars$ that associates to each well-sorted term $t$ the set $\pars(t, \Sigma)$ of all sort parameters that occur
-in its sort, in that of one of its subterms, or in the sort of a variable in $t$.
+We can also define a function $\pars$ that associates to each well-sorted term $t$ the set $\pars(t)$ of all sort parameters that occur
+in its sort, in that of one of its subterms, or in the sort of a variable in $t$.  \pfrem{Say something about the annotations.}
 \end{newver}
 
 \begin{remark}[Match rules]
@@ -1044,9 +1042,7 @@ and
 let $\inter{I}$ be a $\Sigma$-interpretation.
 For every well-sorted term $t$ of sort $\tau$ with respect to $\Sigma$,
 $\mea{\inter I}{t}$ is defined recursively as follows,
-\new{where Case~\ref{ruleI} applies to polymorphic terms
-  and the other cases apply only to monomorphic terms}.
-\pfrem{FIX}
+\new{where Case~\ref{ruleI} is the only rule applying to terms containing sort parameters, whereas the other rules only apply to terms without sort parameters}.
 
 \begin{enumerate}
 \item \new{\label{ruleI}
@@ -1056,9 +1052,9 @@ for all $\theta$\, such that \
 \(
 \begin{cases}
  \theta = \{u_1 \mapsto \sigma_1,\;\ldots,\;u_n\mapsto \sigma_n\}, \\
- \{u_1, \ldots u_n\} = \pars(t, \Sigma),\; n > 0\\
- \sigma_1,\ldots,\sigma_n \in \sortt{\Sigma}\\
- \theta(t)\mbox{ is well-typed}
+ \{u_1, \ldots u_n\} = \pars(t),\; n > 0,\\
+ \sigma_1,\ldots,\sigma_n \in \sortt{\Sigma},\\
+ \Sigma \vdash t{:} \bool
 \end{cases}
 \)}
 
@@ -1081,7 +1077,8 @@ $
  \hat{f} = f \text{ or } \hat{f} = f^\sigma,\\
  %\text{for } i=1,\ldots,n \\
  %\quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}
- f\text{ is of rank }\sigma_1\cdots\sigma_n\sigma
+ \Sigma \vdash t_i{:}\sigma_i\text{ for } i = 1,\dots, n,\\
+ \text{and }f {:} \sigma_1\cdots\sigma_n\sigma \in \Sigma
 \end{cases}
 \)
 
@@ -1093,7 +1090,7 @@ $
 \(
 \begin{cases}
  %\inter{I} \text{ has signature } \Sigma, \\
- t_i \text{ has sort } \sigma_i \text{ and }a_i = \mea{\inter I}{t_i}\text{ for } i=1,\ldots,n ,\\
+ \Sigma \vdash t_i{:}\sigma_i \text{ and }a_i = \mea{\inter I}{t_i}\text{ for } i=1,\ldots,n ,\\
 %\quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
  \text{and }\inter{I}' = {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n]
 \end{cases}
