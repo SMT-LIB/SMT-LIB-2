@@ -18,7 +18,7 @@
   signatures with free sort and function symbols, but with the following 
   restrictions:
   - all terms of sort Int are linear, that is, have no occurrences of the
-    function symbols *, /, div, mod, and abs, except as specified in the 
+    function symbols *, **, /, div, mod, and abs, except as specified in the 
     :extensions attributes;
   - all array terms have sort (Array Int Int).
  "

@@ -15,5 +15,6 @@
 
  :language 
  "Closed formulas built over an arbitrary expansion of the Ints signature
-  with free sort and function symbols."
+  with free sort and function symbols, but whose terms of sort Int 
+  have no occurrences of the function symbol **."
 )

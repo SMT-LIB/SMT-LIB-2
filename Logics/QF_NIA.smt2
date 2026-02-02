@@ -13,8 +13,9 @@
 
  :theories ( Ints )
 
- :language 
+ :language
  "Closed quantifier-free formulas built over an arbitrary expansion of the
-  Ints signature with free constant symbols.
+  Ints signature with free constant symbols, but whose terms of sort Int 
+  have no occurrences of the function symbol **.
  "
 )

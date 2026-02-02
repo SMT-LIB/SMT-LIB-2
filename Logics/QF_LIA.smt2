@@ -18,7 +18,7 @@
  "Closed quantifier-free formulas built over an arbitrary expansion of the
   Ints signature with free constant symbols, but whose terms of sort Int 
   are all linear, that is, have no occurrences of the function symbols
-  /, div, mod, and abs, and no occurrences of the function symbol *,
+  **, /, div, mod, and abs, and no occurrences of the function symbol *,
   except as specified in the :extensions attribute.
  "
 

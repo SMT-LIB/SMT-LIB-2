@@ -15,7 +15,7 @@
  "Closed formulas built over an arbitrary expansion of the
   Ints signature with free constant symbols, but whose terms of sort Int 
   are all linear, that is, have no occurrences of the function symbols
-  *, /, div, mod, and abs, except as specified the :extensions attribute.
+  *, **, /, div, mod, and abs, except as specified the :extensions attribute.
  "
 
  :extensions
