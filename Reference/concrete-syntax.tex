@@ -520,7 +520,7 @@ where each sort may contain sort parameters,
 may stand for a whole \emph{family} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
-of a sort parameter with a monomorphic sort built from the \emph{current} set of sort constructors.\footnote{This sets consists of the constructors in the context when checking the satisfiability.}
+of a sort parameter with a monomorphic sort built from the \emph{current} set of sort constructors.\footnote{This set consists of the constructors in the context when checking for satisfiability.}
 This is the case, however, only for \emph{global} function symbols, that is, 
 symbols introduced with \ter{declare-fun} or related commands, not maps introduced in a \ter{let} expression
 (see Section~\ref{sec:binders}).
@@ -1128,8 +1128,8 @@ This means that all the following terms are ill sorted:
 \end{lstlisting}
 
 \noindent In contrast, if 
-\ter{"abc"} is a constant of sort \ter{String},
-\ter{b} is a constant of sort \expr{B}, and 
+\ter{"abc"} is a constant of sort \ter{String} and
+\ter{b} is a constant of sort \expr{B}, then
 all the following terms are well sorted:
 
 \begin{lstlisting}[linewidth=35.5em]
@@ -2065,7 +2065,7 @@ For instance, if \ter{f} is a function symbol of rank $\tau_1\tau_2$,
 one can define a corresponding map with the command 
 (see~\ref{sec:new-symbols}) 
 \begin{center}
-\expr{(define-const c\_f (lambda ((x $\tau_1$)) (f x)))} .
+\expr{(define-const c\_f (-> $\tau_1$ $\tau_2$) (lambda ((x $\tau_1$)) (f x)))} .
 \end{center}
 %
 Conversely, if \ter{e} is any term of sort \expr{(-> $\tau_1$ $\tau_2$)},
@@ -2082,14 +2082,14 @@ Correspondingly, the application operator \ter{@} is defined as left-associative
 allowing the syntax
 \expr{(@ $t_1$ $t_2$ $t_3$)} to be used in place of the syntax
 \expr{(@ (@ $t_1$ $t_2$) $t_3$)}.
-Note that this also allows the \emph{partial} application \expr{(@ g t)} 
-of a constant \ter{g} of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
+Note that this also allows the \emph{partial} application \expr{(@ $g$ $t$)} 
+of a constant $g$ of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
 which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
 
 \begin{newver}
 As an additional simplification which does not introduce ambiguities, when
-\ter{g} has a monomorphic sort,\footnote{And therefore it does not need to be annotated with \ter{as}.} it is possible to omit the \ter{@} symbol altogether in applications and write
-\expr{(g t)} instead of \expr{(@ g t)}.
+a term $s$ has a monomorphic sort \expr{(-> $\sigma_1$ $\sigma_2$)},\footnote{And therefore it does not need to be annotated with \ter{as}.} it is possible to omit the \ter{@} symbol altogether in applications and write
+\expr{($s$ $t$)} instead of \expr{(@ $s$ $t$)}.
 
 \begin{remark}
   Equality over maps is extensional, that is, two maps are equal if and only if they agree on all inputs.  In other words, for all sorts $\tau_1$ and $\tau_2$, the following formula holds:
@@ -2128,8 +2128,8 @@ Maps can be declared or defined to be polymorphic, as in the examples below.
 (declare-sort-parameter B)
 (declare-sort-parameter C)
 (declare-const m (-> A B))
-(define-const id (lambda ((a A)) a))
-(define-const compose 
+(define-const id (-> A A) (lambda ((a A)) a))
+(define-const compose (-> (-> A B) (-> B C) (-> A C))
   (lambda ((f (-> A B)) (g (-> B C)))
     (lambda ((a A)) (@ g (@ f a)))))
 \end{lstlisting}
