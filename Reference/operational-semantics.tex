@@ -864,7 +864,7 @@ in any case.
 \subsection{Introducing new symbols} \label{sec:new-symbols}
 %-------------------------------------------------------------------------------
 
-\new{The first command below allows the declaration of sort parameters.}
+The first command below allows the declaration of sort parameters.
 The next seven commands allow one to introduce new sort or function symbols 
 by providing them with a rank declaration
 (\ter{declare-sort}, \ter{declare-fun} and \ter{declare-const})
@@ -882,18 +882,15 @@ whether the option \attr{global-declarations} is set to \ter{true} or not.
 %%% declare-sort-parameter %%%
 %
 \item[\expr{(declare-sort-parameter $s$)}]
-\new{
 adds \emph{global} sort parameter $s$ to the current signature.
 The command reports an error if $s$ is a sort symbol, sort parameter, 
 or theory symbol already present in the current signature.%
-}
+
 %\endnote{%
-%\new{
 %In SMT-LIB 2.7, the \expr{par} construct, short for \emph{parameter}, is a misnomer,
 %as \expr{par} actually introduces sort \emph{variables} rather than sort \emph{parameters}.
 %We have adopted a pragmatic approach to this issue, 
 %deciding not to rename the \expr{par} construct for backward compatibility.
-%}
 %}
 \smallskip
 
@@ -901,7 +898,7 @@ or theory symbol already present in the current signature.%
 %
 \item[\expr{(declare-sort $s$ $n$)}]
 adds sort symbol $s$ with associated arity $n$.
-It is an error if $s$ is a sort symbol \new{or parameter} already present 
+It is an error if $s$ is a sort symbol or parameter already present 
 in the current signature.
 \smallskip
 
@@ -910,7 +907,7 @@ in the current signature.
 \item[\expr{(define-sort $s$ ($u_1$ $\cdots$ $u_n$) $\tau$)}] with $n \geq 0$
 adds sort symbol $s$ with arity $n$ and associates it with sort $\tau$,
 where the $u_i$'s are (local) sort parameters, and $\tau$ may contain 
-any of $u_1$, \dots, $u_n$\new{, but no global sort parameters}.
+any of $u_1$, \dots, $u_n$, but no global sort parameters.
 
 % (define-sort set-of-pairs (u v) (set (pair (u v))))
 % (define-sort set-of-pairs () (set (pair (u v))))
@@ -951,11 +948,9 @@ with $n \geq 0$ adds a new symbol $f$
 with associated rank $\tau_1\cdots\tau_n\tau$.
 The command reports an error if a function symbol with name $f$ 
 is already present in the current signature.
-\new{
 Note that 
 $\tau_1$ $\cdots$ $\tau_n$, and $\tau$ may contain sort parameters,
 making $f$ polymorphic.
-}
 \smallskip
 
 %%% declare-const %%%
@@ -979,10 +974,8 @@ Let $\delta = \delta_i$, $k = k_i$ and $d = d_i$ for $i \in \{1,\ldots,n\}$.
 If $k >0$ then $d$ is an expression of the form 
 \expr{(par ($u_1$ $\cdots$ $u_k$) $l$)}
 where $u_1, \ldots, u_k$ are sort parameters;\endnote{
-\new{
 Using local sort parameters as opposed to globally declared sort parameters
 is necessary because their order is meaningful, as arguments of the sort constructor.
-}
 }
 % The u_1, u_k correspond to the k arguments of the sort constructor.  
 % (Pair Int Real) is not the same of (Pair Real Int), and the relation to the pair
@@ -1003,11 +996,9 @@ $(iv)$ $\tau_j$ is a sort term
 that contains no occurrences of $\delta_1, \ldots, \delta_n$ below its top symbol.
 
 In the polymorphic case,
-\new{the terms $\tau_i$ can contain only the sort parameters in the list $u_1, \ldots, u_k$}.%
+the terms $\tau_i$ can contain only the sort parameters in the list $u_1, \ldots, u_k$.%
 \footnote{%
-\new{
 No previously declared sort parameter that is not shadowed by a $u_i$ can be used.
-}
 }
 The datatype $\delta$ must be \define{well founded} in the following inductive sense:
 it must have a constructor of rank $\tau_1\cdots\tau_m\delta$ 
@@ -1153,11 +1144,9 @@ with the sort associations $(x_1:\tau_1),\; \ldots,\; (x_n:\tau_n)$.
 
 %%% define-const %%%
 %
-\new{
 \item[\expr{(define-const $f$ $\tau$ $t$)}] has the same effect as
 \expr{(define-fun $f$ () $\tau$ $t$)}.
 \smallskip
-}
 
 %%% define-funs-rec %%%
 %
@@ -1222,10 +1211,8 @@ $(f_m:\tau_{m,1}\; \cdots\; \tau_{m,n_m}\tau_m)$
 and
 $(x_{i,1}:\tau_{i,1}),\; \ldots,\; (x_{i,n_i}:\tau_{i,n_i})$.
 
-\new{
 Note that, as for \ter{declare-fun}, 
 for each $i$, $\tau_{i,1}, \ldots, \tau_{i,n_i}$, $\tau_i$ may contain sort parameters.
-}
 
 \smallskip
 
@@ -1301,12 +1288,12 @@ but it is unsatisfiable if the available sorts include theory sorts,
 such as \ter{Int}, denoting sets of larger cardinality.
 Note that this semantic is \emph{not} aligned with that of other logics
 with type polymorphism, where sort/type parameters are interpreted as subsets 
-of a large universe of individuals.\footnote{\new{
+of a large universe of individuals.\footnote{
 In such logics, the formula above would always be unsatisfiable, independently 
 of the signature.
-}}
+}
 In contrast, sort parameters in SMT-LIB are effectively \emph{schematic} variables 
-standing for monomorphic sorts.\endnote{\new{
+standing for monomorphic sorts.\endnote{
 The decision to adopt this semantics is mostly a pragmatic one as it easier 
 for SMT solvers to support sort parameters that range over sorts.
 Note that because of the syntactic restriction to rank-1 polymorphism
@@ -1314,7 +1301,7 @@ Note that because of the syntactic restriction to rank-1 polymorphism
 the SMT-LIB semantics is sound with respect to those where type parameters 
 range over sets: every formula unsatisfiable under the former semantics is 
 unsatisfiable under the latter as well. 
-}}
+}
 \end{remark}
 
 \begin{remark}
@@ -1525,7 +1512,7 @@ that its partial model can be indeed extended as needed.
 %
 \item[\expr{(get-value ($t_1$ $\cdots$ $t_n$))}]
 where $n > 0$ and each $t_i$ is a well-sorted closed quantifier-free term
-\new{of monomorphic sort}, 
+of monomorphic sort, 
 returns for each $t_i$ a value term $v_i$\footnote{%
 Recall that value terms are particular ground terms defined in a logic 
 for each sort (see Subsection~\ref{sec:logic-decl}).  
@@ -1604,7 +1591,7 @@ which is set to \ter{false} by default, is set to \ter{true}
 (see Section~\ref{sec:options}).  
 \smallskip
 
-\newpage
+%\newpage
 
 %%% get-model %%%
 %
@@ -1702,7 +1689,7 @@ being recursively defined.
 Similarly to the response of \ter{get-value}, 
 the terms $t,t_1,\ldots,t_p$ above are allowed to contain symbols
 not in the current signature only if they are abstract values.
-Moreover, each occurrence of an abstract value  $a$ of sort $\sigma$ 
+Moreover, each occurrence of an abstract value $a$ of sort $\sigma$ 
 in $t,t_1,\ldots,t_p$ has to be contained in a term of the form 
 \expr{(as $a$ $\sigma$)}.
 

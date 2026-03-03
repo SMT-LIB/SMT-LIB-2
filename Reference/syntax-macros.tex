@@ -144,7 +144,7 @@
              &\alt & \ter{(} \ter{let} 
                              \ter{(} \nter[+]{var\_binding} \ter{)} \nter{term}
                      \ter{)} \\
-             &\alt & \ter{(} \ter{\new{lambda}} 
+             &\alt & \ter{(} \ter{lambda}
                              \ter{(} \nter[+]{sorted\_var} \ter{)} \nter{term}
                      \ter{)} \\
              &\alt & \ter{(} \ter{forall} 
@@ -285,8 +285,8 @@
             \ter{(} \nter[*]{sort} \ter{)} \nter{sort}
            \ter{)} \\
   & \alt & \ter{(} \ter{declare-sort} \nter{symbol} \nter{numeral} \ter{)} \\
-  & \alt & \ter{(} \ter{\new{declare-sort-parameter}} \nter{symbol} \ter{)} \\
-  & \alt & \ter{(} \ter{\new{define-const}} \nter{symbol} \nter{sort} \nter{term} \ter{)} \\
+  & \alt & \ter{(} \ter{declare-sort-parameter} \nter{symbol} \ter{)} \\
+  & \alt & \ter{(} \ter{define-const} \nter{symbol} \nter{sort} \nter{term} \ter{)} \\
   & \alt & \ter{(} \ter{define-fun} \nter{function\_def} \ter{)} \\
   & \alt & \ter{(} \ter{define-fun-rec} \nter{function\_def} \ter{)}
            \\
