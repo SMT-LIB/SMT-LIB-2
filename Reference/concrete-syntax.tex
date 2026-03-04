@@ -498,11 +498,44 @@ by replacing the sort parameters of $\tau$ (if any)
 with monomorphic sorts over $C$.
 We call such a sort $\sigma$ a \define{(monomorphic) instance} of $\tau$.
 
+In SMT-LIB scripts, the monomorphic instances considered for polymorphic sorts are 
+with respect to the set of sort constructors in the \emph{current context} 
+(see Section~\ref{sec:assert-stack}) \emph{at satisfiability-checking time}, that is, 
+when a \ter{check-sat} command is executed, not when a specific polymorphic sort 
+is introduced.
+
+\begin{lstlisting}[linewidth=35em,numbers=left]
+(set-logic QF_UFLIA)
+(declare-sort-parameter X)
+(declare-fun f (X) X)
+(assert (forall ((x X)) (not (= (f x) x))))
+(declare-sort A 0)
+(assert (forall ((x X)) (not (= (f (f x)) x))))
+(check-sat)
+(declare-sort B 0)
+(check-sat)
+\end{lstlisting}
+
+In the script above, the function symbol \ter{f} has polymorphic rank \ter{X X}.
+When executing the \ter{check-sat} command at line 7, 
+the assertions about \ter{f} at line 4 and 6 are with respect to all instantiations
+of the parameter \ter{X} with the built-in sorts \ter{Bool} and \ter{Int}
+as well as the sort \ter{A}, but not the sort \ter{B}.
+In contrast, the \ter{check-sat} command at line 9, also includes
+instantiations with sort \ter{B}.
+In other words, the order function and sort declarations does not matter 
+for sort parameter instantiation purposes 
+since polymorphic sorts are instantiated only at \ter{check-sat} time.
+What matters is only the order with respect to \ter{check-sat} commands.
+\medskip
+
 We will write just \emph{sort} to mean a polymorphic sort, and 
 write instead \emph{monomorphic sort} when we want to emphasize 
 that the sort has no parameters. 
 We will use $\sigma$ to denote monomorphic sorts and 
 $\tau$ to denote, more generally, polymorphic sorts.
+
+
 
 \subsection{Ranks}
 
@@ -520,10 +553,12 @@ where each sort may contain sort parameters,
 may stand for a whole \emph{family} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
-of a sort parameter with a monomorphic sort built from the \emph{current} set of sort constructors.\footnote{This set consists of the constructors in the context when checking for satisfiability.}
+of a sort parameter with a monomorphic sort built from the set of  constructors 
+in the context when checking for satisfiability (see subsection above).
 This is the case, however, only for \emph{global} function symbols, that is, 
-symbols introduced with \ter{declare-fun} or related commands, not maps introduced in a \ter{let} expression
-(see Section~\ref{sec:binders}).
+symbols introduced with \ter{declare-fun} or related commands 
+(see Section~\ref{sec:new-symbols}), 
+not maps introduced in a \ter{let} expression (see Section~\ref{sec:binders}).
 \end{newver}
 
 \begin{remark}[No parametric polymorphism]
@@ -2068,10 +2103,10 @@ one can define a corresponding map with the command
 \expr{(define-const c\_f (-> $\tau_1$ $\tau_2$) (lambda ((x $\tau_1$)) (f x)))} .
 \end{center}
 %
-Conversely, if \ter{e} is any term of sort \expr{(-> $\tau_1$ $\tau_2$)},
+Conversely, if \ter{m} is any term of sort \expr{(-> $\tau_1$ $\tau_2$)},
 the corresponding function can be defined by the command 
 \begin{center}
-\expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (@ e x))} .
+\expr{(define-fun f\_c ((x $\tau_1$)) $\tau_2$ (@ m x))} .
 \end{center}
 
 The \ter{->} sort constructor is defined as right-associative, 
@@ -2087,16 +2122,20 @@ of a constant $g$ of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
 which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
 
 \begin{newver}
-As an additional simplification which does not introduce ambiguities, when
-a term $s$ has a monomorphic sort \expr{(-> $\sigma_1$ $\sigma_2$)},\footnote{And therefore it does not need to be annotated with \ter{as}.} it is possible to omit the \ter{@} symbol altogether in applications and write
-\expr{($s$ $t$)} instead of \expr{(@ $s$ $t$)}.
+%%CT We decided to remove this because it actually complicates the notation unnecessarily
+%% in case of polymorphic maps.
+%
+%As an additional simplification which does not introduce ambiguities, when
+%a term $s$ has a monomorphic sort \expr{(-> $\sigma_1$ $\sigma_2$)},\footnote{And therefore it does not need to be annotated with \ter{as}.} it is possible to omit the \ter{@} symbol altogether in applications and write
+%\expr{($s$ $t$)} instead of \expr{(@ $s$ $t$)}.
+%
 
 \begin{remark}
   Equality over maps is extensional, that is, two maps are equal if and only if they agree on all inputs.  In other words, for all sorts $\tau_1$ and $\tau_2$, the following formula holds:
   \begin{center}
     \begin{tabular}{l}
       \expr{(forall ((f (-> $\tau_1$ $\tau_2$)) (g (-> $\tau_1$ $\tau_2$)))}\\
-      \quad\quad \expr{(= (= f g) (forall ((x $\tau_1$)) (= (f x) (g x)))))} .
+      \quad\quad \expr{(= (= f g) (forall ((x $\tau_1$)) (= (@ f x) (@ g x)))))} .
     \end{tabular}
   \end{center}
 \end{remark}
