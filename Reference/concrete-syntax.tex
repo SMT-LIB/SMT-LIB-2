@@ -549,7 +549,6 @@ and returns a value of sort $\sigma$.
 
 In contrast, a function symbol $f$ with rank $\tau_1\cdots\tau_n\tau$,
 where each sort may contain sort parameters,
-\begin{newver}
 may stand for a whole \emph{family} of function symbols, 
 all named $f$ and each with a rank obtained from $\tau_1\cdots\tau_n\tau$ 
 by instantiating in all possible ways every occurrence in $\tau_1\cdots\tau_n\tau$
@@ -559,7 +558,6 @@ This is the case, however, only for \emph{global} function symbols, that is,
 symbols introduced with \ter{declare-fun} or related commands 
 (see Section~\ref{sec:new-symbols}), 
 not maps introduced in a \ter{let} expression (see Section~\ref{sec:binders}).
-\end{newver}
 
 \begin{remark}[No parametric polymorphism]
 Note that, contrary to other logic or programming languages,
@@ -735,7 +733,6 @@ Because of the parallel semantics,
 \emph{the variables $x_1, \ldots, x_n$ in (\ref{eq:let}) must be pairwise distinct}.
 
 
-\begin{newver}
 Contrary to many functional programming languages,
 constants introduced with the \ter{let} binder do not stand 
 for a family of constants, even if their rank contains sort parameters.
@@ -787,7 +784,6 @@ The formula in the fourth \ter{assert} command
 (see the higher-order core theory in Section~\ref{sec:ho-core}),
 where \ter{id} is of sort \expr{(-> X X)},
 is ill sorted for similar reasons.
-\end{newver}
 
 \begin{remark}[No sequential version of \ter{let}]
 The language does not have a sequential version of \ter{let}.
@@ -1143,7 +1139,6 @@ are not explicitly assigned a sort.
 For example, let \ter{A} and \ter{B} be two sort parameters.
 Consider the usual \ter{nil} and \ter{cons} list constructors,
 of respective rank \expr{(List A)} and \expr{A\,(List A)\,(List A)}.
-\begin{newver}
 Similarly, consider a user-declared array \ter{a} 
 of rank \expr{(Array A B)}. 
 %
@@ -1173,7 +1168,6 @@ all the following terms are well sorted:
 (select (as a (Array Int B)) 0)
 (select ((as g (Array B Real)) 0.0) (as b B))
 \end{lstlisting}
-\end{newver}
 
 The same disambiguation requirement applies to occurrences of 
 solver-generated constants within terms output by the solver ---
@@ -2121,7 +2115,6 @@ Note that this also allows the \emph{partial} application \expr{(@ $g$ $t$)}
 of a constant $g$ of sort \expr{(-> $\tau_1$ $\tau_2$ $\tau_3$)},
 which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
 
-\begin{newver}
 %%CT We decided to remove this because it actually complicates the notation unnecessarily
 %% in case of polymorphic maps.
 %
@@ -2140,8 +2133,6 @@ which is a term of sort \expr{(-> $\tau_2$ $\tau_3$)}.
   \end{center}
 \end{remark}
 
-\end{newver}
-
 \begin{remark}
 Note that the SMT-LIB logic remains first-order in syntax:
 it is not possible to have a function symbol $g$ of rank $\tau_1 \cdots \tau_n$
@@ -2158,7 +2149,6 @@ Similarly, it is not possible to return a function of rank $\tau_1 \cdots \tau_n
 a value of sort \expr{(-> $\tau_1$ $\cdots$ $\tau_n$)}.
 \end{remark}
 
-\begin{newver}
 \begin{remark}
 Maps can be declared or defined to be polymorphic, as in the examples below. 
 
@@ -2178,7 +2168,6 @@ The sorting discipline is the same as for any other polymorphic constants,
 as discussed for the \ter{let} binder in Section~\ref{sec:binders}.
 
 \end{remark}
-\end{newver}
 
 %-------------------------------------------------------------------------------
 \section{Logic Declarations} \label{sec:logic-declarations}

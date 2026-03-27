@@ -449,7 +449,6 @@ $\theta(\tau_1)\cdots\theta(\tau_n)\theta(\tau)$ for some sort substitution
 $\theta$.
 \end{definition}
 
-\begin{newver}
 A sort substitution $\theta$ can be applied to a term, where all sorts either in the annotation of a function $f^\tau$ or in the sort of a bound variable $(x:\tau)$ are subject to the substitution.  More precisely, the application $\theta(t)$ of a sort substitution $\theta$ to a term $t$ is defined inductively as follows, based on the grammar in Fig~\ref{fig:abstract-sorts}:
 \begin{itemize}
 \item $\theta(x)=x$
@@ -462,7 +461,6 @@ A sort substitution $\theta$ can be applied to a term, where all sorts either in
   $\quad \quad \akey{match}\ \theta(t)\ \akey{with}\ (p_1 \to \theta(t_1) \cdots (p_n \to \theta(t_n))^+$
 \end{itemize}
 It can be shown that $\theta(t)$ is well-sorted if $t$ is.
-\end{newver}
 
 We will use the syntax $\{u_1 \mapsto \tau_1, \cdots u_n \mapsto \tau_n \}$
 to denote a sort substitution that maps $u_i$ to $\tau_i$ for each $i=1,\dots n$
@@ -659,13 +657,11 @@ we say that \define{$t$ has, or is of, sort $\tau$}.
 
 With this definition, it is possible to show that every closed term has 
 at most one sort in a given signature $\Sigma$.
-\begin{newver}
 This means that we can define a total function that associates a unique sort
 to each well-sorted term $t$.
 We can also define a function $\pars$ that associates to each well-sorted term $t$ 
 the set $\pars(t)$ of all sort parameters that explicitly occur in $t$,
 that is, in a binder in $t$ or in the annotation of a function symbol in $t$.
-\end{newver}
 
 \begin{remark}[Match rules]
 The two rules for the \akey{match} binder in Figure~\ref{fig:well-sorted-terms} 
@@ -1029,7 +1025,7 @@ and
 let $\inter{I}$ be a $\Sigma$-interpretation.
 For every well-sorted term $t$ of sort $\tau$ with respect to $\Sigma$,
 $\mea{\inter I}{t}$ is defined recursively as follows,
-\new{where Case~\ref{ruleI} is the only rule applying to terms containing sort parameters, whereas the other rules only apply to terms without sort parameters}.
+where Case~\ref{ruleI} is the only rule applying to terms containing sort parameters, whereas the other rules only apply to terms without sort parameters.
 
 \begin{enumerate}
 \item \label{ruleI}
@@ -1041,7 +1037,7 @@ for all $\theta$\, such that \
  \theta = \{u_1 \mapsto \sigma_1,\;\ldots,\;u_n\mapsto \sigma_n\}, \\
  \{u_1, \ldots u_n\} = \pars(t),\; n > 0,\\
  \sigma_1,\ldots,\sigma_n \in \sortt{\Sigma},\\
- \new{\Sigma \vdash t{:} \bool}
+ \Sigma \vdash t{:} \bool
 \end{cases}
 \)
 
@@ -1064,8 +1060,8 @@ $
  \hat{f} = f \text{ or } \hat{f} = f^\sigma,\\
  %\text{for } i=1,\ldots,n \\
  %\quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}
- \new{\Sigma \vdash t_i{:}\sigma_i\text{ for } i = 1,\dots, n,}\\
- \new{\text{and }f {:} \sigma_1\cdots\sigma_n\sigma \in \Sigma}
+ \Sigma \vdash t_i{:}\sigma_i\text{ for } i = 1,\dots, n,\\
+ \text{and }f {:} \sigma_1\cdots\sigma_n\sigma \in \Sigma
 \end{cases}
 \)
 
@@ -1077,7 +1073,7 @@ $
 \(
 \begin{cases}
  %\inter{I} \text{ has signature } \Sigma, \\
- \new{\Sigma \vdash t_i{:}\sigma_i \text{ and }a_i = \mea{\inter I}{t_i}\text{ for } i=1,\ldots,n ,}\\
+ \Sigma \vdash t_i{:}\sigma_i \text{ and }a_i = \mea{\inter I}{t_i}\text{ for } i=1,\ldots,n ,\\
 %\quad \Sigma \vdash t_i : \sigma_i \text{ and } a_i = \mea{\inter I}{t_i}, \\
  \text{and }\inter{I}' = {\inter I}[x_1{:}\sigma_1\mapsto a_1,\;\ldots,\;x_n{:}\sigma_n\mapsto a_n]
 \end{cases}
