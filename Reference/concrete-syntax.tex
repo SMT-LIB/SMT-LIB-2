@@ -833,10 +833,11 @@ unless every constructor of $\delta$ occurs in one of the patterns.\endnote{
 This guarantees that the match expressions are always well defined
 (see Section~\ref{sec:models}).
 }
-The recommended choice for a single variable pattern is \ter{\_}; the use of
-other variables will be deprecated in future versions.\endnote{This is to avoid
+The recommended choice for a single variable pattern is \ter{\_}, when the variable is not used in the corresponding return term.\endnote{This is to avoid
 the situation where a typo while attempting to write a nullary constructor introduces a variable pattern, thus
 changing the meaning of the match term without warning or error.}
+
+
 
 %For the expression~(\ref{eq:match}) to be well-formed
 %the list $p_1,\ldots p_n$ must satisfy these additional requirements:\footnote{%
