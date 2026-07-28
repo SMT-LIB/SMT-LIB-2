@@ -4,7 +4,7 @@
  :smt-lib-release "2024-07-21"
  :written-by "Cesare Tinelli"
  :date "2010-04-17"
- :last-updated "2024-07-21"
+ :last-updated "2026-01-16"
  :update-history
  "Note: history only accounts for content changes, not release changes.
   2026-01-16 Added exponentiation.
@@ -69,8 +69,8 @@
 
     (= (** m n) (div 1 (** m (- n))))
 
-    So the following holds for all integers n < 0:
-    - (= (** 0 n) (div 1 0))
+    when the div term is defined.  The following holds for all integers n < 0:
+    - (= (** 0 n) 0)
     - (= (** m n) (** m (- n))) if (= (abs m) 1)
     - (= (** m n) 0)            if (> (abs m) 1)
 
